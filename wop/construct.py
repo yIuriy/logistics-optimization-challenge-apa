@@ -14,6 +14,7 @@ import numpy as np
 
 from wop.instance import Instance
 from wop.solution import Solution
+from wop.rankings import useful_stock
 
 
 def aisle_stock(inst: Instance, aisle_ids) -> np.ndarray:
@@ -36,7 +37,19 @@ def fill_orders(inst: Instance, aisle_ids, order_rank) -> list[int]:
     Return the list of chosen order indices. The result may be below LB -
     the caller must check that.
     """
-    raise NotImplementedError("issue: Greedy construction")
+    stock = aisle_stock(inst, aisle_ids)
+    total = 0
+    chosen = []
+    for o in order_rank:
+        units = inst.order_units[o]
+        if total + units > inst.ub:
+            continue
+        items, qtys = inst.orders[o]
+        if np.all(stock[items] >= qtys):
+            stock[items] -= qtys
+            total += units
+            chosen.append(int(o))
+    return chosen
 
 
 def greedy_prefix(inst: Instance, aisle_rank, order_rank) -> Solution | None:
@@ -50,4 +63,20 @@ def greedy_prefix(inst: Instance, aisle_rank, order_rank) -> Solution | None:
     min(UB, stock of those k aisles) / k. Once UB / k cannot beat the best
     value found so far, no larger k can either - stop the loop.
     """
-    raise NotImplementedError("issue: Greedy construction")
+    useful = useful_stock(inst)
+    best, best_value = None, 0.0
+    stock_so_far = 0
+    for k in range(1, inst.n_aisles + 1):
+        stock_so_far += useful[aisle_rank[k - 1]]
+        if inst.ub / k <= best_value:
+            break
+        if min(inst.ub, stock_so_far) / k <= best_value:
+            continue
+        
+        aisles = [int(a) for a in aisle_rank[:k]]
+        orders = fill_orders(inst, aisles, order_rank)
+        units = int(inst.order_units[orders].sum()) if orders else 0
+        if units >= inst.lb and units / k > best_value:
+            best, best_value = Solution(orders, aisles), units / k
+    return best
+        
