@@ -5,12 +5,14 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+import time
 
 from wop.construct import fill_orders, greedy_prefix
 from wop.instance import read_instance
 from wop.official import official_check
 from wop.rankings import AISLE_RANKINGS, ORDER_RANKINGS
 from wop.solution import Solution, is_feasible, objective, read_solution, violations, write_solution
+from wop.local_search import improve
 from wop.solver import solve
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -69,3 +71,10 @@ def test_item_ids_are_unique_inside_each_order_and_aisle(dataset):
     inst = read_instance(sorted((ROOT / "data" / "instances" / dataset).glob("*.txt"))[0])
     for items, _ in inst.orders + inst.aisles:
         assert len(np.unique(items)) == len(items)
+
+def test_local_search_reaches_optimum_on_example(inst):
+    rank = ORDER_RANKINGS["units_desc"](inst)
+    start = greedy_prefix(inst, AISLE_RANKINGS["useful_stock"](inst), rank)
+    assert objective(inst, start) == 4.5  # greedy alone is not optimal here
+    best = improve(inst, start, rank, deadline=time.perf_counter() + 5)
+    assert is_feasible(inst, best) and objective(inst, best) == 5.0
