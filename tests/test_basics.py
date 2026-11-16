@@ -42,18 +42,11 @@ def test_detects_violations(inst):
     assert violations(inst, Solution([0, 4], [2]))  # aisle 2 has no item 0
 
 
-# The two tests below cover the greedy construction, which is not implemented yet.
-# When you implement it (issue "Greedy construction"), delete the `xfail` markers.
-NOT_YET = pytest.mark.xfail(raises=NotImplementedError, reason="issue: Greedy construction")
-
-
-@NOT_YET
 def test_fill_respects_stock_and_ub(inst):
     orders = fill_orders(inst, [1, 3], ORDER_RANKINGS["units_desc"](inst))
     assert is_feasible(inst, Solution(orders, [1, 3]))
 
 
-@NOT_YET
 def test_greedy_and_solver_are_feasible(inst):
     sol = greedy_prefix(inst, AISLE_RANKINGS["useful_stock"](inst), ORDER_RANKINGS["units_desc"](inst))
     assert sol is not None and is_feasible(inst, sol)
