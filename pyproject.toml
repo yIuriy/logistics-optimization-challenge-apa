@@ -1,0 +1,10 @@
+[project]
+name = "wop"
+version = "0.1.0"
+description = "Wave Order Picking (SBPO 2025 / Mercado Livre challenge) - APA course project"
+requires-python = ">=3.10"
+dependencies = ["numpy"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
