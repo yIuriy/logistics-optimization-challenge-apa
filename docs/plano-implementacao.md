@@ -7,8 +7,8 @@ Plano fechado em 2026-11-20 para o trabalho final de Análise e Projeto de Algor
 - O enunciado da disciplina é a regra final. O README, a descrição do problema e o regulamento do desafio só valem para o que o enunciado não define. Por isso Python e HiGHS são permitidos (seção 2 do enunciado), mesmo com o regulamento exigindo Java e CPLEX ou OR-Tools.
 - Solver HiGHS via `highspy`, com o método de Dinkelbach para tratar o objetivo em forma de fração.
 - Algoritmo genético com vetor de bits sobre os corredores e penalidade para ondas abaixo de LB. Em 2026-11-21 essa versão substituiu a primeira, que usava bits sobre os pedidos e reparo, porque a primeira visitava quase todos os corredores e chegava a menos de 7% do melhor valor oficial.
-- As 30 instâncias da fase final (conjuntos B e X), com 600 s por instância e por método.
-- O limite de 600 s vem do README do repositório oficial (linha 38). O enunciado e a descrição do problema não citam limite, e a pergunta ao professor ainda não teve resposta.
+- As 30 instâncias da fase final (conjuntos B e X), com 600 s por instância e por método nas rodadas atuais.
+- O professor confirmou que a avaliação da disciplina não usa o limite de tempo do desafio. O grupo mantém `time_limit_seconds` como parâmetro, porque sem limite o algoritmo exato pode não terminar em tempo útil nas instâncias grandes. Como a nota compara a qualidade das soluções com a dos outros grupos, o grupo pode escolher um limite maior para a rodada final.
 - Cada execução gera um par `.txt` e `.json`. Na avaliação, o grupo escolhe qual algoritmo submeter.
 - A comparação final usa `best_objectives.csv` do repositório oficial.
 - O enunciado não diz quais instâncias a turma avalia. Usar B e X é uma suposição do grupo.
@@ -89,5 +89,5 @@ Duas issues extras ainda sem responsável completam a divisão. A #17 gera os gr
 ## Riscos
 
 - Em 2026-11-21 o algoritmo genético rodou as 30 instâncias por 600 s cada, com semente 1, e chegou em média a 98,3% do melhor valor oficial. A pior foi `x_instance_0004`, com 93,0%. Os pares `.txt` e `.json` estão em `results/`.
-- O limite de 600 s é uma suposição até o professor responder.
+- Sem limite de tempo na avaliação, outros grupos podem rodar por mais tempo e chegar a soluções melhores. Uma rodada final mais longa do algoritmo genético diminui esse risco.
 - Uma instância nova apresentada na hora não cabe em 600 s dentro dos 5 minutos de apresentação.
