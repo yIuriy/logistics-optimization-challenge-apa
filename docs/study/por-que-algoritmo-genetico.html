@@ -1,0 +1,287 @@
+<!-- Imagem para o grupo do Trabalho Prático Final: por que usar algoritmo genético, como ele funciona, o que é comparado e a análise de sensibilidade. -->
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Por que algoritmo genético | Trabalho Prático Final</title>
+    <style>
+      :root {
+        --ink: #1f2433;
+        --muted: #5f6675;
+        --paper: #fffdf7;
+        --coral: #ff6b57;
+        --coral-bg: #ffe3dd;
+        --sun: #ffc531;
+        --sun-bg: #fff3c7;
+        --teal: #15a39a;
+        --teal-bg: #d4f3ef;
+        --grape: #7b4fd6;
+        --grape-bg: #e9dffb;
+        --sky: #2f80ed;
+        --sky-bg: #dbe9ff;
+        --leaf: #2e9e4f;
+        --leaf-bg: #dcf5e3;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font:
+          18px/1.45 system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+      }
+      .wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 30px 22px;
+      }
+      h1 {
+        font-size: 2.3rem;
+        line-height: 1.1;
+        margin: 0 0 6px;
+      }
+      .lead {
+        color: var(--muted);
+        margin: 0 0 22px;
+      }
+      h2 {
+        font-size: 1.35rem;
+        margin: 0 0 6px;
+      }
+      p {
+        margin: 0 0 6px;
+      }
+      .panel {
+        border: 3px solid var(--ink);
+        border-radius: 16px;
+        background: #fff;
+        padding: 18px 20px;
+        margin-bottom: 20px;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      svg {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .note {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin-top: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Por que um algoritmo genético?</h1>
+      <p class="lead">Solução proposta pelo grupo no Trabalho Prático Final de Análise e Projeto de Algoritmos, comparada com o algoritmo exato e com os melhores valores oficiais.</p>
+
+      <div class="panel" style="background: var(--sun-bg)">
+        <h2>Cada solução vira um cromossomo</h2>
+        <p>Um bit por corredor. O bit 1 quer dizer que a onda visita o corredor, e o bit 0 deixa o corredor de fora. O número de corredores visitados é o denominador do objetivo, então o algoritmo genético controla esse número diretamente.</p>
+        <svg viewBox="0 0 820 150" role="img" aria-label="Cromossomo com oito bits, cada bit ligado a um corredor">
+          <g font-family="Georgia, serif" font-size="30" text-anchor="middle" stroke="#1f2433" stroke-width="3">
+            <rect x="20" y="20" width="80" height="56" rx="10" fill="#2e9e4f" />
+            <rect x="110" y="20" width="80" height="56" rx="10" fill="#fff" />
+            <rect x="200" y="20" width="80" height="56" rx="10" fill="#2e9e4f" />
+            <rect x="290" y="20" width="80" height="56" rx="10" fill="#2e9e4f" />
+            <rect x="380" y="20" width="80" height="56" rx="10" fill="#fff" />
+            <rect x="470" y="20" width="80" height="56" rx="10" fill="#fff" />
+            <rect x="560" y="20" width="80" height="56" rx="10" fill="#2e9e4f" />
+            <rect x="650" y="20" width="80" height="56" rx="10" fill="#fff" />
+          </g>
+          <g font-family="Georgia, serif" font-size="30" font-weight="700" text-anchor="middle">
+            <text x="60" y="58" fill="#fff">1</text>
+            <text x="150" y="58">0</text>
+            <text x="240" y="58" fill="#fff">1</text>
+            <text x="330" y="58" fill="#fff">1</text>
+            <text x="420" y="58">0</text>
+            <text x="510" y="58">0</text>
+            <text x="600" y="58" fill="#fff">1</text>
+            <text x="690" y="58">0</text>
+            <text x="775" y="58">…</text>
+          </g>
+          <g font-size="15" text-anchor="middle" fill="#1f2433">
+            <text x="60" y="100">corredor 0</text>
+            <text x="150" y="100">corredor 1</text>
+            <text x="240" y="100">corredor 2</text>
+            <text x="330" y="100">corredor 3</text>
+            <text x="420" y="100">corredor 4</text>
+            <text x="510" y="100">corredor 5</text>
+            <text x="600" y="100">corredor 6</text>
+            <text x="690" y="100">corredor 7</text>
+          </g>
+          <g font-size="15" font-weight="700" fill="#2e9e4f">
+            <rect x="20" y="118" width="18" height="18" rx="4" fill="#2e9e4f" stroke="#1f2433" stroke-width="2" />
+            <text x="46" y="133">visitado</text>
+          </g>
+          <g font-size="15" font-weight="700" fill="#5f6675">
+            <rect x="140" y="118" width="18" height="18" rx="4" fill="#fff" stroke="#1f2433" stroke-width="2" />
+            <text x="166" y="133">fora da onda</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="panel">
+        <h2>Um ciclo que melhora a população</h2>
+        <svg viewBox="0 0 820 330" role="img" aria-label="Ciclo do algoritmo genético com cinco etapas: população, seleção, cruzamento, mutação e decodificador">
+          <defs>
+            <marker id="seta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L10 5 L0 10 z" fill="#1f2433" />
+            </marker>
+          </defs>
+          <g fill="none" stroke="#1f2433" stroke-width="3" marker-end="url(#seta)">
+            <path d="M330 70 L470 70" />
+            <path d="M610 105 L640 175" />
+            <path d="M600 260 L470 270" />
+            <path d="M330 270 L210 260" />
+            <path d="M170 175 L200 105" />
+          </g>
+          <g stroke="#1f2433" stroke-width="3">
+            <rect x="190" y="30" width="140" height="80" rx="14" fill="#dbe9ff" />
+            <rect x="470" y="30" width="140" height="80" rx="14" fill="#d4f3ef" />
+            <rect x="600" y="175" width="160" height="90" rx="14" fill="#e9dffb" />
+            <rect x="330" y="230" width="140" height="80" rx="14" fill="#ffe3dd" />
+            <rect x="60" y="175" width="160" height="90" rx="14" fill="#dcf5e3" />
+          </g>
+          <g font-size="19" font-weight="700" text-anchor="middle">
+            <text x="260" y="66">População</text>
+            <text x="540" y="66">Seleção</text>
+            <text x="680" y="212">Cruzamento</text>
+            <text x="400" y="266">Mutação</text>
+            <text x="140" y="212">Decodificador</text>
+          </g>
+          <g font-size="14" text-anchor="middle" fill="#5f6675">
+            <text x="260" y="90">várias ondas</text>
+            <text x="540" y="90">torneio</text>
+            <text x="680" y="236">mistura bits de</text>
+            <text x="680" y="254">dois pais</text>
+            <text x="400" y="290">troca alguns bits</text>
+            <text x="140" y="236">escolhe os pedidos</text>
+            <text x="140" y="254">dos corredores</text>
+          </g>
+          <g font-size="15" text-anchor="middle" font-weight="700" fill="#15a39a">
+            <text x="410" y="160">a cada volta, as melhores</text>
+            <text x="410" y="182">ondas sobrevivem</text>
+          </g>
+        </svg>
+        <p class="note">Seleção, cruzamento e mutação são ideias que parte do grupo já estudou em Teoria da Computação, e cabem nos 3 minutos de apresentação.</p>
+      </div>
+
+      <div class="panel" style="background: var(--coral-bg)">
+        <h2>O decodificador transforma corredores em pedidos</h2>
+        <svg viewBox="0 0 820 190" role="img" aria-label="Três passos do decodificador: somar o estoque, escolher os pedidos e calcular a nota">
+          <defs>
+            <marker id="seta2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L10 5 L0 10 z" fill="#1f2433" />
+            </marker>
+          </defs>
+          <g stroke="#1f2433" stroke-width="3" fill="#fff">
+            <rect x="10" y="20" width="240" height="150" rx="14" />
+            <rect x="290" y="20" width="240" height="150" rx="14" />
+            <rect x="570" y="20" width="240" height="150" rx="14" />
+          </g>
+          <g fill="none" stroke="#1f2433" stroke-width="3" marker-end="url(#seta2)">
+            <path d="M252 95 L286 95" />
+            <path d="M532 95 L566 95" />
+          </g>
+          <g stroke="#1f2433" stroke-width="2" transform="translate(280 0)">
+            <rect x="40" y="62" width="180" height="22" rx="6" fill="#fff3c7" />
+            <rect x="95" y="62" width="85" height="22" fill="#2e9e4f" />
+            <line x1="95" y1="54" x2="95" y2="92" stroke-width="3" />
+            <line x1="180" y1="54" x2="180" y2="92" stroke-width="3" />
+          </g>
+          <g font-size="13" text-anchor="middle" fill="#5f6675" transform="translate(280 0)">
+            <text x="95" y="108">mínimo</text>
+            <text x="180" y="108">máximo</text>
+          </g>
+          <g stroke="#1f2433" stroke-width="2" transform="translate(-280 0)">
+            <rect x="320" y="56" width="26" height="60" rx="4" fill="#2f80ed" />
+            <rect x="354" y="56" width="26" height="60" rx="4" fill="#fff" />
+            <rect x="388" y="56" width="26" height="60" rx="4" fill="#2f80ed" />
+            <rect x="422" y="56" width="26" height="60" rx="4" fill="#fff" />
+            <rect x="456" y="56" width="26" height="60" rx="4" fill="#fff" />
+            <rect x="490" y="56" width="26" height="60" rx="4" fill="#fff" />
+          </g>
+          <g font-family="Georgia, serif" text-anchor="middle">
+            <text x="690" y="78" font-size="22">unidades</text>
+            <line x1="625" y1="88" x2="755" y2="88" stroke="#1f2433" stroke-width="2.5" />
+            <text x="690" y="112" font-size="22">corredores</text>
+          </g>
+          <g font-size="15" font-weight="700" text-anchor="middle">
+            <text x="130" y="140">1. soma o estoque</text>
+            <text x="130" y="158">dos corredores visitados</text>
+            <text x="410" y="140">2. aceita pedidos até</text>
+            <text x="410" y="158">o limite superior</text>
+            <text x="690" y="140">3. calcula a nota</text>
+            <text x="690" y="158">da onda</text>
+          </g>
+        </svg>
+        <p class="note">Os pedidos entram do maior para o menor enquanto cabem no estoque e no limite superior, então a onda respeita essas restrições por construção. Se ela ficar abaixo do limite inferior, a nota fica negativa, e a seleção empurra a população para ondas válidas. Uma solução inválida vale zero na instância.</p>
+      </div>
+
+      <div class="row">
+        <div class="panel" style="background: var(--grape-bg)">
+          <h2>Comparação</h2>
+          <svg viewBox="0 0 380 230" role="img" aria-label="Duas barras ilustrativas, algoritmo genético e algoritmo exato, medidas contra uma linha do melhor valor oficial">
+            <line x1="30" y1="40" x2="360" y2="40" stroke="#ff6b57" stroke-width="3" stroke-dasharray="8 6" />
+            <text x="360" y="30" font-size="14" font-weight="700" text-anchor="end" fill="#ff6b57">melhor valor oficial</text>
+            <g stroke="#1f2433" stroke-width="3">
+              <rect x="70" y="70" width="90" height="120" rx="8" fill="#15a39a" />
+              <rect x="220" y="55" width="90" height="135" rx="8" fill="#7b4fd6" />
+              <line x1="30" y1="190" x2="360" y2="190" />
+            </g>
+            <g font-size="15" font-weight="700" text-anchor="middle">
+              <text x="115" y="212">algoritmo</text>
+              <text x="115" y="228">genético</text>
+              <text x="265" y="212">algoritmo</text>
+              <text x="265" y="228">exato</text>
+            </g>
+          </svg>
+          <p class="note">Barras ilustrativas. O algoritmo exato usa o HiGHS e devolve o ótimo provado ou um limite inferior e um limite superior quando o tempo acaba.</p>
+        </div>
+        <div class="panel" style="background: var(--leaf-bg)">
+          <h2>Análise de sensibilidade</h2>
+          <svg viewBox="0 0 380 230" role="img" aria-label="Grade de combinações de tamanho de população e taxa de mutação, cada célula é uma execução">
+            <g font-size="14" fill="#1f2433">
+              <text x="190" y="20" text-anchor="middle" font-weight="700">tamanho da população</text>
+              <text x="130" y="44" text-anchor="middle">30</text>
+              <text x="220" y="44" text-anchor="middle">50</text>
+              <text x="310" y="44" text-anchor="middle">100</text>
+              <text x="20" y="140" font-weight="700" transform="rotate(-90 20 140)" text-anchor="middle">taxa de mutação</text>
+              <text x="70" y="88" text-anchor="end">baixa</text>
+              <text x="70" y="148" text-anchor="end">média</text>
+              <text x="70" y="208" text-anchor="end">alta</text>
+            </g>
+            <g stroke="#1f2433" stroke-width="2.5" fill="#fff">
+              <rect x="88" y="55" width="84" height="54" rx="8" />
+              <rect x="178" y="55" width="84" height="54" rx="8" />
+              <rect x="268" y="55" width="84" height="54" rx="8" />
+              <rect x="88" y="115" width="84" height="54" rx="8" />
+              <rect x="178" y="115" width="84" height="54" rx="8" fill="#2e9e4f" />
+              <rect x="268" y="115" width="84" height="54" rx="8" />
+              <rect x="88" y="175" width="84" height="54" rx="8" />
+              <rect x="178" y="175" width="84" height="54" rx="8" />
+              <rect x="268" y="175" width="84" height="54" rx="8" />
+            </g>
+            <text x="220" y="148" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">1 execução</text>
+          </svg>
+          <p class="note">Um arquivo de configuração lista os valores, e o programa roda todas as combinações.</p>
+        </div>
+      </div>
+
+      <p class="note">Limite assumido de 600 segundos por instância, como no desafio oficial, até o professor confirmar.</p>
+    </div>
+  </body>
+</html>

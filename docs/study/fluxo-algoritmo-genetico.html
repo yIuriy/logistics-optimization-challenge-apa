@@ -1,0 +1,534 @@
+<!doctype html>
+<!-- Fluxo do algoritmo genético da issue #13 do TPF de APA, com tempos medidos por etapa em x_instance_0014, para decidir o que cortar. -->
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fluxo do algoritmo genético | TPF de APA</title>
+    <style>
+      :root {
+        --ink: #1f2433;
+        --muted: #5f6675;
+        --paper: #fffdf7;
+        --line: #1f2433;
+        --coral: #ff6b57;
+        --coral-bg: #ffe3dd;
+        --sun: #ffc531;
+        --sun-bg: #fff3c7;
+        --teal: #15a39a;
+        --teal-bg: #d4f3ef;
+        --grape: #7b4fd6;
+        --grape-bg: #e9dffb;
+        --sky: #2f80ed;
+        --sky-bg: #dbe9ff;
+        --leaf: #2e9e4f;
+        --leaf-bg: #dcf5e3;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      body {
+        margin: 0;
+        font:
+          17px/1.6 system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+      }
+      .wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 28px 18px 80px;
+      }
+      header {
+        border: 2px solid var(--line);
+        border-radius: 14px;
+        padding: 22px 24px;
+        background: #fff;
+        box-shadow: 6px 6px 0 var(--teal);
+      }
+      h1 {
+        font-size: 2rem;
+        line-height: 1.15;
+        margin: 0 0 8px;
+      }
+      .lead {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.05rem;
+      }
+      .lead a {
+        color: var(--sky);
+        font-weight: 700;
+      }
+      h2 {
+        font-size: 1.6rem;
+        margin: 40px 0 12px;
+        line-height: 1.2;
+      }
+      h3 {
+        font-size: 1.1rem;
+        margin: 18px 0 6px;
+      }
+      p {
+        margin: 0 0 12px;
+      }
+      /* etiquetas e cartões */
+      .tag {
+        display: inline-block;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border: 2px solid var(--line);
+        border-radius: 6px;
+        padding: 2px 10px;
+        margin: 0 6px 8px 0;
+        background: #fff;
+      }
+      .tag.f1 {
+        background: var(--sky-bg);
+      }
+      .tag.f2 {
+        background: var(--teal-bg);
+      }
+      .tag.f3 {
+        background: var(--grape-bg);
+      }
+      .card {
+        border: 2px solid var(--line);
+        border-radius: 12px;
+        padding: 16px 18px;
+        background: #fff;
+        margin: 14px 0;
+        overflow-x: auto;
+      }
+      .card.sun {
+        background: var(--sun-bg);
+      }
+      /* fórmulas e contas */
+      .formula {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 1.25rem;
+        background: #fff;
+        border: 2px dashed var(--line);
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin: 10px 0;
+        overflow-x: auto;
+        text-align: center;
+      }
+      .calc {
+        font-family: Georgia, serif;
+        font-size: 1.1rem;
+        line-height: 1.3;
+        background: var(--paper);
+        border: 2px dashed var(--line);
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin: 6px 0;
+        overflow-x: auto;
+      }
+      .frac {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        vertical-align: middle;
+        margin: 0 0.2em;
+        line-height: 1.1;
+      }
+      .frac > .num {
+        border-bottom: 2px solid currentColor;
+        padding: 0 0.3em 0.1em;
+      }
+      .frac > .den {
+        padding: 0.1em 0.3em 0;
+      }
+      .sq {
+        display: inline-flex;
+        align-items: center;
+        vertical-align: middle;
+        margin: 0 0.1em;
+      }
+      .sq::before {
+        content: "√";
+        font-size: 1.35em;
+        line-height: 1;
+        margin-right: 0.05em;
+      }
+      .sq > span {
+        display: inline-flex;
+        align-items: center;
+        border-top: 2px solid currentColor;
+        padding: 0.1em 0.3em 0;
+      }
+      .formulas {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 10px;
+      }
+      .formulas div {
+        border: 2px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+      }
+      .formulas .f1 {
+        background: var(--sky-bg);
+      }
+      .formulas .f2 {
+        background: var(--teal-bg);
+      }
+      .formulas .f3 {
+        background: var(--grape-bg);
+      }
+      .formulas b {
+        display: block;
+        margin-bottom: 4px;
+      }
+      .formulas .formula {
+        font-size: 1.05rem;
+        padding: 8px 10px;
+      }
+      /* tabelas */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 10px 0;
+        background: #fff;
+        font-size: 0.95rem;
+      }
+      th,
+      td {
+        border: 2px solid var(--line);
+        padding: 8px 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: var(--sun-bg);
+      }
+      td.c {
+        text-align: center;
+        font-family: Georgia, serif;
+        font-size: 1.05rem;
+      }
+      td.hit {
+        background: var(--sun);
+        font-weight: 800;
+      }
+      /* bloco de exercício/tópico com resolução recolhível */
+      .ex {
+        border: 3px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+        margin: 26px 0;
+        overflow: hidden;
+      }
+      .ex.f1 {
+        box-shadow: 8px 8px 0 var(--sky);
+      }
+      .ex.f2 {
+        box-shadow: 8px 8px 0 var(--teal);
+      }
+      .ex.f3 {
+        box-shadow: 8px 8px 0 var(--grape);
+      }
+      .ex .head {
+        padding: 14px 18px;
+        border-bottom: 2px solid var(--line);
+      }
+      .ex.f1 .head {
+        background: var(--sky-bg);
+      }
+      .ex.f2 .head {
+        background: var(--teal-bg);
+      }
+      .ex.f3 .head {
+        background: var(--grape-bg);
+      }
+      .ex .head h2 {
+        margin: 0 0 6px;
+        font-size: 1.35rem;
+      }
+      .ex blockquote {
+        margin: 0;
+        padding: 10px 14px;
+        border-left: 6px solid var(--line);
+        background: #fff;
+        border-radius: 0 8px 8px 0;
+        font-style: italic;
+      }
+      details {
+        border-top: 2px solid var(--line);
+      }
+      summary {
+        cursor: pointer;
+        padding: 12px 18px;
+        font-weight: 800;
+        background: var(--sun-bg);
+        list-style: none;
+      }
+      summary::before {
+        content: "▸ ";
+      }
+      details[open] summary::before {
+        content: "▾ ";
+      }
+      summary::-webkit-details-marker {
+        display: none;
+      }
+      .body {
+        padding: 14px 18px 18px;
+      }
+      /* leitura dos dados */
+      .read {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 8px;
+        margin: 8px 0 14px;
+      }
+      .read div {
+        border: 2px solid var(--line);
+        border-radius: 8px;
+        padding: 8px 10px;
+        background: var(--paper);
+        font-size: 0.95rem;
+      }
+      .read b {
+        font-family: Georgia, serif;
+        font-size: 1.1rem;
+        margin-right: 6px;
+      }
+      .read div.z {
+        grid-column: 1/-1;
+        background: var(--sun-bg);
+      }
+      /* caixas de significado */
+      .why {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--sun);
+        background: var(--sun-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 10px 0;
+      }
+      .ans {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--leaf);
+        background: var(--leaf-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 12px 0 6px;
+        font-weight: 700;
+        font-size: 1.05rem;
+      }
+      .check {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--coral);
+        background: var(--coral-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 8px 0;
+      }
+      .say {
+        border: 2px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 8px 0;
+        background: var(--paper);
+      }
+      .say b {
+        color: var(--leaf);
+      }
+      /* passos numerados */
+      .steps {
+        counter-reset: s;
+        padding: 0;
+        margin: 10px 0;
+        list-style: none;
+      }
+      .steps li {
+        counter-increment: s;
+        position: relative;
+        padding: 6px 0 6px 44px;
+        margin: 4px 0;
+      }
+      .steps li::before {
+        content: counter(s);
+        position: absolute;
+        left: 0;
+        top: 6px;
+        width: 30px;
+        height: 30px;
+        border: 2px solid var(--line);
+        border-radius: 50%;
+        background: var(--sun);
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      footer {
+        margin-top: 50px;
+        font-size: 0.85rem;
+        color: var(--muted);
+        border-top: 2px solid var(--line);
+        padding-top: 12px;
+      }
+      code {
+        font-size: 0.9em;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 0 4px;
+      }
+      @media (max-width: 600px) {
+        h1 {
+          font-size: 1.6rem;
+        }
+        .formula {
+          font-size: 1.1rem;
+        }
+        .calc {
+          font-size: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>Fluxo do algoritmo genético da issue #13, etapa por etapa</h1>
+        <p class="lead">
+          O que o código de <code>genetic_algorithm.py</code> (commit 6bc150c) faz em cada etapa, quanto tempo cada uma gasta em x_instance_0014 e quais decisões merecem corte.
+        </p>
+      </header>
+
+      <h2>Execução medida</h2>
+      <table>
+        <tr>
+          <th>Instância</th>
+          <th>Pedidos</th>
+          <th>Corredores</th>
+          <th>Gerações em 600 s</th>
+          <th>Objetivo</th>
+          <th>Melhor oficial</th>
+        </tr>
+        <tr>
+          <td>b_instance_0001</td>
+          <td class="c">11.321</td>
+          <td class="c">185</td>
+          <td class="c">186</td>
+          <td class="c">34,4</td>
+          <td class="c">631,5 (5%)</td>
+        </tr>
+        <tr>
+          <td>x_instance_0014</td>
+          <td class="c">68.064</td>
+          <td class="c">483</td>
+          <td class="c">4</td>
+          <td class="c">30,6</td>
+          <td class="c">1633,7 (2%)</td>
+        </tr>
+      </table>
+      <p>Parâmetros nas duas: população 50, torneio 3, taxa de mutação 0,001, semente 1, limite 600 s. O x_instance_0014 terminou em 612,8 s.</p>
+
+      <h2>O laço completo</h2>
+      <div class="card sun">
+        <ol class="steps">
+          <li><b>Preparação.</b> Calcula as tabelas usadas pelo reparo, uma vez.</li>
+          <li><b>População inicial.</b> Sorteia 50 vetores de bits e repara cada um.</li>
+          <li><b>Geração.</b> Para cada um dos 50 filhos: dois torneios, cruzamento uniforme, mutação, reparo.</li>
+          <li><b>Troca.</b> Os 50 filhos substituem a população inteira. Se o melhor filho supera o melhor de todos, grava em <code>history</code>.</li>
+          <li><b>Parada.</b> Confere o relógio só no fim de cada geração. Para em 595 s.</li>
+        </ol>
+      </div>
+      <div class="why"><b>De onde vem o tempo:</b> cada indivíduo novo passa pelo reparo, e cada reparo leva 2,3 s no X. São 50 reparos por geração, logo cerca de 115 s por geração. A população inicial sozinha consumiu 121 s.</div>
+
+      <div class="ex f1">
+        <div class="head">
+          <span class="tag f1">Início</span>
+          <h2>1. Preparação e população inicial</h2>
+        </div>
+        <div class="body">
+          <p><b>Preparação</b> (<code>build_repair_tables</code>). Guarda o total de unidades de cada pedido, o estoque total de cada item e, para cada item, a lista de corredores que o têm.</p>
+          <p><b>População inicial.</b> Cada bit vale 1 com chance igual a (LB + UB) / 2 dividido pelo total de unidades da instância.</p>
+          <div class="calc">X: (4039 + 22918) / 2 / 79715 = 0,169</div>
+          <div class="read">
+            <div><b>11.500</b> pedidos com bit 1</div>
+            <div><b>13.200</b> unidades na onda</div>
+            <div><b>10.700</b> itens diferentes</div>
+            <div><b>470</b> de 483 corredores</div>
+          </div>
+          <div class="check"><b>Decisão ruim:</b> mirar o meio entre LB e UB cria ondas enormes, com itens espalhados por quase todos os corredores. O objetivo fica perto de 13.200 / 470 = 28. O melhor oficial (1633,7) visita poucos corredores.</div>
+        </div>
+      </div>
+
+      <div class="ex f2">
+        <div class="head">
+          <span class="tag f2">Reparo</span>
+          <h2>2. Reparo (<code>repair</code>), 2,3 s por indivíduo no X</h2>
+        </div>
+        <div class="body">
+          <table>
+            <tr><th>Passo</th><th>O que faz</th><th>Tempo no X</th></tr>
+            <tr><td>1. Acima de UB</td><td>Embaralha os pedidos escolhidos e tira do fim da lista até a onda caber em UB.</td><td class="c">&lt; 0,01 s</td></tr>
+            <tr><td>Estoque</td><td>Tira pedidos cujo item passou do estoque somado de todos os corredores (<code>drop_orders_without_stock</code>).</td><td class="c">0,018 s</td></tr>
+            <tr><td>2. Abaixo de LB</td><td>Embaralha os pedidos de fora e acrescenta os que cabem até chegar a LB. Se não chega, recomeça de uma onda vazia (<code>fill_up_to_lower_limit</code>).</td><td class="c">0,025 s</td></tr>
+            <tr><td>3. Corredores</td><td>A cada rodada, soma quanto cada corredor ainda não escolhido cobre do que falta e pega o maior. Repete até não faltar nada (<code>choose_aisles</code>).</td><td class="c hit">2,212 s</td></tr>
+            <tr><td>4. Sobras</td><td>Do último corredor escolhido ao primeiro, tira os que não fazem falta (<code>drop_unneeded_aisles</code>).</td><td class="c">0,037 s</td></tr>
+          </table>
+          <div class="check"><b>Gargalo do passo 3.</b> São cerca de 470 rodadas. Em cada uma, o código percorre os 10.700 itens em falta, cerca de 5 corredores por item, e testa <code>aisle not in chosen_aisles</code> numa lista. Testar presença numa lista percorre a lista inteira, até 470 posições. Um <code>set</code> faz esse teste em tempo constante.</div>
+          <div class="check"><b>Decisão ruim:</b> os passos 1 e 2 escolhem pedidos ao acaso, sem olhar os corredores. O passo 3 só consegue cobrir o que já foi sorteado, então a onda nasce cara.</div>
+        </div>
+      </div>
+
+      <div class="ex f3">
+        <div class="head">
+          <span class="tag f3">Evolução</span>
+          <h2>3. Seleção, cruzamento e mutação, 0,011 s por filho no X</h2>
+        </div>
+        <div class="body">
+          <p><b>Torneio.</b> Sorteia 3 indivíduos da população e fica com o de maior objetivo. Faz isso duas vezes para ter os dois pais.</p>
+          <p><b>Cruzamento uniforme.</b> Para cada um dos 68.064 bits, sorteia de qual pai o bit vem, 50% para cada.</p>
+          <p><b>Mutação.</b> Cada bit troca de valor com chance 0,001.</p>
+          <div class="calc">X: 0,001 × 68.064 = 68 trocas por filho &nbsp;&nbsp; B: 0,001 × 11.321 = 11 trocas por filho</div>
+          <p><b>Depois do reparo.</b> O filho guarda os bits já reparados, e não os que saíram do cruzamento.</p>
+          <div class="check"><b>Mutação fraca:</b> 68 trocas num filho com cerca de 11.500 pedidos mexem em menos de 1% da onda. Quase toda a mudança de um filho para o pai vem do cruzamento e do sorteio do reparo.</div>
+          <div class="check"><b>Cruzamento sem estrutura:</b> dois pais com ondas de 11.500 pedidos sorteados quase não têm pedidos em comum. O filho herda metade de cada um e cai de novo numa onda aleatória espalhada por todos os corredores.</div>
+        </div>
+      </div>
+
+      <div class="ex f1">
+        <div class="head">
+          <span class="tag f1">Fim</span>
+          <h2>4. Melhor solução e parada</h2>
+        </div>
+        <div class="body">
+          <p>Guarda o melhor indivíduo de todas as gerações à parte. Grava <code>[segundos, objetivo]</code> em <code>history</code> a cada melhora.</p>
+          <div class="check"><b>Estouro de tempo:</b> o relógio só é conferido entre gerações. No X, a quarta geração começou antes de 595 s e terminou em 612,8 s.</div>
+        </div>
+      </div>
+
+      <h2>Decisões candidatas a corte ou troca</h2>
+      <table>
+        <tr><th>#</th><th>Decisão atual</th><th>Efeito medido</th></tr>
+        <tr><td class="c">1</td><td>Onda inicial no meio de LB e UB</td><td>470 de 483 corredores e objetivo perto de 28</td></tr>
+        <tr><td class="c">2</td><td>Pedidos sorteados sem olhar corredores</td><td>Nenhuma onda fica concentrada em poucos corredores</td></tr>
+        <tr><td class="c">3</td><td>Lista em <code>chosen_aisles</code></td><td>96% do tempo do reparo</td></tr>
+        <tr><td class="c">4</td><td>Taxa de mutação 0,001 por bit</td><td>Menos de 1% da onda muda por filho</td></tr>
+        <tr><td class="c">5</td><td>Relógio conferido só entre gerações</td><td>12,8 s acima do limite no X</td></tr>
+      </table>
+
+      <footer>
+        Medições feitas em 2026-11-20 nesta máquina. Tempos por passo são a média de 3 reparos da população inicial de x_instance_0014 com semente 1. Gerações e objetivos vêm das execuções de 600 s, aprovadas pelo <code>checker.py</code>. O melhor oficial vem de <code>data/best_objectives.csv</code>.
+      </footer>
+    </div>
+  </body>
+</html>

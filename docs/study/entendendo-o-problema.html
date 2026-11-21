@@ -1,0 +1,1299 @@
+<!doctype html>
+<!-- Página de estudo do TPF de Análise e Projeto de Algoritmos. Explica o problema de seleção de pedidos em waves (desafio SBPO 2025 do Mercado Livre) com um simulador do exemplo oficial, a lista completa de waves do exemplo, o formato dos arquivos, a nota e um quiz. -->
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Seleção de pedidos em waves | TPF de Análise e Projeto de Algoritmos</title>
+    <style>
+      :root {
+        --ink: #1f2433;
+        --muted: #5f6675;
+        --paper: #fffdf7;
+        --line: #1f2433;
+        --coral: #ff6b57;
+        --coral-bg: #ffe3dd;
+        --sun: #ffc531;
+        --sun-bg: #fff3c7;
+        --teal: #15a39a;
+        --teal-bg: #d4f3ef;
+        --grape: #7b4fd6;
+        --grape-bg: #e9dffb;
+        --sky: #2f80ed;
+        --sky-bg: #dbe9ff;
+        --leaf: #2e9e4f;
+        --leaf-bg: #dcf5e3;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      body {
+        margin: 0;
+        font:
+          17px/1.6 system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+      }
+      .wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 28px 18px 80px;
+      }
+      header {
+        border: 2px solid var(--line);
+        border-radius: 14px;
+        padding: 22px 24px;
+        background: #fff;
+        box-shadow: 6px 6px 0 var(--teal);
+      }
+      h1 {
+        font-size: 2rem;
+        line-height: 1.15;
+        margin: 0 0 8px;
+      }
+      .lead {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.05rem;
+      }
+      h2 {
+        font-size: 1.6rem;
+        margin: 40px 0 12px;
+        line-height: 1.2;
+      }
+      h3 {
+        font-size: 1.1rem;
+        margin: 18px 0 6px;
+      }
+      p {
+        margin: 0 0 12px;
+      }
+      code {
+        font-size: 0.92em;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 0 4px;
+      }
+      .tag {
+        display: inline-block;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border: 2px solid var(--line);
+        border-radius: 6px;
+        padding: 2px 10px;
+        margin: 0 6px 8px 0;
+        background: #fff;
+      }
+      .tag.f1 {
+        background: var(--sky-bg);
+      }
+      .tag.f2 {
+        background: var(--teal-bg);
+      }
+      .tag.f3 {
+        background: var(--grape-bg);
+      }
+      .card {
+        border: 2px solid var(--line);
+        border-radius: 12px;
+        padding: 16px 18px;
+        background: #fff;
+        margin: 14px 0;
+        overflow-x: auto;
+      }
+      .card.sun {
+        background: var(--sun-bg);
+      }
+      .formula {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 1.25rem;
+        background: #fff;
+        border: 2px dashed var(--line);
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin: 10px 0;
+        overflow-x: auto;
+        text-align: center;
+      }
+      .calc {
+        font-family: Georgia, serif;
+        font-size: 1.1rem;
+        line-height: 1.3;
+        background: var(--paper);
+        border: 2px dashed var(--line);
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin: 6px 0;
+        overflow-x: auto;
+      }
+      .frac {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        vertical-align: middle;
+        margin: 0 0.2em;
+        line-height: 1.1;
+      }
+      .frac > .num {
+        border-bottom: 2px solid currentColor;
+        padding: 0 0.3em 0.1em;
+      }
+      .frac > .den {
+        padding: 0.1em 0.3em 0;
+      }
+      .formulas {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 10px;
+      }
+      .formulas > div {
+        border: 2px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+      }
+      .formulas .f1 {
+        background: var(--sky-bg);
+      }
+      .formulas .f2 {
+        background: var(--teal-bg);
+      }
+      .formulas b {
+        display: block;
+        margin-bottom: 4px;
+      }
+      .formulas .formula {
+        font-size: 1.05rem;
+        padding: 8px 10px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 10px 0;
+        background: #fff;
+        font-size: 0.95rem;
+      }
+      th,
+      td {
+        border: 2px solid var(--line);
+        padding: 6px 9px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: var(--sun-bg);
+      }
+      td.c,
+      th.c {
+        text-align: center;
+      }
+      td.c {
+        font-family: Georgia, serif;
+        font-size: 1.05rem;
+      }
+      tr.on td {
+        background: var(--sky-bg);
+        font-weight: 700;
+      }
+      tr.on-a td {
+        background: var(--teal-bg);
+        font-weight: 700;
+      }
+      td.ok {
+        background: var(--leaf-bg);
+      }
+      td.bad {
+        background: var(--coral-bg);
+        font-weight: 800;
+      }
+      .ex {
+        border: 3px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+        margin: 26px 0;
+        overflow: hidden;
+      }
+      .ex.f1 {
+        box-shadow: 8px 8px 0 var(--sky);
+      }
+      .ex.f2 {
+        box-shadow: 8px 8px 0 var(--teal);
+      }
+      .ex.f3 {
+        box-shadow: 8px 8px 0 var(--grape);
+      }
+      .ex .head {
+        padding: 14px 18px;
+        border-bottom: 2px solid var(--line);
+      }
+      .ex.f1 .head {
+        background: var(--sky-bg);
+      }
+      .ex.f2 .head {
+        background: var(--teal-bg);
+      }
+      .ex.f3 .head {
+        background: var(--grape-bg);
+      }
+      .ex .head h2 {
+        margin: 0 0 6px;
+        font-size: 1.35rem;
+      }
+      .ex blockquote {
+        margin: 0;
+        padding: 10px 14px;
+        border-left: 6px solid var(--line);
+        background: #fff;
+        border-radius: 0 8px 8px 0;
+        font-style: italic;
+      }
+      details {
+        border-top: 2px solid var(--line);
+      }
+      summary {
+        cursor: pointer;
+        padding: 12px 18px;
+        font-weight: 800;
+        background: var(--sun-bg);
+        list-style: none;
+      }
+      summary::before {
+        content: "▸ ";
+      }
+      details[open] summary::before {
+        content: "▾ ";
+      }
+      summary::-webkit-details-marker {
+        display: none;
+      }
+      .body {
+        padding: 14px 18px 18px;
+        overflow-x: auto;
+      }
+      .read {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 8px;
+        margin: 8px 0 14px;
+      }
+      .read div {
+        border: 2px solid var(--line);
+        border-radius: 8px;
+        padding: 8px 10px;
+        background: var(--paper);
+        font-size: 0.95rem;
+      }
+      .read b {
+        font-family: Georgia, serif;
+        font-size: 1.1rem;
+        margin-right: 6px;
+      }
+      .read div.z {
+        grid-column: 1/-1;
+        background: var(--sun-bg);
+      }
+      .why {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--sun);
+        background: var(--sun-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 10px 0;
+      }
+      .ans {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--leaf);
+        background: var(--leaf-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 12px 0 6px;
+        font-weight: 700;
+        font-size: 1.05rem;
+      }
+      .check {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--coral);
+        background: var(--coral-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 8px 0;
+      }
+      .say {
+        border: 2px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 8px 0;
+        background: var(--paper);
+      }
+      .say b {
+        color: var(--leaf);
+      }
+      .steps {
+        counter-reset: s;
+        padding: 0;
+        margin: 10px 0;
+        list-style: none;
+      }
+      .steps li {
+        counter-increment: s;
+        position: relative;
+        padding: 6px 0 6px 44px;
+        margin: 4px 0;
+      }
+      .steps li::before {
+        content: counter(s);
+        position: absolute;
+        left: 0;
+        top: 6px;
+        width: 30px;
+        height: 30px;
+        border: 2px solid var(--line);
+        border-radius: 50%;
+        background: var(--sun);
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      /* componentes novos desta página: botões, barra, arquivos e quiz */
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 6px 0 12px;
+      }
+      button {
+        font: inherit;
+        color: var(--ink);
+        cursor: pointer;
+        border: 2px solid var(--line);
+        border-radius: 8px;
+        padding: 6px 12px;
+        background: #fff;
+        box-shadow: 3px 3px 0 var(--line);
+      }
+      button:active {
+        transform: translate(2px, 2px);
+        box-shadow: 1px 1px 0 var(--line);
+      }
+      button[data-o][aria-pressed="true"] {
+        background: var(--sky);
+        color: #fff;
+        font-weight: 700;
+      }
+      button[data-a][aria-pressed="true"] {
+        background: var(--teal);
+        color: #fff;
+        font-weight: 700;
+      }
+      button.small {
+        padding: 2px 8px;
+        font-size: 0.85rem;
+        box-shadow: 2px 2px 0 var(--line);
+      }
+      .grid2 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 12px;
+      }
+      .bar {
+        position: relative;
+        height: 34px;
+        border: 2px solid var(--line);
+        border-radius: 8px;
+        background: var(--paper);
+        margin: 26px 0 8px;
+      }
+      .bar .fill {
+        position: absolute;
+        inset: 0 auto 0 0;
+        border-radius: 6px 0 0 6px;
+        transition: width 0.25s;
+      }
+      .bar .mark {
+        position: absolute;
+        top: -24px;
+        bottom: -4px;
+        border-left: 3px dashed var(--line);
+        font-size: 0.8rem;
+        font-weight: 800;
+        padding-left: 4px;
+      }
+      .bar .zone {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        background: repeating-linear-gradient(45deg, transparent 0 6px, rgba(46, 158, 79, 0.18) 6px 12px);
+      }
+      .file {
+        font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+        font-size: 0.95rem;
+        border: 2px solid var(--line);
+        border-radius: 8px;
+        background: var(--paper);
+        padding: 8px 0;
+        overflow-x: auto;
+      }
+      .file div {
+        padding: 1px 12px;
+        white-space: pre;
+        cursor: pointer;
+      }
+      .file div:hover,
+      .file div.sel {
+        background: var(--grape-bg);
+      }
+      .file .n {
+        display: inline-block;
+        width: 2.2em;
+        color: var(--muted);
+        user-select: none;
+      }
+      .quiz {
+        border: 2px solid var(--line);
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin: 12px 0;
+        background: #fff;
+      }
+      .quiz .opts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 8px 0;
+      }
+      .quiz button.right {
+        background: var(--leaf-bg);
+      }
+      .quiz button.wrong {
+        background: var(--coral-bg);
+      }
+      .timeline {
+        display: flex;
+        border: 2px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 10px 0;
+      }
+      .timeline div {
+        padding: 10px 12px;
+        font-size: 0.95rem;
+      }
+      .timeline div + div {
+        border-left: 2px solid var(--line);
+      }
+      .num-in {
+        font: inherit;
+        width: 9em;
+        padding: 4px 8px;
+        border: 2px solid var(--line);
+        border-radius: 6px;
+      }
+      svg .aisle {
+        cursor: pointer;
+      }
+      footer {
+        margin-top: 50px;
+        font-size: 0.85rem;
+        color: var(--muted);
+        border-top: 2px solid var(--line);
+        padding-top: 12px;
+      }
+      @media (max-width: 600px) {
+        h1 {
+          font-size: 1.6rem;
+        }
+        .formula {
+          font-size: 1.1rem;
+        }
+        .calc {
+          font-size: 1rem;
+        }
+        .timeline {
+          flex-direction: column;
+        }
+        .timeline div + div {
+          border-left: 0;
+          border-top: 2px solid var(--line);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>Seleção de pedidos em waves, o problema que o TPF pede para resolver</h1>
+        <p class="lead">
+          Esta página explica o desafio SBPO 2025 do Mercado Livre, que é o trabalho final de Análise e Projeto de Algoritmos. Leia de cima para baixo e mexa em cada parte interativa, porque todas
+          usam o exemplo oficial da descrição do problema (5 pedidos, 5 itens e 5 corredores).
+        </p>
+      </header>
+
+      <h2>O que o trabalho pede</h2>
+      <div class="card sun">
+        <ol class="steps">
+          <li>
+            <b>Um programa que lê uma instância e escreve uma solução.</b> A instância é um arquivo de texto com pedidos, corredores e dois limites. A solução é um arquivo com os pedidos escolhidos e
+            os corredores visitados.
+          </li>
+          <li><b>Soluções válidas.</b> O script oficial <code>checker.py</code> confere cada solução. A instância em que a solução quebra alguma restrição vale zero.</li>
+          <li><b>Soluções boas.</b> A nota da parte competitiva compara o resultado do grupo com o melhor resultado da turma.</li>
+          <li><b>Uma apresentação de 5 minutos.</b> Dois minutos para explicar o problema e três para mostrar a estratégia e comparar os resultados com os melhores valores oficiais.</li>
+        </ol>
+        <p>
+          A linguagem é livre, então Python serve. Podem ser usados solvers de Programação Linear Inteira (programas prontos que acham a melhor resposta de um modelo matemático, como CPLEX, Gurobi,
+          OR-Tools e HiGHS) e meta-heurísticas (estratégias de busca que acham respostas boas sem garantir a melhor, como GRASP, Simulated Annealing, Algoritmos Genéticos e Busca Local). IA também é
+          permitida, e o grupo precisa saber justificar os blocos essenciais do código e as decisões matemáticas.
+        </p>
+      </div>
+
+      <h2>A história por trás do problema</h2>
+      <p>
+        Quando alguém compra no Mercado Livre, o pedido entra no <b>backlog</b>, que é a fila de pedidos cujos itens ainda não foram buscados nas prateleiras. Buscar os itens de um pedido de cada vez
+        gasta muita caminhada. Por isso o armazém junta vários pedidos num lote chamado <b>wave</b> (onda) e busca os itens desse lote de uma vez só.
+      </p>
+      <p>
+        A caminhada acontece nos <b>corredores</b>, os espaços entre duas fileiras de estantes. Cada corredor guarda certas quantidades de certos itens. Quanto menos corredores a pessoa precisa
+        visitar para montar a wave, mais rápida é a coleta.
+      </p>
+
+      <div class="card">
+        <svg viewBox="0 0 600 210" width="100%" role="img" aria-label="Planta de um armazém com seis estantes e cinco corredores numerados de 0 a 4. Clique num corredor para escolhê-lo no simulador.">
+          <rect x="10" y="10" width="580" height="190" rx="10" fill="#fffdf7" stroke="#1f2433" stroke-width="3" />
+          <g id="svg-aisles"></g>
+          <g id="svg-shelves"></g>
+        </svg>
+        <p>As estantes estão em cinza escuro e os corredores ficam entre elas. Clique num corredor para ligá-lo no simulador.</p>
+      </div>
+
+      <div class="read">
+        <div><b>Item</b> um produto, como "caneca azul".</div>
+        <div><b>Pedido</b> uma lista de itens com quantidades, feita por um cliente.</div>
+        <div><b>Backlog</b> todos os pedidos esperando coleta. Na notação, é o conjunto O.</div>
+        <div><b>Wave</b> o lote de pedidos escolhido do backlog. Na notação, é O′.</div>
+        <div><b>Corredor</b> um lugar de coleta com estoque de alguns itens. Os escolhidos formam A′.</div>
+        <div><b>LB e UB</b> Lower Bound e Upper Bound, o mínimo e o máximo de unidades que a wave pode ter.</div>
+        <div class="z">
+          <b>A pergunta do problema</b> Quais pedidos entram na wave e quais corredores serão visitados, para que cada corredor visitado renda o maior número possível de unidades coletadas?
+        </div>
+      </div>
+
+      <h2>A matemática em três peças</h2>
+      <p>Você escolhe duas coisas ao mesmo tempo, o conjunto de pedidos O′ e o conjunto de corredores A′. Com essas duas escolhas, a descrição oficial define um objetivo e três restrições.</p>
+      <div class="formulas">
+        <div class="f1">
+          <b>Unidades por corredor, objetivo (1)</b>
+          <div class="formula">
+            max
+            <span class="frac"
+              ><span class="num"
+                >∑<sub>o∈O′</sub> ∑<sub>i∈I<sub>o</sub></sub> u<sub>oi</sub></span
+              ><span class="den">|A′|</span></span
+            >
+          </div>
+          Em cima, o total de unidades de todos os pedidos da wave. Embaixo, quantos corredores serão visitados.
+        </div>
+        <div class="f2">
+          <b>Tamanho da wave, restrições (2) e (3)</b>
+          <div class="formula">
+            LB ≤ ∑<sub>o∈O′</sub> ∑<sub>i∈I<sub>o</sub></sub> u<sub>oi</sub> ≤ UB
+          </div>
+          A wave precisa ter pelo menos LB e no máximo UB unidades. No exemplo, LB = 5 e UB = 12.
+        </div>
+        <div class="f2">
+          <b>Estoque suficiente, restrição (4)</b>
+          <div class="formula">∑<sub>o∈O′</sub> u<sub>oi</sub> ≤ ∑<sub>a∈A′</sub> u<sub>ai</sub></div>
+          Vale para cada item i pedido na wave. Somando os corredores escolhidos, tem de haver unidades bastantes desse item.
+        </div>
+      </div>
+      <div class="read">
+        <div>
+          <b>u<sub>oi</sub></b> unidades do item i que o pedido o quer.
+        </div>
+        <div>
+          <b>u<sub>ai</sub></b> unidades do item i guardadas no corredor a.
+        </div>
+        <div>
+          <b>I<sub>o</sub></b> os itens que aparecem no pedido o.
+        </div>
+        <div><b>|A′|</b> a quantidade de corredores escolhidos.</div>
+      </div>
+      <div class="why">
+        <b>A fração torna o problema difícil.</b> Colocar mais um pedido aumenta o número de cima. Se esse pedido exigir um corredor novo, o número de baixo também aumenta, e a razão pode cair. No
+        exemplo, a wave com os pedidos 0, 2 e 3 coleta 12 unidades, mas precisa de 3 corredores, então vale 12 ÷ 3 = 4. A wave só com os pedidos 1 e 2 coleta 5 unidades num único corredor e vale 5 ÷ 1
+        = 5. A wave menor ganha.
+      </div>
+
+      <div class="ex f1" id="sim">
+        <div class="head">
+          <span class="tag f1">Simulador</span>
+          <h2>Monte uma wave com o exemplo oficial</h2>
+          <blockquote>
+            "Considere o seguinte exemplo com 5 pedidos, 5 itens diferentes e 5 corredores. [...] Os limites inferior e superior para o tamanho da wave são 5 e 12, respectivamente." (descrição
+            oficial, seção 3)
+          </blockquote>
+        </div>
+        <div class="body">
+          <div class="grid2">
+            <div>
+              <h3>Pedidos (unidades que cada um quer)</h3>
+              <table id="t-orders"></table>
+            </div>
+            <div>
+              <h3>Corredores (unidades em estoque)</h3>
+              <table id="t-aisles"></table>
+            </div>
+          </div>
+
+          <h3>1. Escolha os pedidos da wave</h3>
+          <div class="chips" id="chips-o"></div>
+          <h3>2. Escolha os corredores que serão visitados</h3>
+          <div class="chips" id="chips-a"></div>
+          <div class="chips">
+            <button id="btn-min">Escolher o menor conjunto de corredores para estes pedidos</button>
+            <button id="btn-clear">Limpar tudo</button>
+          </div>
+          <p>Exemplos da descrição oficial:</p>
+          <div class="chips" id="presets"></div>
+
+          <h3>Unidades na wave, restrições (2) e (3)</h3>
+          <div class="bar" id="bar"></div>
+          <p id="bar-text"></p>
+
+          <h3>Estoque de cada item, restrição (4)</h3>
+          <table id="t-cover"></table>
+
+          <div id="verdict"></div>
+        </div>
+      </div>
+
+      <div class="ex f1">
+        <div class="head">
+          <span class="tag f1">Exploração</span>
+          <h2>Todas as 31 waves do exemplo, da melhor para a pior</h2>
+          <blockquote>"De fato, pode-se mostrar que esta solução é ótima para a instância dada." (descrição oficial, seção 3)</blockquote>
+        </div>
+        <details>
+          <summary>Ver a lista (tente achar a melhor no simulador antes)</summary>
+          <div class="body">
+            <p>
+              Com 5 pedidos existem 2<sup>5</sup> − 1 = 31 waves não vazias. Para cada uma, a página testou todos os 31 conjuntos de corredores e guardou o menor que cobre o estoque. Clique em
+              "Testar" para carregar a linha no simulador.
+            </p>
+            <table id="t-rank"></table>
+            <div class="ans" id="rank-ans"></div>
+            <div class="check">
+              <b>Conferência com a descrição oficial:</b> o documento mostra os pedidos 0, 1, 2 e 4 com os corredores 1 e 3 como solução ótima, valendo 5. A busca completa desta página confirma o
+              valor 5 e acha também os pedidos 1 e 2 com o corredor 4, que vale 5 do mesmo jeito. As duas empatam no ótimo, então a afirmação oficial continua correta.
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <h2>Por que não dá para testar todas as waves</h2>
+      <p>
+        No exemplo, 31 waves cabem numa tabela. Cada pedido pode estar dentro ou fora da wave, então n pedidos geram 2<sup>n</sup> − 1 waves não vazias, e para cada wave ainda é preciso escolher
+        corredores. Esse crescimento é exponencial, porque cada pedido a mais dobra a quantidade de waves.
+      </p>
+      <div class="card">
+        <label for="n-orders"><b>Número de pedidos:</b></label>
+        <input class="num-in" id="n-orders" type="number" min="1" max="100000" value="11321" />
+        <div class="calc" id="n-out"></div>
+        <p>
+          O valor inicial, 11321, é o número de pedidos da instância
+          <code>b/instance_0001</code>.
+        </p>
+      </div>
+      <div class="ex f3">
+        <div class="head">
+          <span class="tag f3">Instâncias reais</span>
+          <h2>Tamanho das instâncias B e X e o melhor valor de cada uma</h2>
+        </div>
+        <details>
+          <summary>Ver as 30 instâncias da fase final</summary>
+          <div class="body">
+            <p>
+              Pedidos, itens e corredores vêm da primeira linha de cada arquivo no repositório oficial. O melhor objetivo vem da seção 2 do
+              <code>resultado-desafio-sbpo.pdf</code>. Esses valores são a referência para comparar os resultados do grupo na apresentação.
+            </p>
+            <table id="t-inst"></table>
+          </div>
+        </details>
+      </div>
+
+      <div class="ex f3">
+        <div class="head">
+          <span class="tag f3">Arquivos</span>
+          <h2>O que o programa lê e o que ele escreve</h2>
+        </div>
+        <div class="body">
+          <h3>Entrada: o exemplo oficial no formato de arquivo</h3>
+          <p>Clique numa linha para ver o que ela diz. O formato foi tirado da função <code>read_input</code> do <code>checker.py</code> oficial.</p>
+          <div class="file" id="file-in"></div>
+          <div class="say" id="file-in-say"><b>Linha escolhida:</b> clique numa linha do arquivo.</div>
+
+          <h3>Saída: a wave que está agora no simulador</h3>
+          <p>Este arquivo muda quando você mexe no simulador. Primeiro vem a quantidade de pedidos e um pedido por linha. Depois vem a quantidade de corredores e um corredor por linha.</p>
+          <div class="file" id="file-out"></div>
+          <p>Para conferir uma solução, o repositório oficial usa este comando:</p>
+          <div class="calc">
+            <code>python checker.py arquivo_da_instancia.txt arquivo_da_solucao.txt</code>
+          </div>
+          <p>O checker diz se a solução é viável e, quando é, mostra o valor do objetivo. Ele soma as unidades dos pedidos e divide pelo número de corredores diferentes da lista.</p>
+          <div class="check">
+            <b>Tempo de execução:</b> o enunciado da disciplina não cita limite de tempo. No desafio oficial, o README do repositório diz que cada instância tinha 600 segundos. Vale confirmar com os
+            professores qual limite será usado na turma.
+          </div>
+        </div>
+      </div>
+
+      <h2>Como a nota da solução é calculada</h2>
+      <div class="formula">
+        Nota<sub>solução</sub> = 10 ×
+        <span class="frac"><span class="num">Desempenho da equipe</span><span class="den">Melhor desempenho da turma</span></span>
+      </div>
+      <p>
+        O grupo com o melhor resultado global (soma ou normalização do objetivo nas instâncias avaliadas) leva 10. Os outros recebem a parte proporcional. Uma instância com solução inviável vale zero.
+      </p>
+      <div class="card">
+        <label><b>Desempenho do grupo:</b> <input class="num-in" id="g-team" type="number" min="0" step="any" value="1500" /></label>
+        <label><b>Melhor da turma:</b> <input class="num-in" id="g-best" type="number" min="0" step="any" value="1600" /></label>
+        <div class="ans" id="g-out"></div>
+      </div>
+      <h3>Divisão dos 5 minutos de apresentação</h3>
+      <div class="timeline">
+        <div style="flex: 2; background: var(--sky-bg)"><b>0:00 a 2:00</b><br />O problema, a função objetivo e as restrições principais, de preferência com elementos gráficos.</div>
+        <div style="flex: 3; background: var(--teal-bg)">
+          <b>2:00 a 5:00</b><br />A estratégia (modelo exato, heurística ou mistura) e a comparação dos resultados com os valores de referência oficiais.
+        </div>
+      </div>
+      <p>Os professores Marcelo e Diogo podem fazer perguntas, e a capacidade de respondê-las conta na nota da apresentação.</p>
+
+      <h2>Caminhos para resolver</h2>
+      <p>O enunciado aceita dois tipos de abordagem, e o grupo pode misturar os dois.</p>
+      <table>
+        <tr>
+          <th>Abordagem</th>
+          <th>Como funciona</th>
+          <th>Vantagem</th>
+          <th>Custo</th>
+        </tr>
+        <tr>
+          <td>Modelo exato com solver</td>
+          <td>Você escreve o objetivo e as restrições como equações e um solver busca a melhor resposta.</td>
+          <td>Pode provar que achou o ótimo.</td>
+          <td>Em instâncias com dezenas de milhares de pedidos, pode não terminar dentro do tempo.</td>
+        </tr>
+        <tr>
+          <td>Heurística ou meta-heurística</td>
+          <td>Você constrói uma wave com uma regra simples e depois troca pedidos e corredores procurando melhorar.</td>
+          <td>Acha respostas boas rapidamente em instâncias grandes.</td>
+          <td>Não garante o ótimo.</td>
+        </tr>
+      </table>
+      <div class="why">
+        <b>Pistas minhas, que não estão nos documentos do trabalho:</b>
+        <ol class="steps">
+          <li>
+            Comece com uma regra gulosa (que escolhe sempre o pedido que parece melhor agora) e que já produza soluções aceitas pelo
+            <code>checker.py</code>. Assim o grupo garante pontos antes de otimizar.
+          </li>
+          <li>
+            Se o número de corredores k for fixado, o denominador vira constante. Aí maximizar a razão é o mesmo que maximizar as unidades coletadas usando no máximo k corredores, e o grupo pode
+            repetir isso para vários valores de k.
+          </li>
+          <li>Objetivos em forma de fração aparecem na literatura como programação fracionária. O método de Dinkelbach é a técnica clássica para esse tipo de objetivo e vale a pesquisa.</li>
+        </ol>
+      </div>
+
+      <h2>Confira se entendeu</h2>
+      <div id="quiz"></div>
+
+      <h2>Resumo e armadilhas</h2>
+      <table>
+        <tr>
+          <th>Ponto</th>
+          <th>O que lembrar</th>
+        </tr>
+        <tr>
+          <td>Duas escolhas</td>
+          <td>A solução é o par (O′, A′). Os pedidos e os corredores são decididos juntos.</td>
+        </tr>
+        <tr>
+          <td>Objetivo</td>
+          <td>Maximizar unidades coletadas divididas pelo número de corredores visitados.</td>
+        </tr>
+        <tr>
+          <td>Tamanho da wave</td>
+          <td>O total de unidades fica entre LB e UB, contando os dois extremos.</td>
+        </tr>
+        <tr>
+          <td>Estoque</td>
+          <td>Para cada item da wave, a soma dos corredores escolhidos cobre a soma dos pedidos.</td>
+        </tr>
+        <tr>
+          <td>Armadilha: corredor sobrando</td>
+          <td>Um corredor a mais mantém a solução viável e piora o objetivo.</td>
+        </tr>
+        <tr>
+          <td>Armadilha: wave grande</td>
+          <td>Mais pedidos aumentam o numerador, mas podem exigir corredores novos e baixar a razão.</td>
+        </tr>
+        <tr>
+          <td>Armadilha: solução inválida</td>
+          <td>
+            Uma instância com solução inviável vale zero. Rode o
+            <code>checker.py</code> em todas as saídas.
+          </td>
+        </tr>
+        <tr>
+          <td>Armadilha: tempo</td>
+          <td>Busca completa é impossível nas instâncias reais. Confirme o limite de tempo com os professores.</td>
+        </tr>
+      </table>
+
+      <footer>
+        Fontes: <code>dev-docs/enunciado-trabalho.pdf</code> (Moodle, atualizado em 13 nov. 2026), <code>dev-docs/descricao-problema-sbpo.pdf</code> (seções 2 e 3),
+        <code>dev-docs/resultado-desafio-sbpo.pdf</code> (seção 2) e o repositório github.com/mercadolibre/challenge-sbpo-2025 (README, <code>checker.py</code> e primeira linha de cada arquivo em
+        <code>datasets/b</code> e <code>datasets/x</code>, consultados em 20 nov. 2026). A lista das 31 waves foi recalculada por busca completa e encontrou um segundo ótimo empatado (pedidos 1 e 2
+        com o corredor 4) que a descrição oficial não mostra.
+      </footer>
+    </div>
+
+    <script>
+      // Dados do exemplo oficial (descrição do problema, tabelas 1 e 2)
+      const P = [
+        [3, 0, 1, 0, 0],
+        [0, 1, 0, 1, 0],
+        [0, 0, 1, 0, 2],
+        [1, 0, 2, 1, 1],
+        [0, 1, 0, 0, 0],
+      ];
+      const C = [
+        [2, 1, 1, 0, 1],
+        [2, 1, 2, 0, 1],
+        [0, 2, 0, 1, 2],
+        [2, 1, 0, 1, 1],
+        [0, 1, 2, 1, 2],
+      ];
+      const LB = 5,
+        UB = 12,
+        N = 5,
+        MAXU = 15;
+      const ITEMS = [...Array(N).keys()];
+      const selO = new Set(),
+        selA = new Set();
+      const $ = (id) => document.getElementById(id);
+
+      const units = (o) => P[o].reduce((s, v) => s + v, 0);
+      const total = (O) => [...O].reduce((s, o) => s + units(o), 0);
+      const need = (O, i) => [...O].reduce((s, o) => s + P[o][i], 0);
+      const have = (A, i) => [...A].reduce((s, a) => s + C[a][i], 0);
+      const covers = (O, A) => ITEMS.every((i) => need(O, i) <= have(A, i));
+      const fmt = (x) => (Number.isInteger(x) ? String(x) : x.toFixed(2).replace(".", ","));
+      const list = (s) => [...s].sort((a, b) => a - b).join(", ");
+
+      // Todos os subconjuntos não vazios de {0..4}, do menor para o maior
+      const SUBSETS = [];
+      for (let m = 1; m < 1 << N; m++) SUBSETS.push(ITEMS.filter((k) => (m >> k) & 1));
+      SUBSETS.sort((x, y) => x.length - y.length || x.join().localeCompare(y.join()));
+      const minAisles = (O) => SUBSETS.find((A) => covers(O, A)) || null;
+
+      // Tabelas de dados
+      function dataTable(el, rows, label, key) {
+        let h = "<tr><th>" + label + "</th>" + ITEMS.map((i) => '<th class="c">Item ' + i + "</th>").join("") + "</tr>";
+        rows.forEach((r, k) => {
+          h += "<tr data-" + key + '="' + k + '"><td>' + label + " " + k + "</td>" + r.map((v) => '<td class="c">' + v + "</td>").join("") + "</tr>";
+        });
+        el.innerHTML = h;
+      }
+      dataTable($("t-orders"), P, "Pedido", "ro");
+      dataTable($("t-aisles"), C, "Corredor", "ra");
+
+      // Botões de pedidos e corredores
+      $("chips-o").innerHTML = P.map((_, o) => '<button data-o="' + o + '">Pedido ' + o + " (" + units(o) + " un.)</button>").join("");
+      $("chips-a").innerHTML = C.map((_, a) => '<button data-a="' + a + '">Corredor ' + a + "</button>").join("");
+      document.addEventListener("click", (e) => {
+        const b = e.target.closest("[data-o],[data-a],.aisle");
+        if (!b) return;
+        if (b.dataset.o !== undefined) toggle(selO, +b.dataset.o);
+        else toggle(selA, +(b.dataset.a ?? b.dataset.svg));
+        render();
+      });
+      const toggle = (s, v) => (s.has(v) ? s.delete(v) : s.add(v));
+
+      // Planta do armazém: 6 estantes e 5 corredores clicáveis
+      let shelves = "",
+        aisles = "";
+      for (let k = 0; k < 6; k++) shelves += '<rect x="' + (30 + k * 100) + '" y="30" width="40" height="150" rx="4" fill="#5f6675" stroke="#1f2433" stroke-width="2"/>';
+      for (let a = 0; a < 5; a++) {
+        const x = 70 + a * 100;
+        aisles += '<g class="aisle" data-svg="' + a + '"><rect id="svg-a' + a + '" x="' + x + '" y="20" width="60" height="170" fill="transparent"/>';
+        aisles += '<text x="' + (x + 30) + '" y="110" text-anchor="middle" font-size="15" font-weight="800" fill="#1f2433">C' + a + "</text></g>";
+      }
+      $("svg-shelves").innerHTML = shelves;
+      $("svg-aisles").innerHTML = aisles;
+
+      // Exemplos da descrição oficial
+      const PRESETS = [
+        [
+          [0, 4],
+          [0, 1],
+        ],
+        [
+          [0, 2, 3],
+          [1, 3, 4],
+        ],
+        [
+          [0, 1, 2, 4],
+          [1, 3],
+        ],
+      ];
+      $("presets").innerHTML = PRESETS.map((p, k) => '<button data-preset="' + k + '">Pedidos ' + p[0].join(", ") + " com corredores " + p[1].join(", ") + "</button>").join("");
+      $("presets").addEventListener("click", (e) => {
+        const b = e.target.closest("[data-preset]");
+        if (b) load(...PRESETS[+b.dataset.preset]);
+      });
+      function load(O, A) {
+        selO.clear();
+        selA.clear();
+        O.forEach((o) => selO.add(o));
+        A.forEach((a) => selA.add(a));
+        render();
+        $("sim").scrollIntoView({ behavior: "smooth" });
+      }
+      $("btn-clear").onclick = () => {
+        selO.clear();
+        selA.clear();
+        render();
+      };
+      $("btn-min").onclick = () => {
+        const A = minAisles(selO);
+        selA.clear();
+        if (A && selO.size) A.forEach((a) => selA.add(a));
+        render();
+      };
+
+      // Barra de unidades com a faixa permitida [LB, UB]
+      const pct = (v) => (v / MAXU) * 100 + "%";
+      $("bar").innerHTML =
+        '<div class="zone" style="left:' +
+        pct(LB) +
+        ";width:" +
+        pct(UB - LB) +
+        '"></div><div class="fill" id="bar-fill"></div>' +
+        '<div class="mark" style="left:' +
+        pct(LB) +
+        '">LB = ' +
+        LB +
+        '</div><div class="mark" style="left:' +
+        pct(UB) +
+        '">UB = ' +
+        UB +
+        "</div>";
+
+      function render() {
+        document.querySelectorAll("[data-o]").forEach((b) => b.setAttribute("aria-pressed", selO.has(+b.dataset.o)));
+        document.querySelectorAll("[data-a]").forEach((b) => b.setAttribute("aria-pressed", selA.has(+b.dataset.a)));
+        document.querySelectorAll("[data-ro]").forEach((r) => r.classList.toggle("on", selO.has(+r.dataset.ro)));
+        document.querySelectorAll("[data-ra]").forEach((r) => r.classList.toggle("on-a", selA.has(+r.dataset.ra)));
+        for (let a = 0; a < 5; a++) $("svg-a" + a).setAttribute("fill", selA.has(a) ? "#15a39a" : "transparent");
+
+        const t = total(selO);
+        const inRange = t >= LB && t <= UB;
+        const fill = $("bar-fill");
+        fill.style.width = pct(Math.min(t, MAXU));
+        fill.style.background = inRange ? "var(--leaf)" : "var(--coral)";
+        $("bar-text").innerHTML =
+          "A wave tem <b>" +
+          t +
+          " unidades</b>. " +
+          (inRange
+            ? "Está dentro da faixa de " + LB + " a " + UB + "."
+            : t < LB
+              ? "Faltam " + (LB - t) + " para chegar ao mínimo LB = " + LB + "."
+              : "Passou " + (t - UB) + " do máximo UB = " + UB + ".");
+
+        let h = '<tr><th>Item</th><th class="c">Os pedidos querem</th><th class="c">Os corredores têm</th><th class="c">Situação</th></tr>';
+        ITEMS.forEach((i) => {
+          const n = need(selO, i),
+            v = have(selA, i),
+            ok = n <= v;
+          h +=
+            "<tr><td>Item " +
+            i +
+            '</td><td class="c">' +
+            n +
+            '</td><td class="c">' +
+            v +
+            '</td><td class="c ' +
+            (ok ? "ok" : "bad") +
+            '">' +
+            (n === 0 ? "não pedido" : ok ? "cobre" : "faltam " + (n - v)) +
+            "</td></tr>";
+        });
+        $("t-cover").innerHTML = h;
+
+        const reasons = [];
+        if (!selO.size) reasons.push("Escolha pelo menos um pedido.");
+        else if (t < LB) reasons.push("A restrição (2) falhou porque " + t + " unidades é menos que LB = " + LB + ".");
+        else if (t > UB) reasons.push("A restrição (3) falhou porque " + t + " unidades é mais que UB = " + UB + ".");
+        if (!selA.size) reasons.push("Escolha pelo menos um corredor. Sem corredor não há de onde coletar, e o objetivo dividiria por zero.");
+        ITEMS.forEach((i) => {
+          if (need(selO, i) > have(selA, i)) reasons.push("A restrição (4) falhou no item " + i + ". Os pedidos querem " + need(selO, i) + " e os corredores escolhidos têm " + have(selA, i) + ".");
+        });
+
+        let out;
+        if (reasons.length) {
+          out = '<div class="check"><b>Solução inviável.</b><ul>' + reasons.map((r) => "<li>" + r + "</li>").join("") + "</ul></div>";
+        } else {
+          const obj = t / selA.size;
+          out =
+            '<div class="ans">Solução viável. Objetivo = <span class="frac"><span class="num">' +
+            t +
+            ' unidades</span><span class="den">' +
+            selA.size +
+            " corredores</span></span> = " +
+            fmt(obj) +
+            "</div>";
+          const best = minAisles(selO);
+          if (best.length < selA.size)
+            out +=
+              '<div class="why"><b>Dá para melhorar:</b> estes pedidos cabem em só ' +
+              best.length +
+              " corredor(es), e o objetivo subiria para " +
+              fmt(t / best.length) +
+              ". Use o botão do menor conjunto de corredores.</div>";
+          else
+            out +=
+              '<div class="say"><b>Lendo o resultado:</b> cada corredor visitado rende, em média, ' +
+              fmt(obj) +
+              " unidades coletadas. Com estes pedidos, nenhum conjunto menor de corredores cobre o estoque.</div>";
+        }
+        $("verdict").innerHTML = out;
+        renderOut();
+      }
+
+      // Lista completa das 31 waves
+      const RANK = SUBSETS.map((O) => {
+        const t = total(O),
+          inR = t >= LB && t <= UB,
+          A = minAisles(O);
+        return { O, t, inR, A, obj: inR ? t / A.length : -1 };
+      }).sort((x, y) => y.obj - x.obj || y.t - x.t);
+      let rh = '<tr><th>Pedidos</th><th class="c">Unidades</th><th class="c">Entre 5 e 12?</th><th>Menos corredores</th><th class="c">Objetivo</th><th></th></tr>';
+      RANK.forEach((r, k) => {
+        rh +=
+          "<tr><td>" +
+          r.O.join(", ") +
+          '</td><td class="c">' +
+          r.t +
+          '</td><td class="c ' +
+          (r.inR ? "ok" : "bad") +
+          '">' +
+          (r.inR ? "sim" : "não") +
+          "</td><td>" +
+          (r.inR ? r.A.join(", ") : "inviável") +
+          '</td><td class="c">' +
+          (r.inR ? fmt(r.obj) : "inviável") +
+          '</td><td><button class="small" data-rank="' +
+          k +
+          '">Testar</button></td></tr>';
+      });
+      $("t-rank").innerHTML = rh;
+      $("t-rank").addEventListener("click", (e) => {
+        const b = e.target.closest("[data-rank]");
+        if (!b) return;
+        const r = RANK[+b.dataset.rank];
+        load(r.O, r.inR ? r.A : []);
+      });
+      const viable = RANK.filter((r) => r.inR);
+      const topWaves = viable.filter((r) => r.obj === viable[0].obj);
+      $("rank-ans").textContent =
+        viable.length +
+        " das 31 waves respeitam LB e UB. O melhor objetivo é " +
+        fmt(viable[0].obj) +
+        ", alcançado por " +
+        topWaves.length +
+        " waves: " +
+        topWaves.map((r) => "pedidos " + r.O.join(", ") + " com corredores " + r.A.join(", ")).join(" e ") +
+        ".";
+
+      // Calculadora de crescimento exponencial
+      function growth() {
+        const n = Math.max(1, Math.min(100000, Math.floor(+$("n-orders").value || 1)));
+        const digits = Math.floor(n * Math.log10(2)) + 1;
+        const small = n <= 40 ? (2 ** n - 1).toLocaleString("pt-BR") : null;
+        $("n-out").innerHTML = "Waves não vazias = 2<sup>" + n + "</sup> − 1 " + (small ? "= " + small : "é um número com " + digits.toLocaleString("pt-BR") + " dígitos");
+      }
+      $("n-orders").addEventListener("input", growth);
+      growth();
+
+      // Instâncias B e X: pedidos, itens, corredores e melhor objetivo
+      const INST = [
+        ["b/0001", 11321, 7675, 185, 631.5],
+        ["b/0002", 2162, 5922, 165, 180.64],
+        ["b/0003", 2070, 5617, 164, 149.6],
+        ["b/0004", 2448, 6271, 163, 155.94],
+        ["b/0005", 6468, 4959, 179, 368.0],
+        ["b/0006", 1857, 4982, 165, 84.03],
+        ["b/0007", 1841, 1621, 165, 108.0],
+        ["b/0008", 12334, 10365, 398, 227.1],
+        ["b/0009", 5581, 4990, 417, 82.5],
+        ["b/0010", 14952, 13510, 482, 444.0],
+        ["b/0011", 45112, 37820, 482, 898.8],
+        ["b/0012", 28263, 24432, 483, 567.64],
+        ["b/0013", 38214, 32604, 483, 757.0],
+        ["b/0014", 38202, 32238, 483, 885.17],
+        ["b/0015", 11541, 9905, 398, 166.14],
+        ["x/0001", 1949, 4608, 164, 70.85],
+        ["x/0002", 2942, 2485, 168, 217.67],
+        ["x/0003", 11330, 7399, 180, 667.67],
+        ["x/0004", 2732, 6544, 172, 202.75],
+        ["x/0005", 11024, 7365, 182, 628.67],
+        ["x/0006", 2704, 6523, 168, 191.86],
+        ["x/0007", 8725, 7715, 418, 115.15],
+        ["x/0008", 20364, 17991, 482, 438.22],
+        ["x/0009", 39701, 33994, 483, 819.88],
+        ["x/0010", 44193, 36991, 482, 964.62],
+        ["x/0011", 38657, 32534, 483, 1060.0],
+        ["x/0012", 52322, 43088, 483, 1339.67],
+        ["x/0013", 49992, 41228, 483, 1060.71],
+        ["x/0014", 68064, 54106, 483, 1633.67],
+        ["x/0015", 2839, 6763, 171, 263.91],
+      ];
+      const n2 = (v) => v.toLocaleString("pt-BR");
+      $("t-inst").innerHTML =
+        '<tr><th>Instância</th><th class="c">Pedidos</th><th class="c">Itens</th><th class="c">Corredores</th><th class="c">Melhor objetivo</th></tr>' +
+        INST.map(
+          (r) =>
+            "<tr><td>" +
+            r[0] +
+            '</td><td class="c">' +
+            n2(r[1]) +
+            '</td><td class="c">' +
+            n2(r[2]) +
+            '</td><td class="c">' +
+            n2(r[3]) +
+            '</td><td class="c">' +
+            r[4].toFixed(2).replace(".", ",") +
+            "</td></tr>",
+        ).join("");
+
+      // Arquivo de entrada do exemplo, gerado no formato lido pelo checker.py
+      const pairs = (row) => row.map((v, i) => [i, v]).filter((p) => p[1] > 0);
+      const IN = [[N + " " + N + " " + N, "Cabeçalho com três números: quantidade de pedidos (5), de itens (5) e de corredores (5)."]];
+      P.forEach((r, o) => {
+        const p = pairs(r);
+        IN.push([
+          p.length + " " + p.map((x) => x.join(" ")).join(" "),
+          "Pedido " +
+            o +
+            ". O primeiro número diz quantos itens diferentes ele tem (" +
+            p.length +
+            '). Depois vêm pares "item quantidade": ' +
+            p.map((x) => "item " + x[0] + " com " + x[1]).join(", ") +
+            ".",
+        ]);
+      });
+      C.forEach((r, a) => {
+        const p = pairs(r);
+        IN.push([
+          p.length + " " + p.map((x) => x.join(" ")).join(" "),
+          "Corredor " + a + ". Mesmo formato dos pedidos, mas agora é estoque: " + p.map((x) => "item " + x[0] + " com " + x[1]).join(", ") + ".",
+        ]);
+      });
+      IN.push([LB + " " + UB, "Última linha com LB = " + LB + " e UB = " + UB + ", o mínimo e o máximo de unidades da wave."]);
+      $("file-in").innerHTML = IN.map((l, k) => '<div data-line="' + k + '"><span class="n">' + (k + 1) + "</span>" + l[0] + "</div>").join("");
+      $("file-in").addEventListener("click", (e) => {
+        const d = e.target.closest("[data-line]");
+        if (!d) return;
+        document.querySelectorAll("#file-in div").forEach((x) => x.classList.toggle("sel", x === d));
+        $("file-in-say").innerHTML = "<b>Linha " + (+d.dataset.line + 1) + ":</b> " + IN[+d.dataset.line][1];
+      });
+
+      // Arquivo de saída da seleção atual
+      function renderOut() {
+        const O = [...selO].sort((a, b) => a - b),
+          A = [...selA].sort((a, b) => a - b);
+        const lines = [[O.length, "quantidade de pedidos"]]
+          .concat(O.map((o) => [o, "pedido escolhido"]))
+          .concat([[A.length, "quantidade de corredores"]])
+          .concat(A.map((a) => [a, "corredor visitado"]));
+        $("file-out").innerHTML = lines.map((l, k) => '<div><span class="n">' + (k + 1) + "</span>" + String(l[0]).padEnd(6) + '<span style="color:var(--muted)"># ' + l[1] + "</span></div>").join("");
+      }
+
+      // Calculadora da nota
+      function grade() {
+        const t = +$("g-team").value,
+          b = +$("g-best").value;
+        $("g-out").textContent = b > 0 ? "Nota da solução = 10 × " + n2(t) + " ÷ " + n2(b) + " = " + ((10 * t) / b).toFixed(2).replace(".", ",") : "Informe um melhor desempenho maior que zero.";
+      }
+      $("g-team").addEventListener("input", grade);
+      $("g-best").addEventListener("input", grade);
+      grade();
+
+      // Quiz
+      const QUIZ = [
+        [
+          "A wave com os pedidos 0, 1, 2 e 3 é viável?",
+          ["Sim", "Não"],
+          1,
+          "Ela tem 4 + 2 + 3 + 5 = 14 unidades, e 14 passa do máximo UB = 12. A restrição (3) falha antes mesmo de olhar os corredores.",
+        ],
+        [
+          "Numa solução viável, você acrescenta um corredor que não precisava. O que acontece?",
+          ["Fica inviável", "Continua viável e o objetivo cai", "O objetivo sobe"],
+          1,
+          "Mais estoque nunca quebra a restrição (4), então a solução continua viável. O denominador |A′| cresce e a razão diminui.",
+        ],
+        ["O pedido 0 sozinho, com o corredor 0 e o corredor 1, é viável?", ["Sim", "Não"], 1, "O pedido 0 tem só 4 unidades, menos que LB = 5. A restrição (2) falha mesmo com estoque de sobra."],
+        [
+          "Quem escolhe os corredores visitados?",
+          ["Vêm prontos na instância", "O seu algoritmo escolhe, junto com os pedidos"],
+          1,
+          "A solução é o par (O′, A′). O arquivo de saída lista os pedidos e também os corredores.",
+        ],
+        [
+          "Por que não testar todas as waves na instância b/instance_0001?",
+          ["Porque são 11321 waves", "Porque são 2 elevado a 11321, menos 1, waves"],
+          1,
+          "Cada pedido entra ou fica fora, então o número de waves dobra a cada pedido. 2 elevado a 11321 tem 3.408 dígitos.",
+        ],
+      ];
+      $("quiz").innerHTML = QUIZ.map(
+        (q, k) =>
+          '<div class="quiz" data-q="' +
+          k +
+          '"><b>' +
+          (k + 1) +
+          ". " +
+          q[0] +
+          '</b><div class="opts">' +
+          q[1].map((o, j) => '<button data-j="' + j + '">' + o + "</button>").join("") +
+          '</div><div class="fb"></div></div>',
+      ).join("");
+      $("quiz").addEventListener("click", (e) => {
+        const b = e.target.closest("[data-j]");
+        if (!b) return;
+        const box = b.closest("[data-q]"),
+          q = QUIZ[+box.dataset.q],
+          right = +b.dataset.j === q[2];
+        box.querySelectorAll("[data-j]").forEach((x) => x.classList.remove("right", "wrong"));
+        b.classList.add(right ? "right" : "wrong");
+        box.querySelector(".fb").innerHTML = '<div class="' + (right ? "ans" : "check") + '">' + (right ? "Certo. " : "Ainda não. ") + q[3] + "</div>";
+      });
+
+      render();
+    </script>
+  </body>
+</html>
