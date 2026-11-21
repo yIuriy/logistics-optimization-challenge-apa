@@ -57,7 +57,7 @@ JSON, `itertools`, `random` e `time` vêm da biblioteca padrão.
 
 **Exato.** O Dinkelbach maximiza "unidades − λ·corredores" com as restrições (2), (3) e (4) da descrição oficial e depois atualiza λ para unidades/corredores da solução encontrada. Ele para quando o máximo chega a zero. Se os 600 s acabarem, o limite inferior é o λ atual e o limite superior é λ + F̄, onde F̄ é o limite superior que o HiGHS devolve para a última rodada. Essa conta vale porque o número de corredores de qualquer solução é pelo menos 1.
 
-**Genético.** O indivíduo é um vetor de bits sobre os pedidos. O reparo tira pedidos aleatórios enquanto o total passa de UB, acrescenta pedidos enquanto fica abaixo de LB e depois escolhe corredores gulosamente, sempre o que cobre mais unidades ainda faltantes. A aptidão é unidades/corredores. O resto é torneio, cruzamento uniforme, mutação por troca de bit e parada em 600 s. Os parâmetros (tamanho da população, tamanho do torneio, taxa de mutação, semente e tempo limite) vêm do JSON de configuração.
+**Genético.** O indivíduo é um vetor de bits sobre os pedidos. O reparo tira pedidos aleatórios enquanto o total passa de UB, acrescenta pedidos enquanto fica abaixo de LB escolhe corredores gulosamente, sempre o que cobre mais unidades ainda faltantes, e por fim tira cada corredor que deixou de ser necessário. A aptidão é unidades/corredores. O resto é torneio, cruzamento uniforme, mutação por troca de bit e parada em 600 s. Os parâmetros (tamanho da população, tamanho do torneio, taxa de mutação, semente e tempo limite) vêm do JSON de configuração.
 
 ## Passos e critério de pronto
 
