@@ -1,0 +1,12 @@
+{
+  "instances": ["data/b_instance_0001.txt"],
+  "methods": ["genetic"],
+  "time_limit_seconds": 600,
+  "results_dir": "results",
+  "genetic": {
+    "population_size": [50],
+    "tournament_size": [3],
+    "mutation_rate": [0.01],
+    "seed": [1]
+  }
+}
