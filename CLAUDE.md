@@ -2,7 +2,7 @@
 
 Course project (APA, UNIPAMPA): solve the SBPO 2025 / Mercado Livre **Wave Order Picking** problem in Python with an exact algorithm (HiGHS and the Dinkelbach method) as the reference and a genetic algorithm as the proposed solution. Five students, graded on solution quality against other groups **and** on each member defending the code in a 5-minute presentation.
 
-Read first: `docs/plano-implementacao.md` (every decision and the task split), `docs/problem.md` (the problem), `docs/workflow.md` (team rules). The course statement overrides the challenge rules. Where it says nothing, the challenge README and rules apply (600 seconds per instance, official output format).
+Read first: `docs/plano-implementacao.md` (every decision and the task split), `docs/problem.md` (the problem), `docs/workflow.md` (team rules). The course statement overrides the challenge rules. Where it says nothing, the challenge README and rules apply (official output format). The professor confirmed that the course evaluation has no time limit, so `time_limit_seconds` is a run parameter, set to 600 seconds in `configs/`.
 
 ## Commands
 
