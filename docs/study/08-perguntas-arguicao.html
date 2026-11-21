@@ -441,8 +441,8 @@
           o algoritmo exato, o algoritmo genético, o código e os resultados.
           Tente responder em voz alta antes de abrir a resposta. As páginas de
           estudo <a href="02-algoritmo-exato.html">do algoritmo exato</a> e
-          <a href="05-algoritmo-genetico.html">do algoritmo genético</a> explicam
-          cada tema em detalhe.
+          <a href="05-algoritmo-genetico.html">do algoritmo genético</a>
+          explicam cada tema em detalhe.
         </p>
       </header>
       <div class="card sun">
@@ -1107,9 +1107,11 @@
             <span class="n">66</span> Quais resultados vocês já mediram?
           </summary>
           <div class="body">
-            Com 600 segundos, b_instance_0001 chegou a 629,50 contra 631,50
-            (99,7%) e x_instance_0014 chegou a 1617,00 contra 1633,67 (99,0%). A
-            tabela das 30 instâncias sai de results/summary.md.
+            As 30 instâncias dos conjuntos B e X, com 600 segundos cada,
+            população 50, torneio 3, taxa de mutação 0,002 e semente 1. A média
+            ficou em 98,31% do melhor valor oficial, 26 instâncias passaram de
+            95% e 5 empataram com o melhor. O checker.py aprovou as 30 soluções.
+            A tabela está na página 06 e em results/.
           </div>
         </details>
         <details>
@@ -1118,8 +1120,12 @@
             melhor valor e por quê?
           </summary>
           <div class="body">
-            Responder com a tabela final. As causas prováveis são a regra gulosa
-            do decodificador e taxas de mutação que espalham corredores demais.
+            Em 4 instâncias, abaixo de 95%. Em x_instance_0004 (92,97%), a
+            melhor solução apareceu aos 21,9 s e a busca estagnou. Em
+            x_instance_0008 e x_instance_0010, ela apareceu depois de 500 s,
+            então faltou tempo. b_instance_0003 (94,43%) melhorou até os 446 s.
+            A regra gulosa do decodificador também pode deixar ondas melhores de
+            fora.
           </div>
         </details>
         <details>
@@ -1230,8 +1236,8 @@
         exato e do algoritmo genético. Os resultados citados vêm das execuções
         de 600 segundos de 2026-11-21. A afirmação de que o problema é
         NP-difícil é uma inferência do grupo e não aparece na descrição oficial.
-        As respostas sobre a tabela final dependem de
-        <code>results/summary.md</code>, que ainda não existe.
+        A tabela final vem dos 30 arquivos <code>.json</code> de
+        <code>results/</code>, resumidos na página 06.
       </footer>
     </div>
   </body>

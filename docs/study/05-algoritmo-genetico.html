@@ -1693,11 +1693,10 @@ population = rng.random((population_size, n_aisles)) &lt; share_of_aisles</code>
               <code>configs/batch.json</code> (issue #14)
             </td>
             <td>
-              No commit 4e3dea3, os dois arquivos ainda não têm
-              <code>max_generations</code>, e <code>solve</code> lê essa chave,
-              então rodar com eles hoje dá erro (<code>KeyError</code>). As
-              taxas de mutação deles (0,01 e 0,001) também diferem das que
-              funcionaram melhor.
+              Os dois arquivos trazem <code>max_generations</code>, que
+              <code>solve</code> exige. A taxa de mutação 0,002, usada na rodada
+              das 30 instâncias, é a de <code>run.json</code> e uma das duas de
+              <code>batch.json</code>.
             </td>
           </tr>
           <tr>
