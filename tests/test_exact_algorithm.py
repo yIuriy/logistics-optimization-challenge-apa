@@ -1,12 +1,16 @@
 import itertools
 import math
+import multiprocessing
 import subprocess
 import sys
+import time
 from pathlib import Path
 
+import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
+from order_selection import exact_algorithm
 from order_selection.exact_algorithm import solve
 from order_selection.instance import (
     Instance,
@@ -134,6 +138,41 @@ def test_time_limit_on_real_instance_respects_bounds():
             report["objective_lower_bound"], objective(instance, solution)
         )
         assert report["objective_lower_bound"] <= report["objective_upper_bound"]
+
+
+def test_large_instance_stops_before_the_time_limit():
+    # HiGHS alone ran 21 s with a 10 s limit here, inside the root cut rounds
+    instance = read_instance(B_INSTANCE_0001)
+    start = time.perf_counter()
+    solution, report = solve(instance, {"time_limit_seconds": 10})
+    assert time.perf_counter() - start < 10
+    assert report["status"] == "time_limit"
+    assert solution is not None
+    assert is_feasible(instance, solution)
+    assert math.isclose(report["objective_lower_bound"], objective(instance, solution))
+
+
+def raise_memory_error(instance):
+    raise MemoryError
+
+
+@pytest.mark.skipif(
+    multiprocessing.get_start_method() != "fork",
+    reason="the worker only sees the patched build_model when it is forked",
+)
+def test_worker_crash_stops_solve_at_once(monkeypatch):
+    monkeypatch.setattr(exact_algorithm, "build_model", raise_memory_error)
+    start = time.perf_counter()
+    with pytest.raises(RuntimeError, match="worker stopped"):
+        solve(read_instance(B_INSTANCE_0001), {"time_limit_seconds": 30})
+    assert time.perf_counter() - start < 5
+
+
+def test_highs_banner_is_not_printed(tmp_path, capfd):
+    instance_path = tmp_path / "example.txt"
+    instance_path.write_text(EXAMPLE_INSTANCE_TEXT, encoding="utf-8")
+    solve(read_instance(instance_path), {"time_limit_seconds": 30})
+    assert "HiGHS" not in capfd.readouterr().out
 
 
 @settings(max_examples=40, deadline=None)
