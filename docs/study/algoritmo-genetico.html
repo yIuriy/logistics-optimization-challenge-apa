@@ -1543,8 +1543,12 @@ population = rng.random((population_size, n_aisles)) &lt; share_of_aisles</code>
     if time.perf_counter() - start &gt; stop_after_seconds:
         return best_solution, report(generations, history)
     mother, father = (
-        max(rng.choice(population_size, parameters["tournament_size"], replace=False),
-            key=lambda individual: fitness[individual])
+        max(
+            rng.choice(
+                population_size, parameters["tournament_size"], replace=False
+            ),
+            key=lambda individual: fitness[individual],
+        )
         for _ in range(2)
     )
     from_father = rng.random(n_aisles) &lt; 0.5
