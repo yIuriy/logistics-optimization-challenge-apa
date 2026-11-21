@@ -2,6 +2,7 @@ import itertools
 import math
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 from hypothesis import given, settings
@@ -134,6 +135,18 @@ def test_time_limit_on_real_instance_respects_bounds():
             report["objective_lower_bound"], objective(instance, solution)
         )
         assert report["objective_lower_bound"] <= report["objective_upper_bound"]
+
+
+def test_large_instance_stops_before_the_time_limit():
+    # HiGHS alone ran 21 s with a 10 s limit here, inside the root cut rounds
+    instance = read_instance(B_INSTANCE_0001)
+    start = time.perf_counter()
+    solution, report = solve(instance, {"time_limit_seconds": 10})
+    assert time.perf_counter() - start < 10
+    assert report["status"] == "time_limit"
+    assert solution is not None
+    assert is_feasible(instance, solution)
+    assert math.isclose(report["objective_lower_bound"], objective(instance, solution))
 
 
 @settings(max_examples=40, deadline=None)
