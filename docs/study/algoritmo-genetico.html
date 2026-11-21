@@ -1,0 +1,1852 @@
+<!doctype html>
+<!-- Material de estudo do algoritmo genético sobre corredores (issue #13, PR #19). Explica o problema, as decisões, o código de src/order_selection/genetic_algorithm.py, os resultados e as limitações, para quem nunca estudou algoritmo genético nem otimização. -->
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Algoritmo genético sobre corredores | TPF de APA</title>
+    <style>
+      :root {
+        --ink: #1f2433;
+        --muted: #5f6675;
+        --paper: #fffdf7;
+        --line: #1f2433;
+        --coral: #ff6b57;
+        --coral-bg: #ffe3dd;
+        --sun: #ffc531;
+        --sun-bg: #fff3c7;
+        --teal: #15a39a;
+        --teal-bg: #d4f3ef;
+        --grape: #7b4fd6;
+        --grape-bg: #e9dffb;
+        --sky: #2f80ed;
+        --sky-bg: #dbe9ff;
+        --leaf: #2e9e4f;
+        --leaf-bg: #dcf5e3;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font:
+          17px/1.6 system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+      }
+      .wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 28px 18px 80px;
+      }
+      header {
+        border: 2px solid var(--line);
+        border-radius: 14px;
+        padding: 22px 24px;
+        background: #fff;
+        box-shadow: 6px 6px 0 var(--teal);
+      }
+      h1 {
+        font-size: 2rem;
+        line-height: 1.15;
+        margin: 0 0 8px;
+      }
+      .lead {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.05rem;
+      }
+      h2 {
+        font-size: 1.6rem;
+        margin: 40px 0 12px;
+        line-height: 1.2;
+      }
+      h3 {
+        font-size: 1.1rem;
+        margin: 18px 0 6px;
+      }
+      p {
+        margin: 0 0 12px;
+      }
+      code {
+        font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+        font-size: 0.88em;
+        background: var(--paper);
+        border: 1px solid #d8d2c2;
+        border-radius: 4px;
+        padding: 0 4px;
+        overflow-wrap: anywhere;
+      }
+      pre {
+        font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+        font-size: 0.85rem;
+        line-height: 1.45;
+        background: #fff;
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--grape);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 10px 0;
+        overflow-x: auto;
+      }
+      pre code {
+        border: 0;
+        padding: 0;
+        background: none;
+        font-size: 1em;
+      }
+      .tag {
+        display: inline-block;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border: 2px solid var(--line);
+        border-radius: 6px;
+        padding: 2px 10px;
+        margin: 0 6px 8px 0;
+        background: #fff;
+      }
+      .tag.f1 {
+        background: var(--sky-bg);
+      }
+      .tag.f2 {
+        background: var(--teal-bg);
+      }
+      .tag.f3 {
+        background: var(--grape-bg);
+      }
+      .card {
+        border: 2px solid var(--line);
+        border-radius: 12px;
+        padding: 16px 18px;
+        background: #fff;
+        margin: 14px 0;
+        overflow-x: auto;
+      }
+      .card.sun {
+        background: var(--sun-bg);
+      }
+      .formula {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 1.25rem;
+        background: #fff;
+        border: 2px dashed var(--line);
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin: 10px 0;
+        overflow-x: auto;
+        text-align: center;
+      }
+      .calc {
+        font-family: Georgia, serif;
+        font-size: 1.05rem;
+        line-height: 1.4;
+        background: var(--paper);
+        border: 2px dashed var(--line);
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin: 6px 0;
+        overflow-x: auto;
+      }
+      .frac {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        vertical-align: middle;
+        margin: 0 0.2em;
+        line-height: 1.1;
+      }
+      .frac > .num {
+        border-bottom: 2px solid currentColor;
+        padding: 0 0.3em 0.1em;
+      }
+      .frac > .den {
+        padding: 0.1em 0.3em 0;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 10px 0;
+        background: #fff;
+        font-size: 0.95rem;
+      }
+      th,
+      td {
+        border: 2px solid var(--line);
+        padding: 8px 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: var(--sun-bg);
+      }
+      td.c {
+        text-align: center;
+        font-family: Georgia, serif;
+        font-size: 1.05rem;
+      }
+      td.hit {
+        background: var(--sun);
+        font-weight: 800;
+      }
+      .scroll {
+        overflow-x: auto;
+      }
+      .ex {
+        border: 3px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+        margin: 26px 0;
+        overflow: hidden;
+      }
+      .ex.f1 {
+        box-shadow: 8px 8px 0 var(--sky);
+      }
+      .ex.f2 {
+        box-shadow: 8px 8px 0 var(--teal);
+      }
+      .ex.f3 {
+        box-shadow: 8px 8px 0 var(--grape);
+      }
+      .ex .head {
+        padding: 14px 18px;
+        border-bottom: 2px solid var(--line);
+      }
+      .ex.f1 .head {
+        background: var(--sky-bg);
+      }
+      .ex.f2 .head {
+        background: var(--teal-bg);
+      }
+      .ex.f3 .head {
+        background: var(--grape-bg);
+      }
+      .ex .head h2,
+      .ex .head h3 {
+        margin: 0 0 6px;
+        font-size: 1.35rem;
+      }
+      .ex blockquote {
+        margin: 0;
+        padding: 10px 14px;
+        border-left: 6px solid var(--line);
+        background: #fff;
+        border-radius: 0 8px 8px 0;
+        font-style: italic;
+      }
+      details {
+        border-top: 2px solid var(--line);
+      }
+      summary {
+        cursor: pointer;
+        padding: 12px 18px;
+        font-weight: 800;
+        background: var(--sun-bg);
+        list-style: none;
+      }
+      summary::before {
+        content: "▸ ";
+      }
+      details[open] summary::before {
+        content: "▾ ";
+      }
+      summary::-webkit-details-marker {
+        display: none;
+      }
+      .body {
+        padding: 14px 18px 18px;
+      }
+      .read {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 8px;
+        margin: 8px 0 14px;
+      }
+      .read div {
+        border: 2px solid var(--line);
+        border-radius: 8px;
+        padding: 8px 10px;
+        background: var(--paper);
+        font-size: 0.95rem;
+      }
+      .read b {
+        font-family: Georgia, serif;
+        font-size: 1.1rem;
+        margin-right: 6px;
+      }
+      .read div.z {
+        grid-column: 1/-1;
+        background: var(--sun-bg);
+      }
+      .why {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--sun);
+        background: var(--sun-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 10px 0;
+      }
+      .ans {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--leaf);
+        background: var(--leaf-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 12px 0 6px;
+        font-weight: 700;
+        font-size: 1.05rem;
+      }
+      .check {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--coral);
+        background: var(--coral-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 8px 0;
+      }
+      .say {
+        border: 2px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 8px 0;
+        background: var(--paper);
+      }
+      .say b {
+        color: var(--leaf);
+      }
+      .steps {
+        counter-reset: s;
+        padding: 0;
+        margin: 10px 0;
+        list-style: none;
+      }
+      .steps li {
+        counter-increment: s;
+        position: relative;
+        padding: 6px 0 6px 44px;
+        margin: 4px 0;
+      }
+      .steps li::before {
+        content: counter(s);
+        position: absolute;
+        left: 0;
+        top: 6px;
+        width: 30px;
+        height: 30px;
+        border: 2px solid var(--line);
+        border-radius: 50%;
+        background: var(--sun);
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        min-width: 620px;
+        margin: 10px 0;
+      }
+      footer {
+        margin-top: 50px;
+        font-size: 0.85rem;
+        color: var(--muted);
+        border-top: 2px solid var(--line);
+        padding-top: 12px;
+      }
+      @media (max-width: 600px) {
+        h1 {
+          font-size: 1.6rem;
+        }
+        .formula {
+          font-size: 1.1rem;
+        }
+        .calc {
+          font-size: 0.95rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>Como o algoritmo genético do grupo escolhe corredores e pedidos</h1>
+        <p class="lead">
+          Esta página explica, do zero, o algoritmo de
+          <code>src/order_selection/genetic_algorithm.py</code> (issue #13,
+          integrado na <code>main</code> pelo PR #19). Ela parte do problema,
+          apresenta o vocabulário de otimização e de algoritmo genético,
+          justifica cada decisão, percorre o código função por função e termina
+          com os resultados, os efeitos no resto do projeto e as limitações.
+          Leia na ordem. As explicações longas ficam dentro de blocos que abrem
+          com um clique.
+        </p>
+      </header>
+
+      <h2>Roteiro de leitura</h2>
+      <div class="card sun">
+        <ol class="steps">
+          <li>
+            <b>O que o problema pede.</b> Escolher pedidos e corredores para
+            coletar muitas unidades visitando poucos corredores.
+          </li>
+          <li>
+            <b>Por que não testar tudo.</b> O número de combinações cresce
+            rápido demais, por isso usamos uma heurística.
+          </li>
+          <li>
+            <b>O que é um algoritmo genético.</b> Uma população de tentativas
+            que melhora de geração em geração.
+          </li>
+          <li>
+            <b>As seis decisões do nosso algoritmo.</b> Cromossomo,
+            decodificador, penalidade, operadores, parada e NumPy.
+          </li>
+          <li>
+            <b>O código.</b> Cada função com o trecho real e um exemplo pequeno
+            calculado à mão.
+          </li>
+          <li>
+            <b>Resultados, efeitos e limitações.</b> O que foi medido, o que
+            outras partes do projeto precisam ajustar e onde o algoritmo pode
+            errar.
+          </li>
+        </ol>
+      </div>
+
+      <h2>1. O problema em poucas linhas</h2>
+      <p>
+        Um armazém do Mercado Livre tem <b>corredores</b>, e cada corredor
+        guarda algumas unidades de alguns itens. Clientes fazem <b>pedidos</b>,
+        e cada pedido é uma lista de itens com quantidades. Um separador sai uma
+        vez e coleta um grupo de pedidos, chamado <b>onda</b> (em inglês,
+        <i>wave</i>). Precisamos escolher quais pedidos entram na onda e quais
+        corredores o separador visita.
+      </p>
+      <div class="formula">
+        objetivo =
+        <span class="frac"
+          ><span class="num">unidades coletadas na onda</span
+          ><span class="den">corredores visitados</span></span
+        >
+        (quanto maior, melhor)
+      </div>
+      <p>As regras (chamadas <b>restrições</b>) são quatro.</p>
+      <ul>
+        <li>
+          O total de unidades da onda fica entre um limite inferior
+          <b>LB</b> (<i>lower bound</i>) e um limite superior <b>UB</b> (<i
+            >upper bound</i
+          >), ambos dados pela instância.
+        </li>
+        <li>
+          Para cada item, o estoque somado dos corredores visitados cobre o que
+          os pedidos da onda pedem.
+        </li>
+        <li>Um pedido entra inteiro ou fica de fora.</li>
+        <li>A onda visita pelo menos um corredor.</li>
+      </ul>
+      <p>
+        O exemplo oficial (seção 3.1 do regulamento) tem 5 pedidos, 5 itens, 5
+        corredores, LB = 5 e UB = 12. Três ondas possíveis mostram o conflito
+        central do problema.
+      </p>
+      <div class="scroll">
+        <table>
+          <tr>
+            <th>Pedidos da onda</th>
+            <th>Corredores</th>
+            <th>Unidades</th>
+            <th>Objetivo</th>
+          </tr>
+          <tr>
+            <td>{0, 4}</td>
+            <td>{0, 1}</td>
+            <td class="c">5</td>
+            <td class="c">2,5</td>
+          </tr>
+          <tr>
+            <td>{0, 2, 3}</td>
+            <td>{1, 3, 4}</td>
+            <td class="c">12</td>
+            <td class="c">4,0</td>
+          </tr>
+          <tr>
+            <td>{0, 1, 2, 4}</td>
+            <td>{1, 3}</td>
+            <td class="c">10</td>
+            <td class="c hit">5,0 (ótimo)</td>
+          </tr>
+        </table>
+      </div>
+      <div class="why">
+        <b>Por que a terceira onda vence.</b> Ela coleta menos unidades que a
+        segunda, mas visita só dois corredores. Cada corredor a mais aumenta o
+        denominador da fração, então o algoritmo precisa equilibrar mais
+        unidades contra mais corredores.
+      </div>
+      <div class="say">
+        <b>Vocabulário de otimização.</b> <b>Otimizar</b> é procurar, entre
+        muitas escolhas possíveis, a que dá o melhor valor de uma conta. Essa
+        conta é a <b>função objetivo</b> (aqui, unidades por corredor). Uma
+        escolha que respeita todas as restrições é <b>viável</b>, e o
+        <code>checker.py</code> oficial dá nota zero a uma solução inviável. O
+        GPS do celular faz o mesmo tipo de trabalho quando escolhe, entre
+        milhões de caminhos, o de menor tempo respeitando as ruas de mão única.
+      </div>
+
+      <h2>2. Por que não testar todas as combinações</h2>
+      <p>
+        Com A corredores, cada corredor pode estar dentro ou fora da onda. Isso
+        dá 2 × 2 × ... × 2 = 2<sup>A</sup> conjuntos de corredores. As
+        instâncias reais chegam a 483 corredores, e 2<sup>483</sup> é um número
+        com 146 dígitos. Um computador que testasse um bilhão de conjuntos por
+        segundo não terminaria nem uma fração mínima dessa lista antes do limite
+        de 600 segundos por instância.
+      </p>
+      <p>
+        O grupo usa dois caminhos. O <b>modelo exato</b> (issue #12, HiGHS com o
+        método de Dinkelbach) procura o ótimo com garantia matemática, mas pode
+        não terminar no tempo. O <b>algoritmo genético</b> é uma
+        <b>heurística</b>, ou seja, um método que encontra uma solução boa
+        depressa, sem provar que ela é a melhor. Mais precisamente, ele é uma
+        <b>meta-heurística</b>, uma receita geral de busca que funciona para
+        muitos problemas diferentes e que adaptamos a este.
+      </p>
+
+      <h2>3. Algoritmo genético do zero</h2>
+      <p>
+        Um algoritmo genético imita a seleção natural. Ele mantém uma
+        <b>população</b> de tentativas de resposta. As melhores tentativas têm
+        mais chance de virar pais, cada filho mistura os pais e sofre pequenas
+        alterações ao acaso, e a população seguinte é formada pelos filhos.
+        Depois de muitas gerações, a população concentra tentativas boas. A NASA
+        usou essa técnica para projetar a antena da missão Space Technology 5,
+        lançada em 2006.
+      </p>
+      <div class="scroll">
+        <svg
+          viewBox="0 0 760 230"
+          role="img"
+          aria-label="Ciclo do algoritmo genético"
+        >
+          <defs>
+            <marker
+              id="seta"
+              viewBox="0 0 10 10"
+              refX="9"
+              refY="5"
+              markerWidth="7"
+              markerHeight="7"
+              orient="auto"
+            >
+              <path d="M0,0 L10,5 L0,10 z" fill="#1f2433" />
+            </marker>
+          </defs>
+          <g
+            font-family="system-ui, sans-serif"
+            font-size="15"
+            font-weight="700"
+            fill="#1f2433"
+            text-anchor="middle"
+          >
+            <rect
+              x="10"
+              y="20"
+              width="150"
+              height="56"
+              rx="10"
+              fill="#dbe9ff"
+              stroke="#1f2433"
+              stroke-width="2.5"
+            />
+            <text x="85" y="44">População</text>
+            <text x="85" y="64" font-weight="400" font-size="13">
+              P indivíduos
+            </text>
+            <rect
+              x="205"
+              y="20"
+              width="150"
+              height="56"
+              rx="10"
+              fill="#fff3c7"
+              stroke="#1f2433"
+              stroke-width="2.5"
+            />
+            <text x="280" y="44">Avaliar</text>
+            <text x="280" y="64" font-weight="400" font-size="13">
+              aptidão de cada um
+            </text>
+            <rect
+              x="400"
+              y="20"
+              width="150"
+              height="56"
+              rx="10"
+              fill="#d4f3ef"
+              stroke="#1f2433"
+              stroke-width="2.5"
+            />
+            <text x="475" y="44">Selecionar</text>
+            <text x="475" y="64" font-weight="400" font-size="13">
+              torneio entre 3
+            </text>
+            <rect
+              x="595"
+              y="20"
+              width="150"
+              height="56"
+              rx="10"
+              fill="#e9dffb"
+              stroke="#1f2433"
+              stroke-width="2.5"
+            />
+            <text x="670" y="44">Cruzar</text>
+            <text x="670" y="64" font-weight="400" font-size="13">
+              mistura dos pais
+            </text>
+            <rect
+              x="595"
+              y="140"
+              width="150"
+              height="56"
+              rx="10"
+              fill="#ffe3dd"
+              stroke="#1f2433"
+              stroke-width="2.5"
+            />
+            <text x="670" y="164">Mutar</text>
+            <text x="670" y="184" font-weight="400" font-size="13">
+              troca bits ao acaso
+            </text>
+            <rect
+              x="300"
+              y="140"
+              width="210"
+              height="56"
+              rx="10"
+              fill="#dcf5e3"
+              stroke="#1f2433"
+              stroke-width="2.5"
+            />
+            <text x="405" y="164">Nova geração</text>
+            <text x="405" y="184" font-weight="400" font-size="13">
+              guarda a melhor onda à parte
+            </text>
+            <line
+              x1="160"
+              y1="48"
+              x2="203"
+              y2="48"
+              stroke="#1f2433"
+              stroke-width="2.5"
+              marker-end="url(#seta)"
+            />
+            <line
+              x1="355"
+              y1="48"
+              x2="398"
+              y2="48"
+              stroke="#1f2433"
+              stroke-width="2.5"
+              marker-end="url(#seta)"
+            />
+            <line
+              x1="550"
+              y1="48"
+              x2="593"
+              y2="48"
+              stroke="#1f2433"
+              stroke-width="2.5"
+              marker-end="url(#seta)"
+            />
+            <line
+              x1="670"
+              y1="76"
+              x2="670"
+              y2="138"
+              stroke="#1f2433"
+              stroke-width="2.5"
+              marker-end="url(#seta)"
+            />
+            <line
+              x1="595"
+              y1="168"
+              x2="512"
+              y2="168"
+              stroke="#1f2433"
+              stroke-width="2.5"
+              marker-end="url(#seta)"
+            />
+            <path
+              d="M300,168 L85,168 L85,78"
+              fill="none"
+              stroke="#1f2433"
+              stroke-width="2.5"
+              marker-end="url(#seta)"
+            />
+            <text x="190" y="160" font-weight="400" font-size="13">
+              repete até max_generations
+            </text>
+          </g>
+        </svg>
+      </div>
+      <p>A tabela traduz cada termo para o nosso código.</p>
+      <div class="scroll">
+        <table>
+          <tr>
+            <th>Termo</th>
+            <th>O que significa</th>
+            <th>No nosso código</th>
+          </tr>
+          <tr>
+            <td>Indivíduo</td>
+            <td>Uma tentativa de resposta</td>
+            <td>Um conjunto de corredores visitados</td>
+          </tr>
+          <tr>
+            <td>Cromossomo</td>
+            <td>A forma como a tentativa é escrita</td>
+            <td>
+              <code>chromosome</code>, um vetor com um bit (0 ou 1) por corredor
+            </td>
+          </tr>
+          <tr>
+            <td>Gene</td>
+            <td>Uma posição do cromossomo</td>
+            <td>O bit de um corredor</td>
+          </tr>
+          <tr>
+            <td>População</td>
+            <td>Os indivíduos de uma geração</td>
+            <td>
+              <code>population</code>, uma matriz com P linhas e A colunas
+            </td>
+          </tr>
+          <tr>
+            <td>Aptidão (<i>fitness</i>)</td>
+            <td>A nota de um indivíduo</td>
+            <td>O valor que <code>evaluate</code> devolve</td>
+          </tr>
+          <tr>
+            <td>Decodificador</td>
+            <td>Transforma o cromossomo numa solução completa</td>
+            <td>
+              <code>evaluate</code>, que escolhe os pedidos a partir dos
+              corredores
+            </td>
+          </tr>
+          <tr>
+            <td>Seleção por torneio</td>
+            <td>Sorteia alguns indivíduos e fica com o melhor</td>
+            <td>
+              <code>rng.choice</code> com
+              <code>tournament_size</code> indivíduos
+            </td>
+          </tr>
+          <tr>
+            <td>Cruzamento (<i>crossover</i>)</td>
+            <td>Monta um filho com partes dos dois pais</td>
+            <td><code>np.where</code> com um sorteio por bit</td>
+          </tr>
+          <tr>
+            <td>Mutação</td>
+            <td>Pequena alteração ao acaso no filho</td>
+            <td>Troca de bits com probabilidade <code>mutation_rate</code></td>
+          </tr>
+          <tr>
+            <td>Geração</td>
+            <td>Uma volta completa do ciclo</td>
+            <td>Uma volta do <code>while</code> de <code>solve</code></td>
+          </tr>
+          <tr>
+            <td>Semente (<i>seed</i>)</td>
+            <td>Número que fixa a sequência de sorteios</td>
+            <td>
+              <code>np.random.default_rng(seed)</code>. A mesma semente repete a
+              mesma execução
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <h2>4. As seis decisões do nosso algoritmo</h2>
+      <p>
+        As cores separam três grupos. Azul trata de como a solução é
+        representada e avaliada. Verde-azulado trata de como a população evolui.
+        Roxo trata de desempenho.
+      </p>
+
+      <div class="ex f1">
+        <div class="head">
+          <span class="tag f1">Representação</span>
+          <h3>Decisão 1: um bit por corredor</h3>
+          <blockquote>
+            O cromossomo diz só quais corredores a onda visita. Os pedidos ficam
+            fora dele.
+          </blockquote>
+        </div>
+        <details>
+          <summary>Ver explicação</summary>
+          <div class="body">
+            <div class="scroll">
+              <svg
+                viewBox="0 0 760 150"
+                role="img"
+                aria-label="Cromossomo com um bit por corredor"
+              >
+                <g
+                  font-family="Georgia, serif"
+                  font-size="20"
+                  fill="#1f2433"
+                  text-anchor="middle"
+                >
+                  <text
+                    x="70"
+                    y="30"
+                    font-family="system-ui, sans-serif"
+                    font-size="14"
+                    font-weight="700"
+                  >
+                    corredor
+                  </text>
+                  <text
+                    x="70"
+                    y="86"
+                    font-family="system-ui, sans-serif"
+                    font-size="14"
+                    font-weight="700"
+                  >
+                    bit
+                  </text>
+                  <g font-family="system-ui, sans-serif" font-size="14">
+                    <text x="175" y="30">0</text>
+                    <text x="245" y="30">1</text>
+                    <text x="315" y="30">2</text>
+                    <text x="385" y="30">3</text>
+                    <text x="455" y="30">4</text>
+                    <text x="525" y="30">5</text>
+                    <text x="595" y="30">6</text>
+                    <text x="665" y="30">7</text>
+                  </g>
+                  <rect
+                    x="145"
+                    y="50"
+                    width="60"
+                    height="56"
+                    rx="8"
+                    fill="#fff"
+                    stroke="#1f2433"
+                    stroke-width="2.5"
+                  />
+                  <text x="175" y="86">0</text>
+                  <rect
+                    x="215"
+                    y="50"
+                    width="60"
+                    height="56"
+                    rx="8"
+                    fill="#2e9e4f"
+                    stroke="#1f2433"
+                    stroke-width="2.5"
+                  />
+                  <text x="245" y="86" fill="#fff">1</text>
+                  <rect
+                    x="285"
+                    y="50"
+                    width="60"
+                    height="56"
+                    rx="8"
+                    fill="#fff"
+                    stroke="#1f2433"
+                    stroke-width="2.5"
+                  />
+                  <text x="315" y="86">0</text>
+                  <rect
+                    x="355"
+                    y="50"
+                    width="60"
+                    height="56"
+                    rx="8"
+                    fill="#2e9e4f"
+                    stroke="#1f2433"
+                    stroke-width="2.5"
+                  />
+                  <text x="385" y="86" fill="#fff">1</text>
+                  <rect
+                    x="425"
+                    y="50"
+                    width="60"
+                    height="56"
+                    rx="8"
+                    fill="#fff"
+                    stroke="#1f2433"
+                    stroke-width="2.5"
+                  />
+                  <text x="455" y="86">0</text>
+                  <rect
+                    x="495"
+                    y="50"
+                    width="60"
+                    height="56"
+                    rx="8"
+                    fill="#fff"
+                    stroke="#1f2433"
+                    stroke-width="2.5"
+                  />
+                  <text x="525" y="86">0</text>
+                  <rect
+                    x="565"
+                    y="50"
+                    width="60"
+                    height="56"
+                    rx="8"
+                    fill="#fff"
+                    stroke="#1f2433"
+                    stroke-width="2.5"
+                  />
+                  <text x="595" y="86">0</text>
+                  <rect
+                    x="635"
+                    y="50"
+                    width="60"
+                    height="56"
+                    rx="8"
+                    fill="#2e9e4f"
+                    stroke="#1f2433"
+                    stroke-width="2.5"
+                  />
+                  <text x="665" y="86">1</text>
+                  <text
+                    x="420"
+                    y="136"
+                    font-family="system-ui, sans-serif"
+                    font-size="14"
+                  >
+                    a onda visita os corredores 1, 3 e 7, então o denominador do
+                    objetivo é 3
+                  </text>
+                </g>
+              </svg>
+            </div>
+            <div class="why">
+              <b>Por que os corredores e não os pedidos.</b> O número de
+              corredores é o denominador do objetivo. Com um bit por corredor, a
+              busca controla esse número diretamente. A primeira versão do grupo
+              usava um bit por pedido e um reparo que depois escolhia corredores
+              para cobrir os itens. Como os itens de um pedido ficam espalhados
+              por vários corredores, cada pedido escolhido puxava corredores
+              novos, e as ondas acabavam visitando quase o armazém inteiro.
+            </div>
+            <div class="scroll">
+              <table>
+                <tr>
+                  <th>Instância</th>
+                  <th>Bits por pedido</th>
+                  <th>Bits por corredor</th>
+                  <th>Melhor oficial</th>
+                </tr>
+                <tr>
+                  <td><code>b_instance_0001</code></td>
+                  <td class="c">38,52</td>
+                  <td class="c">629,50</td>
+                  <td class="c">631,50</td>
+                </tr>
+                <tr>
+                  <td><code>x_instance_0014</code></td>
+                  <td class="c">53,30</td>
+                  <td class="c">1617,00</td>
+                  <td class="c">1633,67</td>
+                </tr>
+              </table>
+            </div>
+            <div class="say">
+              <b>Lendo a tabela.</b> A versão antiga chegava a 6,1% e 3,3% do
+              melhor valor oficial. A versão atual chega a 99,7% e 99,0%.
+            </div>
+            <div class="check">
+              <b>Isso respeita o regulamento?</b> Sim. O regulamento avalia só a
+              solução final, uma lista de pedidos e uma lista de corredores, e o
+              <code>checker.py</code> confere essa lista. A forma interna do
+              cromossomo é escolha nossa.
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="ex f1">
+        <div class="head">
+          <span class="tag f1">Representação</span>
+          <h3>Decisão 2: um decodificador escolhe os pedidos</h3>
+          <blockquote>
+            Dados os corredores, o decodificador acrescenta os pedidos que o
+            estoque desses corredores consegue atender, até chegar a UB.
+          </blockquote>
+        </div>
+        <details>
+          <summary>Ver explicação</summary>
+          <div class="body">
+            <p>O decodificador faz quatro passos, sempre na mesma ordem.</p>
+            <ol class="steps">
+              <li>
+                <b>Estoque.</b> Soma, para cada item, as unidades guardadas nos
+                corredores visitados.
+              </li>
+              <li>
+                <b>Pedidos que cabem sozinhos.</b> Fica com os pedidos em que
+                cada item, olhado sozinho, cabe nesse estoque.
+              </li>
+              <li>
+                <b>Estoque disputado.</b> Quando vários pedidos querem o mesmo
+                item, ele atende primeiro o pedido com mais unidades (a
+                <b>prioridade</b>) e corta cada pedido que chega a um item
+                depois de o estoque acabar.
+              </li>
+              <li>
+                <b>Limite superior.</b> Percorre os pedidos aceitos na ordem de
+                prioridade e para quando a soma de unidades passaria de UB.
+              </li>
+            </ol>
+            <h3>
+              Exemplo calculado (o teste
+              <code>test_decoder_serves_disputed_stock_by_order_priority</code>)
+            </h3>
+            <div class="read">
+              <div><b>pedido 0</b> 3 unidades do item 0</div>
+              <div><b>pedido 1</b> 4 unidades do item 0</div>
+              <div><b>pedido 2</b> 1 unidade do item 1</div>
+              <div><b>corredor 0</b> 5 do item 0 e 1 do item 1</div>
+              <div class="z">
+                <b>limites</b> LB = 1, UB = 10, cromossomo = [1] (o único
+                corredor é visitado)
+              </div>
+            </div>
+            <ol class="steps">
+              <li>
+                Estoque por item.
+                <div class="calc">item 0 → 5 &nbsp;&nbsp; item 1 → 1</div>
+              </li>
+              <li>Cada pedido sozinho cabe (3 ≤ 5, 4 ≤ 5, 1 ≤ 1).</li>
+              <li>
+                A prioridade é pedido 1 (4 unidades), pedido 0 (3), pedido 2
+                (1). No item 0, a soma acumulada é 4 e depois 4 + 3 = 7. Como 7
+                &gt; 5, o pedido 0 sai.
+                <div class="calc">
+                  item 0: pedido 1 → 4 ≤ 5 aceito &nbsp; pedido 0 → 7 &gt; 5
+                  cortado
+                </div>
+              </li>
+              <li>
+                Os pedidos aceitos, na ordem de prioridade, são 1 e 2. A soma
+                acumulada é 4 e depois 5, abaixo de UB = 10.
+              </li>
+            </ol>
+            <div class="ans">
+              Onda = pedidos {1, 2}, corredores {0}, aptidão = 5 ÷ 1 = 5
+            </div>
+            <div class="why">
+              <b>Por que o maior pedido primeiro.</b> Com os corredores já
+              escolhidos, o denominador está fixo, então o decodificador quer o
+              máximo de unidades. Atender primeiro os pedidos grandes é uma
+              regra simples e rápida para isso. Ela é uma escolha heurística, e
+              a seção 8 mostra um caso em que ela erra.
+            </div>
+            <div class="say">
+              <b>Consequência.</b> Toda onda que sai do decodificador já
+              respeita o estoque e UB. Só LB pode falhar, e a decisão 3 trata
+              disso.
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="ex f1">
+        <div class="head">
+          <span class="tag f1">Representação</span>
+          <h3>Decisão 3: penalidade abaixo de LB</h3>
+          <blockquote>
+            Uma onda com menos unidades que LB recebe como aptidão menos o que
+            falta para chegar a LB.
+          </blockquote>
+        </div>
+        <details>
+          <summary>Ver explicação</summary>
+          <div class="body">
+            <div class="formula">
+              aptidão =
+              <span class="frac"
+                ><span class="num">unidades</span
+                ><span class="den">corredores</span></span
+              >
+              se unidades ≥ LB, &nbsp; senão aptidão = −(LB − unidades)
+            </div>
+            <div class="why">
+              <b>Por que uma nota negativa em vez de descartar.</b> Uma onda com
+              90 unidades quando LB = 100 está mais perto de servir que uma com
+              10 unidades. A penalidade dá −10 à primeira e −90 à segunda, então
+              o torneio prefere a primeira e a população caminha em direção a
+              ondas viáveis. Toda onda viável tem aptidão positiva, então ela
+              sempre vence uma inviável.
+            </div>
+            <p>
+              O código usa <code>max(1, LB)</code> no lugar de LB. Assim uma
+              onda vazia nunca conta como viável, mesmo numa instância com LB =
+              0. Um cromossomo sem nenhum corredor dá zero unidades, cai na
+              penalidade e nunca chega à divisão, então a divisão por zero fica
+              impossível.
+            </p>
+            <p>
+              No exemplo oficial, visitar só o corredor 1 dá −4, e não visitar
+              nada dá −5 (LB = 5).
+            </p>
+          </div>
+        </details>
+      </div>
+
+      <div class="ex f2">
+        <div class="head">
+          <span class="tag f2">Evolução</span>
+          <h3>Decisão 4: população inicial e operadores</h3>
+          <blockquote>
+            Cada indivíduo inicial sorteia a própria fração de corredores.
+            Depois vêm torneio, cruzamento uniforme e mutação por troca de bit.
+          </blockquote>
+        </div>
+        <details>
+          <summary>Ver explicação</summary>
+          <div class="body">
+            <h3>População inicial com fração sorteada</h3>
+            <p>
+              Cada indivíduo sorteia um número p entre 0 e 1, e cada um dos seus
+              bits vira 1 com probabilidade p. Um indivíduo com p = 0,01 visita
+              perto de 1% dos corredores, e outro com p = 0,9 visita perto de
+              90%.
+            </p>
+            <div class="why">
+              <b>Por que não 50% para todos.</b> Com 483 corredores, sortear
+              cada bit com 50% daria ondas de uns 240 corredores. A população
+              começaria sem nenhuma onda pequena, e as melhores ondas medidas
+              usam 2 ou 3 corredores.
+            </div>
+            <h3>Seleção por torneio</h3>
+            <p>
+              Para escolher um pai, o código sorteia
+              <code>tournament_size</code> indivíduos diferentes (3 nos testes
+              medidos) e fica com o de maior aptidão. Indivíduos bons vencem
+              mais torneios, mas um indivíduo mediano ainda pode vencer quando
+              cai num grupo fraco, e isso mantém variedade na população.
+            </p>
+            <h3>Cruzamento uniforme</h3>
+            <p>
+              Para cada corredor, o filho copia o bit do pai ou da mãe com
+              chance de 50% cada.
+            </p>
+            <div class="calc">
+              pai &nbsp;&nbsp;1 0 1 1 0<br />mãe &nbsp;0 0 1 0 1<br />sorteio P
+              M P M M<br />filho 1 0 1 0 1
+            </div>
+            <h3>Mutação por troca de bit</h3>
+            <p>
+              Cada bit do filho troca de valor com probabilidade
+              <code>mutation_rate</code>. Com 483 corredores e taxa 0,002, o
+              filho troca em média 483 × 0,002 ≈ 1 bit. Com taxa 0,01, troca
+              perto de 5 bits, e na instância <code>x_instance_0014</code> isso
+              piorou muito o resultado (seção 6).
+            </p>
+            <div class="why">
+              <b>Por que a mutação existe.</b> O cruzamento só recombina bits
+              que já estão na população. A mutação cria combinações novas, por
+              exemplo ligar um corredor que nenhum pai visitava.
+            </div>
+            <h3>A melhor onda fica guardada à parte</h3>
+            <p>
+              A cada geração, os filhos substituem a população inteira. A melhor
+              onda viável vista em toda a execução fica numa variável separada
+              (<code>best_solution</code>), então uma geração ruim nunca apaga o
+              melhor resultado.
+            </p>
+          </div>
+        </details>
+      </div>
+
+      <div class="ex f2">
+        <div class="head">
+          <span class="tag f2">Evolução</span>
+          <h3>Decisão 5: parar por gerações, com o tempo como trava</h3>
+          <blockquote>
+            A execução para depois de <code>max_generations</code> gerações, ou
+            antes, quando o relógio passa de
+            <code>time_limit_seconds</code> menos 5 segundos.
+          </blockquote>
+        </div>
+        <details>
+          <summary>Ver explicação</summary>
+          <div class="body">
+            <div class="why">
+              <b>Por que gerações.</b> Com a mesma semente e o mesmo número de
+              gerações, duas máquinas diferentes produzem exatamente a mesma
+              solução. Se a parada fosse só por tempo, uma máquina mais rápida
+              faria mais gerações e o resultado mudaria.
+            </div>
+            <div class="why">
+              <b>Por que a trava de tempo.</b> O desafio dá 600 segundos por
+              instância. O relógio é conferido antes de cada filho, e os 5
+              segundos de margem (<code>SAFETY_MARGIN_SECONDS</code>) deixam
+              tempo para gravar o arquivo de saída.
+            </div>
+            <p>
+              O tempo é medido com <code>time.perf_counter()</code>, um relógio
+              feito para medir durações, como manda o <code>CLAUDE.md</code> do
+              projeto.
+            </p>
+          </div>
+        </details>
+      </div>
+
+      <div class="ex f3">
+        <div class="head">
+          <span class="tag f3">Desempenho</span>
+          <h3>Decisão 6: avaliação vetorizada com NumPy</h3>
+          <blockquote>
+            O decodificador trabalha com vetores inteiros do NumPy, sem laço em
+            Python sobre pedidos ou itens.
+          </blockquote>
+        </div>
+        <details>
+          <summary>Ver explicação</summary>
+          <div class="body">
+            <p>
+              Um laço <code>for</code> em Python executa cada volta passo a
+              passo no interpretador, o que é lento quando há dezenas de
+              milhares de linhas de pedido. O NumPy é uma biblioteca que guarda
+              números em vetores e executa a mesma operação sobre o vetor
+              inteiro em código compilado (escrito em C). Trocar o laço por uma
+              operação de vetor é o que chamamos de <b>vetorizar</b>.
+            </p>
+            <p>Quatro operações fazem quase todo o trabalho.</p>
+            <div class="scroll">
+              <table>
+                <tr>
+                  <th>Operação</th>
+                  <th>O que faz</th>
+                  <th>Exemplo</th>
+                </tr>
+                <tr>
+                  <td><code>np.bincount(rótulos, pesos)</code></td>
+                  <td>Soma os pesos de cada rótulo</td>
+                  <td>rótulos [0, 0, 1], pesos [4, 3, 1] → [7, 1]</td>
+                </tr>
+                <tr>
+                  <td><code>np.cumsum(v)</code></td>
+                  <td>Soma acumulada</td>
+                  <td>[4, 3, 1] → [4, 7, 8]</td>
+                </tr>
+                <tr>
+                  <td><code>np.where(cond, a, b)</code></td>
+                  <td>Escolhe a ou b posição por posição</td>
+                  <td>cond [T, F], a [1, 1], b [0, 0] → [1, 0]</td>
+                </tr>
+                <tr>
+                  <td><code>a ^ b</code> (XOR, “ou exclusivo”)</td>
+                  <td>Troca o bit de a onde b é verdadeiro</td>
+                  <td>[1, 0, 1] ^ [T, T, F] → [0, 1, 1]</td>
+                </tr>
+              </table>
+            </div>
+            <div class="say">
+              <b>Efeito medido.</b> Em <code>b_instance_0001</code>, a execução
+              de 600 segundos completou 23.980 gerações de 50 filhos.
+            </div>
+            <div class="check">
+              <b>Custo da escolha.</b> O NumPy virou dependência do projeto
+              (<code>numpy&gt;=2.0</code> no <code>pyproject.toml</code>). O
+              <code>checker.py</code> oficial já dependia dele.
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <h2>5. O código, função por função</h2>
+      <p>
+        O arquivo tem uma classe de dados e quatro funções. As explicações
+        abaixo usam o mesmo exemplo da decisão 2 (pedidos {0: 3}, {0: 4}, {1: 1}
+        e um corredor com {0: 5, 1: 1}).
+      </p>
+
+      <div class="ex f1">
+        <div class="head">
+          <span class="tag f1">Dados</span>
+          <h3><code>InstanceArrays</code> e <code>build_arrays</code></h3>
+          <blockquote>
+            Transformam a instância em vetores do NumPy uma única vez por
+            execução.
+          </blockquote>
+        </div>
+        <details>
+          <summary>Ver explicação</summary>
+          <div class="body">
+            <p>
+              A instância chega como listas de dicionários (<code
+                >{item: unidades}</code
+              >). Para vetorizar, cada linha de pedido vira uma
+              <b>entrada</b> com três números (pedido, item, unidades), e cada
+              linha de corredor vira uma <b>entrada de estoque</b> (corredor,
+              item, unidades).
+            </p>
+            <pre><code>order_units = np.bincount(entry_order, weights=entry_units, minlength=len(instance.orders))
+priority = np.argsort(-order_units, kind="stable")
+rank = np.empty_like(priority)
+rank[priority] = np.arange(len(priority))</code></pre>
+            <ol class="steps">
+              <li>
+                <code>order_units</code> soma as unidades de cada pedido. No
+                exemplo, [3, 4, 1].
+              </li>
+              <li>
+                <code>priority</code> lista os pedidos do maior para o menor. No
+                exemplo, [1, 0, 2]. O <code>kind="stable"</code> mantém a ordem
+                original em caso de empate, para o resultado não depender do
+                acaso.
+              </li>
+              <li>
+                <code>rank</code> é o inverso de <code>priority</code> e diz a
+                posição de cada pedido na fila. No exemplo, o pedido 0 tem
+                posição 1, o pedido 1 tem posição 0 e o pedido 2 tem posição 2.
+              </li>
+            </ol>
+            <pre><code>by_item = np.lexsort((rank[entry_order], entry_item))
+starts_group = np.r_[True, entry_item[1:] != entry_item[:-1]]
+item_group_start = np.maximum.accumulate(np.where(starts_group, positions, 0))</code></pre>
+            <ol class="steps">
+              <li>
+                <code>np.lexsort</code> ordena as entradas por item e, dentro do
+                mesmo item, pela posição do pedido na fila. Assim, dentro de
+                cada item, a soma acumulada percorre os pedidos na ordem de
+                prioridade.
+              </li>
+              <li>
+                <code>starts_group</code> marca onde começa o bloco de cada
+                item.
+              </li>
+              <li>
+                <code>item_group_start</code> diz, para cada entrada, a posição
+                da primeira entrada do mesmo item. O
+                <code>np.maximum.accumulate</code> repete o último início visto
+                até aparecer o próximo.
+              </li>
+            </ol>
+            <div class="scroll">
+              <table>
+                <tr>
+                  <th>Posição</th>
+                  <th>Pedido</th>
+                  <th>Item</th>
+                  <th>Unidades</th>
+                  <th>Início do grupo</th>
+                </tr>
+                <tr>
+                  <td class="c">0</td>
+                  <td class="c">1</td>
+                  <td class="c">0</td>
+                  <td class="c">4</td>
+                  <td class="c">0</td>
+                </tr>
+                <tr>
+                  <td class="c">1</td>
+                  <td class="c">0</td>
+                  <td class="c">0</td>
+                  <td class="c">3</td>
+                  <td class="c">0</td>
+                </tr>
+                <tr>
+                  <td class="c">2</td>
+                  <td class="c">2</td>
+                  <td class="c">1</td>
+                  <td class="c">1</td>
+                  <td class="c">2</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="ex f1">
+        <div class="head">
+          <span class="tag f1">Decodificador</span>
+          <h3><code>evaluate(instance, arrays, chromosome)</code></h3>
+          <blockquote>
+            Recebe os corredores visitados e devolve a aptidão e os pedidos da
+            onda, ou uma aptidão negativa e <code>None</code>.
+          </blockquote>
+        </div>
+        <details>
+          <summary>Ver explicação</summary>
+          <div class="body">
+            <h3>Passo 1: estoque por item</h3>
+            <pre><code>capacity = np.bincount(
+    arrays.stock_item,
+    weights=arrays.stock_units * chromosome[arrays.stock_aisle],
+    minlength=instance.n_items,
+)</code></pre>
+            <p>
+              <code>chromosome[arrays.stock_aisle]</code> vale 1 para as
+              entradas de estoque de corredores visitados e 0 para as outras.
+              Multiplicar pelas unidades zera o estoque dos corredores não
+              visitados, e o <code>bincount</code> soma o resto por item. No
+              exemplo, <code>capacity</code> = [5, 1].
+            </p>
+            <h3>Passo 2: pedidos que cabem sozinhos</h3>
+            <pre><code>available = capacity[arrays.entry_item]
+fits_alone = arrays.entry_units &lt;= available
+order_fits = np.bincount(arrays.entry_order, ~fits_alone, n_orders) == 0</code></pre>
+            <p>
+              <code>available</code> copia, para cada entrada, o estoque do seu
+              item. <code>~fits_alone</code> marca as entradas que não cabem, e
+              o <code>bincount</code> conta quantas dessas cada pedido tem. Um
+              pedido com contagem zero cabe sozinho.
+            </p>
+            <h3>Passo 3: estoque disputado</h3>
+            <pre><code>demand = arrays.entry_units * order_fits[arrays.entry_order]
+running = np.cumsum(demand)
+start = arrays.item_group_start
+item_running = running - running[start] + demand[start]
+out_of_stock = item_running &gt; available
+order_fits &amp;= np.bincount(arrays.entry_order, out_of_stock, n_orders) == 0</code></pre>
+            <p>
+              <code>running</code> é a soma acumulada de todas as entradas. Para
+              recomeçar a soma em cada item, o código subtrai o acumulado até o
+              início do grupo e devolve a demanda da primeira entrada do grupo.
+              Isso dá a soma acumulada dentro do item sem nenhum laço.
+            </p>
+            <div class="scroll">
+              <table>
+                <tr>
+                  <th>Posição</th>
+                  <th>Pedido</th>
+                  <th>demand</th>
+                  <th>running</th>
+                  <th>item_running</th>
+                  <th>available</th>
+                  <th>out_of_stock</th>
+                </tr>
+                <tr>
+                  <td class="c">0</td>
+                  <td class="c">1</td>
+                  <td class="c">4</td>
+                  <td class="c">4</td>
+                  <td class="c">4 − 4 + 4 = 4</td>
+                  <td class="c">5</td>
+                  <td class="c">não</td>
+                </tr>
+                <tr>
+                  <td class="c">1</td>
+                  <td class="c">0</td>
+                  <td class="c">3</td>
+                  <td class="c">7</td>
+                  <td class="c">7 − 4 + 4 = 7</td>
+                  <td class="c">5</td>
+                  <td class="c hit">sim</td>
+                </tr>
+                <tr>
+                  <td class="c">2</td>
+                  <td class="c">2</td>
+                  <td class="c">1</td>
+                  <td class="c">8</td>
+                  <td class="c">8 − 8 + 1 = 1</td>
+                  <td class="c">1</td>
+                  <td class="c">não</td>
+                </tr>
+              </table>
+            </div>
+            <p>
+              O pedido 0 tem uma entrada sem estoque, então sai de
+              <code>order_fits</code>.
+            </p>
+            <h3>Passo 4: limite superior e aptidão</h3>
+            <pre><code>accepted = order_fits[arrays.priority]
+units_in_order = arrays.order_units[arrays.priority] * accepted
+within_limit = np.cumsum(units_in_order) &lt;= instance.wave_max_units
+orders = arrays.priority[accepted &amp; within_limit]
+wave_units = int(arrays.order_units[orders].sum())
+
+shortfall = max(1, instance.wave_min_units) - wave_units
+if shortfall &gt; 0:
+    return -shortfall, None
+return wave_units / int(chromosome.sum()), orders</code></pre>
+            <p>
+              Na ordem de prioridade [1, 0, 2], os aceitos são [sim, não, sim],
+              as unidades são [4, 0, 1] e a soma acumulada é [4, 4, 5]. Tudo
+              fica abaixo de UB = 10, então a onda tem os pedidos 1 e 2, com 5
+              unidades. Como 5 ≥ 1, a aptidão é 5 ÷ 1 = 5.
+            </p>
+          </div>
+        </details>
+      </div>
+
+      <div class="ex f2">
+        <div class="head">
+          <span class="tag f2">Evolução</span>
+          <h3>
+            <code>solve(instance, parameters)</code> e <code>report</code>
+          </h3>
+          <blockquote>
+            Roda as gerações e devolve a melhor solução viável (ou
+            <code>None</code>) e um resumo da execução.
+          </blockquote>
+        </div>
+        <details>
+          <summary>Ver explicação</summary>
+          <div class="body">
+            <p>
+              <code>parameters</code> precisa trazer seis chaves:
+              <code>population_size</code>, <code>tournament_size</code>,
+              <code>mutation_rate</code>, <code>max_generations</code>,
+              <code>seed</code> e <code>time_limit_seconds</code>.
+            </p>
+            <h3>Guardar a melhor onda</h3>
+            <pre><code>def evaluate_and_keep_best(chromosome: np.ndarray) -&gt; float:
+    nonlocal best_fitness, best_solution
+    fitness, orders = evaluate(instance, arrays, chromosome)
+    if orders is not None and fitness &gt; best_fitness:
+        best_fitness = fitness
+        aisles = np.flatnonzero(chromosome).tolist()
+        best_solution = Solution(sorted(orders.tolist()), aisles)
+        history.append([time.perf_counter() - start, best_fitness])
+    return fitness</code></pre>
+            <p>
+              Esta função fica dentro de <code>solve</code> para alterar as
+              variáveis dela (<code>nonlocal</code>). Toda avaliação passa por
+              aqui. Quando aparece uma onda viável melhor, ela vira
+              <code>best_solution</code>, e o par [segundos, objetivo] entra em
+              <code>history</code>. <code>np.flatnonzero</code> devolve as
+              posições dos bits 1, que são os corredores visitados.
+            </p>
+            <h3>População inicial</h3>
+            <pre><code>share_of_aisles = rng.random((population_size, 1))
+population = rng.random((population_size, n_aisles)) &lt; share_of_aisles</code></pre>
+            <p>
+              A primeira linha sorteia uma fração por indivíduo (uma coluna). A
+              segunda sorteia um número por bit e compara com a fração da linha.
+              O NumPy repete a coluna para todas as colunas da matriz (isso se
+              chama <i>broadcasting</i>).
+            </p>
+            <h3>Uma geração</h3>
+            <pre><code>for child in range(population_size):
+    if time.perf_counter() - start &gt; stop_after_seconds:
+        return best_solution, report(generations, history)
+    mother, father = (
+        max(rng.choice(population_size, parameters["tournament_size"], replace=False),
+            key=lambda individual: fitness[individual])
+        for _ in range(2)
+    )
+    from_father = rng.random(n_aisles) &lt; 0.5
+    children[child] = np.where(from_father, population[father], population[mother])
+    children[child] ^= rng.random(n_aisles) &lt; parameters["mutation_rate"]
+    children_fitness[child] = evaluate_and_keep_best(children[child])</code></pre>
+            <ol class="steps">
+              <li>Confere o relógio antes de cada filho.</li>
+              <li>
+                Faz dois torneios, um para a mãe e outro para o pai.
+                <code>replace=False</code> impede sortear o mesmo indivíduo duas
+                vezes no mesmo torneio.
+              </li>
+              <li>
+                Monta o filho por cruzamento uniforme com <code>np.where</code>.
+              </li>
+              <li>Aplica a mutação com XOR.</li>
+              <li>Avalia o filho e atualiza a melhor onda.</li>
+            </ol>
+            <p>
+              No fim da geração, <code>population</code> e
+              <code>fitness</code> passam a ser os dos filhos e o contador
+              <code>generations</code> sobe um.
+            </p>
+            <h3><code>report</code></h3>
+            <p>
+              Monta o dicionário devolvido ao lado da solução, com
+              <code>generations</code> (gerações completas),
+              <code>best_found_seconds</code> (em que segundo a melhor onda
+              apareceu) e <code>history</code>.
+            </p>
+            <h3>Complexidade de tempo</h3>
+            <p>
+              Com O pedidos, A corredores, I itens, E linhas de pedido, S linhas
+              de corredor e P indivíduos, cada avaliação custa O(S + I) para o
+              estoque, O(E + O) para aceitar pedidos e O(O) para o limite
+              superior. Cruzamento e mutação custam O(A). Uma geração tem P
+              filhos.
+            </p>
+            <div class="formula">uma geração = O(P · (A + S + I + E + O))</div>
+            <p>
+              A notação O(·) (“O grande”) descreve como o tempo cresce com o
+              tamanho da entrada, sem contar constantes.
+            </p>
+          </div>
+        </details>
+      </div>
+
+      <h2>6. Resultados medidos</h2>
+      <p>
+        Execuções de 600 segundos em 2026-11-21, com população 50, torneio 3 e
+        semente 1.
+      </p>
+      <div class="scroll">
+        <table>
+          <tr>
+            <th>Instância</th>
+            <th>Taxa de mutação</th>
+            <th>Gerações</th>
+            <th>Corredores</th>
+            <th>Objetivo</th>
+            <th>Melhor oficial</th>
+            <th>% do melhor</th>
+          </tr>
+          <tr>
+            <td><code>b_instance_0001</code></td>
+            <td class="c">0,005</td>
+            <td class="c">23.980</td>
+            <td class="c">2</td>
+            <td class="c">629,50</td>
+            <td class="c">631,50</td>
+            <td class="c hit">99,7%</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0014</code></td>
+            <td class="c">0,002</td>
+            <td class="c">613</td>
+            <td class="c">3</td>
+            <td class="c">1617,00</td>
+            <td class="c">1633,67</td>
+            <td class="c hit">99,0%</td>
+          </tr>
+        </table>
+      </div>
+      <p>
+        Na instância X, a taxa de mutação mudou muito o resultado. Cada linha
+        abaixo é uma execução de 600 segundos com seis execuções dividindo a
+        máquina.
+      </p>
+      <div class="scroll">
+        <table>
+          <tr>
+            <th>Taxa</th>
+            <th>Semente 1</th>
+            <th>Semente 2</th>
+            <th>Corredores (semente 1)</th>
+          </tr>
+          <tr>
+            <td class="c">0,002</td>
+            <td class="c hit">1617,00</td>
+            <td class="c hit">1619,67</td>
+            <td class="c">3</td>
+          </tr>
+          <tr>
+            <td class="c">0,005</td>
+            <td class="c">1233,71</td>
+            <td class="c">1212,33</td>
+            <td class="c">7</td>
+          </tr>
+          <tr>
+            <td class="c">0,01</td>
+            <td class="c">701,46</td>
+            <td class="c">671,78</td>
+            <td class="c">26</td>
+          </tr>
+        </table>
+      </div>
+      <div class="say">
+        <b>Lendo os números.</b> Com taxa alta, cada filho liga e desliga vários
+        corredores ao acaso, e a população não consegue manter ondas de poucos
+        corredores. A taxa 0,002 troca perto de um bit por filho e chegou a 3
+        corredores.
+      </div>
+      <div class="check">
+        <b>Cuidado ao generalizar.</b> Só 2 das 30 instâncias foram rodadas,
+        cada uma com uma taxa diferente. O <code>checker.py</code> aprovou a
+        saída de <code>b_instance_0001</code>. Ainda falta escolher um único
+        conjunto de parâmetros e rodar as 30 instâncias.
+      </div>
+
+      <h2>7. No que a implementação interfere</h2>
+      <div class="scroll">
+        <table>
+          <tr>
+            <th>Parte do projeto</th>
+            <th>Efeito</th>
+          </tr>
+          <tr>
+            <td>
+              <code>configs/run.json</code> e
+              <code>configs/batch.json</code> (issue #14)
+            </td>
+            <td>
+              No commit 4e3dea3, os dois arquivos ainda não têm
+              <code>max_generations</code>, e <code>solve</code> lê essa chave,
+              então rodar com eles hoje dá erro (<code>KeyError</code>). As
+              taxas de mutação deles (0,01 e 0,001) também diferem das que
+              funcionaram melhor.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code>batch_runner.py</code> e <code>cli.py</code> (issues #14 e
+              #15)
+            </td>
+            <td>
+              Precisam tratar <code>None</code>, que <code>solve</code> devolve
+              quando nenhum indivíduo foi viável, e gravar
+              <code>generations</code>, <code>best_found_seconds</code> e
+              <code>history</code> no <code>.json</code> de resultado.
+            </td>
+          </tr>
+          <tr>
+            <td>Gráficos da apresentação</td>
+            <td>
+              <code>history</code> traz os pares [segundos, objetivo] de cada
+              melhora e serve para desenhar a curva de evolução.
+            </td>
+          </tr>
+          <tr>
+            <td><code>pyproject.toml</code></td>
+            <td>Ganhou a dependência <code>numpy&gt;=2.0</code>.</td>
+          </tr>
+          <tr>
+            <td>
+              <code>CLAUDE.md</code>, <code>README.md</code> e
+              <code>docs/plano-implementacao.md</code>
+            </td>
+            <td>
+              Descrevem o cromossomo por corredores e aceitam
+              <code>np.random.default_rng(seed)</code> como gerador com semente.
+            </td>
+          </tr>
+          <tr>
+            <td><code>tests/test_genetic_algorithm.py</code></td>
+            <td>
+              Seis testes, entre eles um teste de propriedade (Hypothesis) que
+              gera instâncias pequenas ao acaso e confere que toda onda com
+              aptidão positiva passa em <code>is_feasible</code>.
+            </td>
+          </tr>
+          <tr>
+            <td><code>exact_algorithm.py</code> (issue #12)</td>
+            <td>
+              Nenhum efeito. Os dois métodos só compartilham
+              <code>instance.py</code>.
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <h2>8. Limitações e armadilhas</h2>
+      <div class="check">
+        <b
+          >O decodificador pode perder a melhor onda para os mesmos
+          corredores.</b
+        >
+        No exemplo oficial, os corredores {1, 3} permitem a onda ótima {0, 1, 2,
+        4} com objetivo 5. O decodificador atende primeiro o pedido 3 (5
+        unidades), que consome o estoque disputado, e termina com os pedidos {3,
+        4}, 6 unidades e objetivo 3. A regra “maior pedido primeiro” é rápida,
+        mas não garante o melhor uso do estoque.
+      </div>
+      <div class="check">
+        <b>Pedido cortado ainda ocupa estoque na conta.</b> No passo 3, a soma
+        acumulada de um item inclui pedidos que vão ser cortados por falta de
+        outro item. A onda continua viável, mas algum estoque pode sobrar sem
+        uso.
+      </div>
+      <div class="check">
+        <b>O corte em UB para no primeiro estouro.</b> Quando a soma acumulada
+        passa de UB, todos os pedidos seguintes ficam de fora, mesmo um pedido
+        pequeno que ainda caberia.
+      </div>
+      <div class="check">
+        <b
+          ><code>tournament_size</code> maior que
+          <code>population_size</code> dá erro</b
+        >, porque o torneio sorteia sem repetição.
+      </div>
+      <div class="check">
+        <b>A população inicial não confere o relógio.</b> A trava de tempo só
+        começa a valer nas gerações. Nas instâncias medidas isso não foi
+        problema.
+      </div>
+
+      <h2>Resumo das decisões</h2>
+      <div class="scroll">
+        <table>
+          <tr>
+            <th>#</th>
+            <th>Decisão</th>
+            <th>Escolha</th>
+            <th>Motivo</th>
+          </tr>
+          <tr>
+            <td class="c">1</td>
+            <td>Cromossomo</td>
+            <td>Um bit por corredor</td>
+            <td>O número de corredores é o denominador do objetivo</td>
+          </tr>
+          <tr>
+            <td class="c">2</td>
+            <td>Decodificador</td>
+            <td>
+              Estoque, pedidos que cabem, disputa pelo maior pedido, corte em UB
+            </td>
+            <td>Toda onda respeita estoque e UB por construção</td>
+          </tr>
+          <tr>
+            <td class="c">3</td>
+            <td>Aptidão</td>
+            <td>Objetivo, ou menos o que falta para LB</td>
+            <td>Ondas quase viáveis ainda guiam a seleção</td>
+          </tr>
+          <tr>
+            <td class="c">4</td>
+            <td>Operadores</td>
+            <td>Fração sorteada, torneio, uniforme, troca de bit</td>
+            <td>
+              Começar com ondas de todos os tamanhos e mudar pouco por filho
+            </td>
+          </tr>
+          <tr>
+            <td class="c">5</td>
+            <td>Parada</td>
+            <td>
+              <code>max_generations</code>, com 600 s menos 5 s como trava
+            </td>
+            <td>Mesma semente dá a mesma solução em qualquer máquina</td>
+          </tr>
+          <tr>
+            <td class="c">6</td>
+            <td>Desempenho</td>
+            <td>NumPy vetorizado</td>
+            <td>Milhares de gerações dentro de 600 s</td>
+          </tr>
+        </table>
+      </div>
+
+      <footer>
+        Fontes: <code>src/order_selection/genetic_algorithm.py</code> e
+        <code>tests/test_genetic_algorithm.py</code> na
+        <code>main</code> (commit 4e3dea3, PR #19),
+        <code>docs/problem.md</code>, <code>docs/plano-implementacao.md</code> e
+        a issue #13. Os resultados vêm das execuções de 2026-11-21 conferidas
+        nesta sessão. Os exemplos do decodificador (pedidos {1, 2} com aptidão
+        5, e pedidos {3, 4} com aptidão 3 no exemplo oficial) foram recalculados
+        rodando <code>evaluate</code>. O caso da antena Space Technology 5 é um
+        exemplo conhecido da literatura de computação evolutiva e não foi
+        conferido em fonte nesta página.
+      </footer>
+    </div>
+  </body>
+</html>
