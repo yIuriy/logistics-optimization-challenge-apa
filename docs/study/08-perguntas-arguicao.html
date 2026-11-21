@@ -626,10 +626,15 @@
         <details>
           <summary><span class="n">17</span> O problema é NP-difícil?</summary>
           <div class="body">
-            A descrição oficial não afirma isso. Nossa justificativa é uma
-            inferência. Mesmo com a onda fixa, escolher o menor conjunto de
-            corredores que cobre a demanda generaliza o problema de cobertura de
-            conjuntos (set cover), que é NP-difícil.
+            Sim. Com LB = UB = total de unidades, a onda precisa levar todos os
+            pedidos, e maximizar unidades ÷ corredores vira escolher o menor
+            conjunto de corredores que cobre a demanda. Com pedidos e estoques
+            de 1 unidade, isso é a cobertura de conjuntos (set cover), um dos
+            21 problemas NP-completos de Karp (1972). A versão de decisão
+            ("existe onda com objetivo pelo menos k?") é NP-completa, porque o
+            checker.py confere uma resposta em tempo polinomial. A descrição
+            oficial não fala nisso, e a redução é do grupo. A prova passo a
+            passo está na página 01.
           </div>
         </details>
         <details>

@@ -167,6 +167,9 @@
       .formulas .f2 {
         background: var(--teal-bg);
       }
+      .formulas .f3 {
+        background: var(--grape-bg);
+      }
       .formulas b {
         display: block;
         margin-bottom: 4px;
@@ -713,6 +716,43 @@
           <code>b/instance_0001</code>.
         </p>
       </div>
+
+      <h2 id="np">Por que o problema é NP-difícil</h2>
+      <p>Contar 2<sup>n</sup> waves ainda não prova que o problema é difícil. Ordenar n números tem n! ordens possíveis, e mesmo assim o Python ordena um milhão de números em menos de um segundo, porque o algoritmo não testa todas as ordens. A pergunta certa é se existe algum algoritmo rápido para o problema. A teoria da complexidade responde isso com quatro termos.</p>
+
+      <h3>Tempo polinomial e tempo exponencial</h3>
+      <p>Tempo polinomial é quando o número de passos cresce como uma potência fixa do tamanho da entrada, como n (linear) ou n² (quadrático). Comparar todos os pares de n pedidos é quadrático. Tempo exponencial é quando cresce como 2<sup>n</sup>, como testar todas as waves.</p>
+      <table>
+        <tr><th>Pedidos (n)</th><th>n² passos</th><th>2<sup>n</sup> passos</th></tr>
+        <tr><td class="c">20</td><td class="c">400</td><td class="c">cerca de 1 milhão</td></tr>
+        <tr><td class="c">60</td><td class="c">3.600</td><td class="c">cerca de 10<sup>18</sup></td></tr>
+        <tr><td class="c">11.321</td><td class="c">cerca de 128 milhões</td><td class="c">um número com 3.408 dígitos</td></tr>
+      </table>
+      <div class="say"><b>Lendo a tabela.</b> Um computador faz perto de um bilhão de passos simples por segundo. Com n², os 11.321 pedidos de <code>b_instance_0001</code> levam uma fração de segundo. Com 2<sup>n</sup>, só 60 pedidos já levariam mais de 30 anos.</div>
+
+      <h3>As classes P, NP, NP-difícil e NP-completo</h3>
+      <p>As classes P e NP falam de problemas de decisão, que têm resposta sim ou não. A versão de decisão do nosso problema pergunta se existe uma wave válida com objetivo pelo menos k.</p>
+      <div class="formulas">
+        <div class="f1"><b>P</b>Problemas que algum algoritmo resolve em tempo polinomial. Exemplo: achar o menor caminho num mapa com o algoritmo de Dijkstra.</div>
+        <div class="f2"><b>NP</b>Problemas em que uma resposta "sim" pode ser conferida em tempo polinomial, se alguém mostrar a solução. Exemplo: o <code>checker.py</code> confere uma wave e calcula o objetivo em tempo polinomial.</div>
+        <div class="f3"><b>NP-difícil</b>Problemas pelo menos tão difíceis quanto todos os de NP. Um algoritmo rápido para um deles daria um algoritmo rápido para todos os problemas de NP.</div>
+        <div class="f1"><b>NP-completo</b>Problemas que estão em NP e também são NP-difíceis. São os mais difíceis de NP.</div>
+      </div>
+      <div class="why"><b>Por que isso importa.</b> Ninguém conhece algoritmo polinomial para um problema NP-completo, e ninguém provou que ele não existe. Essa é a pergunta "P = NP?", aberta desde 1971. Na prática, um problema NP-difícil grande é resolvido com algoritmo exato que pode demorar muito, ou com heurística, que acha boas soluções sem garantir a melhor.</div>
+
+      <h3>Como provar que o nosso problema é NP-difícil</h3>
+      <p>A prova usa uma redução, que é transformar um problema já conhecido como difícil num caso do nosso problema. O problema conhecido é a cobertura de conjuntos (set cover), que está na lista de 21 problemas NP-completos publicada por Richard Karp em 1972. Ele pergunta qual é o menor número de conjuntos que, juntos, cobrem todos os elementos.</p>
+      <ol class="steps">
+        <li><b>Comece com uma cobertura de conjuntos.</b> Elementos A, B, C e D. Conjuntos {A, B}, {C, D} e {B, C}.<div class="calc">menor cobertura = {A, B} e {C, D}, com 2 conjuntos</div></li>
+        <li><b>Transforme elementos em pedidos.</b> Cada elemento vira um item, e cada item ganha um pedido de 1 unidade. São 4 pedidos com 4 unidades no total.</li>
+        <li><b>Transforme conjuntos em corredores.</b> Cada conjunto vira um corredor com 1 unidade de cada item dele. O corredor 0 tem A e B, o corredor 1 tem C e D, e o corredor 2 tem B e C.</li>
+        <li><b>Force a wave a levar todos os pedidos.</b> Faça LB = UB = 4. A única wave permitida é a que tem os 4 pedidos.</li>
+        <li><b>Leia o objetivo.</b> As unidades ficam fixas em 4, então maximizar 4 ÷ corredores é usar o menor número de corredores que cobre todos os itens.<div class="calc">corredores 0 e 1 → 4 ÷ 2 = 2</div></li>
+      </ol>
+      <div class="ans">A melhor wave dessa instância responde à cobertura de conjuntos. Um algoritmo rápido para o nosso problema resolveria a cobertura de conjuntos rápido, então o nosso problema é NP-difícil.</div>
+      <div class="say"><b>Por que um caso especial basta.</b> A instância construída é um caso particular do nosso problema. Se até esse caso é difícil, o problema geral, que inclui esse caso, também é. A transformação só cria uma linha por elemento e por conjunto, então leva tempo polinomial.</div>
+      <div class="ans">A versão de decisão ("existe wave com objetivo pelo menos k?") é NP-completa. Ela está em NP porque o <code>checker.py</code> confere a resposta em tempo polinomial, e é NP-difícil pela redução acima. A versão de otimização, que pede a melhor wave, é NP-difícil.</div>
+      <div class="check"><b>Fonte.</b> A descrição oficial do desafio não fala em NP-dificuldade. A redução desta seção foi montada pelo grupo, e só o resultado sobre a cobertura de conjuntos vem da literatura (Karp, 1972).</div>
       <div class="ex f3">
         <div class="head">
           <span class="tag f3">Instâncias reais</span>
