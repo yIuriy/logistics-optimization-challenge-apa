@@ -1,0 +1,24 @@
+{
+  "instance": "x_instance_0013",
+  "n_orders": 49992,
+  "n_items": 41228,
+  "n_aisles": 483,
+  "wave_min_units": 7173,
+  "wave_max_units": 28203,
+  "method": "genetic",
+  "parameters": {
+    "population_size": 50,
+    "tournament_size": 3,
+    "mutation_rate": 0.002,
+    "max_generations": 1000000000,
+    "seed": 1,
+    "time_limit_seconds": 600
+  },
+  "source_commit": "85d9a38",
+  "objective": 1043.4285714285713,
+  "aisles_visited": 7,
+  "generations": 972,
+  "best_found_seconds": 330.744,
+  "best_official": 1060.7142857142858,
+  "percent_of_best": 98.37
+}

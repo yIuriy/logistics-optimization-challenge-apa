@@ -88,6 +88,6 @@ Duas issues extras ainda sem responsável completam a divisão. A #17 gera os gr
 
 ## Riscos
 
-- A qualidade do algoritmo genético foi medida só em `b_instance_0001` e `x_instance_0014`, ambas acima de 99% do melhor valor oficial. As outras 28 instâncias ainda não foram rodadas.
+- Em 2026-11-21 o algoritmo genético rodou as 30 instâncias por 600 s cada, com semente 1, e chegou em média a 98,3% do melhor valor oficial. A pior foi `x_instance_0004`, com 93,0%. Os pares `.txt` e `.json` estão em `results/`.
 - O limite de 600 s é uma suposição até o professor responder.
 - Uma instância nova apresentada na hora não cabe em 600 s dentro dos 5 minutos de apresentação.
