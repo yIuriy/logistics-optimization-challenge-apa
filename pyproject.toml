@@ -1,10 +1,73 @@
 [project]
-name = "wop"
+name = "order-selection"
 version = "0.1.0"
-description = "Wave Order Picking (SBPO 2025 / Mercado Livre challenge) - APA course project"
-requires-python = ">=3.10"
-dependencies = ["numpy"]
+description = "Wave order picking (SBPO 2025 / Mercado Livre challenge) solved with an exact model and a genetic algorithm"
+requires-python = ">=3.13"
+# highspy solves the exact model. numpy is required by the official checker.py.
+dependencies = ["highspy>=1.11", "numpy>=2.0"]
+
+[build-system]
+requires = ["uv_build>=0.9,<1"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "complexipy>=9.0.0",
+    "hypothesis>=6.100",
+    "pytest>=8.0",
+    "ruff>=0.17.6",
+    "vulture>=2.16",
+]
 
 [tool.pytest.ini_options]
-pythonpath = ["."]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+extend-exclude = ["src/order_selection/checker.py"]
+[tool.ruff.lint]
+# Enabling preview only for the rules selected by their exact code (PLW1514, PLR6301 and NPY002)
+preview = true
+explicit-preview-rules = true
+select = ["E", "F", "I", "B", "UP", "SIM", "C90", "PL", "S", "D", "TID251", "ARG", "BLE", "PGH003", "PGH004", "RUF100", "PLW1514", "PLR6301", "NPY002"]
+ignore = ["D100", "D104", "D105", "D107"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "PLR2004", "D", "ARG"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"__future__".msg = "Python 3.13+ project"
+"unittest.mock".msg = "Test through real collaborators. Mock only at an external boundary, with a noqa that states the reason."
+"random.random".msg = "The global generator changes the result on every run. Use random.Random(seed) or numpy.random.default_rng(seed)."
+"random.randint".msg = "The global generator changes the result on every run. Use random.Random(seed) or numpy.random.default_rng(seed)."
+"random.randrange".msg = "The global generator changes the result on every run. Use random.Random(seed) or numpy.random.default_rng(seed)."
+"random.uniform".msg = "The global generator changes the result on every run. Use random.Random(seed) or numpy.random.default_rng(seed)."
+"random.gauss".msg = "The global generator changes the result on every run. Use random.Random(seed) or numpy.random.default_rng(seed)."
+"random.choice".msg = "The global generator changes the result on every run. Use random.Random(seed) or numpy.random.default_rng(seed)."
+"random.choices".msg = "The global generator changes the result on every run. Use random.Random(seed) or numpy.random.default_rng(seed)."
+"random.sample".msg = "The global generator changes the result on every run. Use random.Random(seed) or numpy.random.default_rng(seed)."
+"random.shuffle".msg = "The global generator changes the result on every run. Use random.Random(seed) or numpy.random.default_rng(seed)."
+"random.seed".msg = "The global generator changes the result on every run. Use random.Random(seed) or numpy.random.default_rng(seed)."
+"time.time".msg = "The wall clock jumps when the system clock is set. Use time.perf_counter() for durations, or datetime.now(UTC) for a timestamp."
+
+[tool.complexipy]
+max-complexity-allowed = 15
+exclude = ["src/order_selection/checker.py"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.pylint]
+max-args = 5
+max-branches = 12
+max-returns = 6
+max-statements = 50
+
+[tool.vulture]
+paths = ["."]
+exclude = [".venv/", "tests/", "src/order_selection/checker.py"]
+min_confidence = 80
+

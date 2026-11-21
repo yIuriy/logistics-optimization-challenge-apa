@@ -83,5 +83,5 @@ Solution:
 ## How we are graded (course assignment)
 
 * Solution score = 10 × (our performance / best group in class).
-* A solution rejected by the official checker (`tools/checker.py`) scores **zero** on that instance.
+* A solution rejected by the official checker (`src/order_selection/checker.py`) scores **zero** on that instance.
 * 5-minute presentation: 2 min problem, 3 min approach + results vs. best known values.
