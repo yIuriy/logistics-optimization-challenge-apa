@@ -1,0 +1,1238 @@
+<!doctype html>
+<!-- Perguntas prováveis da arguição do Trabalho Prático Final de APA, com respostas curtas para estudo. Agrupadas por tema, cada resposta abre com um clique. -->
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Perguntas da arguição | TPF de APA</title>
+    <style>
+      :root {
+        --ink: #1f2433;
+        --muted: #5f6675;
+        --paper: #fffdf7;
+        --line: #1f2433;
+        --coral: #ff6b57;
+        --coral-bg: #ffe3dd;
+        --sun: #ffc531;
+        --sun-bg: #fff3c7;
+        --teal: #15a39a;
+        --teal-bg: #d4f3ef;
+        --grape: #7b4fd6;
+        --grape-bg: #e9dffb;
+        --sky: #2f80ed;
+        --sky-bg: #dbe9ff;
+        --leaf: #2e9e4f;
+        --leaf-bg: #dcf5e3;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      body {
+        margin: 0;
+        font:
+          17px/1.6 system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+      }
+      .wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 28px 18px 80px;
+      }
+      header {
+        border: 2px solid var(--line);
+        border-radius: 14px;
+        padding: 22px 24px;
+        background: #fff;
+        box-shadow: 6px 6px 0 var(--teal);
+      }
+      h1 {
+        font-size: 2rem;
+        line-height: 1.15;
+        margin: 0 0 8px;
+      }
+      .lead {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.05rem;
+      }
+      .lead a {
+        color: var(--sky);
+        font-weight: 700;
+      }
+      h2 {
+        font-size: 1.6rem;
+        margin: 40px 0 12px;
+        line-height: 1.2;
+      }
+      h3 {
+        font-size: 1.1rem;
+        margin: 18px 0 6px;
+      }
+      p {
+        margin: 0 0 12px;
+      }
+      /* etiquetas e cartões */
+      .tag {
+        display: inline-block;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border: 2px solid var(--line);
+        border-radius: 6px;
+        padding: 2px 10px;
+        margin: 0 6px 8px 0;
+        background: #fff;
+      }
+      .tag.f1 {
+        background: var(--sky-bg);
+      }
+      .tag.f2 {
+        background: var(--teal-bg);
+      }
+      .tag.f3 {
+        background: var(--grape-bg);
+      }
+      .card {
+        border: 2px solid var(--line);
+        border-radius: 12px;
+        padding: 16px 18px;
+        background: #fff;
+        margin: 14px 0;
+        overflow-x: auto;
+      }
+      .card.sun {
+        background: var(--sun-bg);
+      }
+      /* fórmulas e contas */
+      .formula {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 1.25rem;
+        background: #fff;
+        border: 2px dashed var(--line);
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin: 10px 0;
+        overflow-x: auto;
+        text-align: center;
+      }
+      .calc {
+        font-family: Georgia, serif;
+        font-size: 1.1rem;
+        line-height: 1.3;
+        background: var(--paper);
+        border: 2px dashed var(--line);
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin: 6px 0;
+        overflow-x: auto;
+      }
+      .frac {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        vertical-align: middle;
+        margin: 0 0.2em;
+        line-height: 1.1;
+      }
+      .frac > .num {
+        border-bottom: 2px solid currentColor;
+        padding: 0 0.3em 0.1em;
+      }
+      .frac > .den {
+        padding: 0.1em 0.3em 0;
+      }
+      .sq {
+        display: inline-flex;
+        align-items: center;
+        vertical-align: middle;
+        margin: 0 0.1em;
+      }
+      .sq::before {
+        content: "√";
+        font-size: 1.35em;
+        line-height: 1;
+        margin-right: 0.05em;
+      }
+      .sq > span {
+        display: inline-flex;
+        align-items: center;
+        border-top: 2px solid currentColor;
+        padding: 0.1em 0.3em 0;
+      }
+      .formulas {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 10px;
+      }
+      .formulas div {
+        border: 2px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+      }
+      .formulas .f1 {
+        background: var(--sky-bg);
+      }
+      .formulas .f2 {
+        background: var(--teal-bg);
+      }
+      .formulas .f3 {
+        background: var(--grape-bg);
+      }
+      .formulas b {
+        display: block;
+        margin-bottom: 4px;
+      }
+      .formulas .formula {
+        font-size: 1.05rem;
+        padding: 8px 10px;
+      }
+      /* tabelas */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 10px 0;
+        background: #fff;
+        font-size: 0.95rem;
+      }
+      th,
+      td {
+        border: 2px solid var(--line);
+        padding: 8px 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: var(--sun-bg);
+      }
+      td.c {
+        text-align: center;
+        font-family: Georgia, serif;
+        font-size: 1.05rem;
+      }
+      td.hit {
+        background: var(--sun);
+        font-weight: 800;
+      }
+      /* bloco de exercício/tópico com resolução recolhível */
+      .ex {
+        border: 3px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+        margin: 26px 0;
+        overflow: hidden;
+      }
+      .ex.f1 {
+        box-shadow: 8px 8px 0 var(--sky);
+      }
+      .ex.f2 {
+        box-shadow: 8px 8px 0 var(--teal);
+      }
+      .ex.f3 {
+        box-shadow: 8px 8px 0 var(--grape);
+      }
+      .ex .head {
+        padding: 14px 18px;
+        border-bottom: 2px solid var(--line);
+      }
+      .ex.f1 .head {
+        background: var(--sky-bg);
+      }
+      .ex.f2 .head {
+        background: var(--teal-bg);
+      }
+      .ex.f3 .head {
+        background: var(--grape-bg);
+      }
+      .ex .head h2 {
+        margin: 0 0 6px;
+        font-size: 1.35rem;
+      }
+      .ex blockquote {
+        margin: 0;
+        padding: 10px 14px;
+        border-left: 6px solid var(--line);
+        background: #fff;
+        border-radius: 0 8px 8px 0;
+        font-style: italic;
+      }
+      details {
+        border-top: 2px solid var(--line);
+      }
+      summary {
+        cursor: pointer;
+        padding: 12px 18px;
+        font-weight: 800;
+        background: var(--sun-bg);
+        list-style: none;
+      }
+      summary::before {
+        content: "▸ ";
+      }
+      details[open] summary::before {
+        content: "▾ ";
+      }
+      summary::-webkit-details-marker {
+        display: none;
+      }
+      .body {
+        padding: 14px 18px 18px;
+      }
+      /* leitura dos dados */
+      .read {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 8px;
+        margin: 8px 0 14px;
+      }
+      .read div {
+        border: 2px solid var(--line);
+        border-radius: 8px;
+        padding: 8px 10px;
+        background: var(--paper);
+        font-size: 0.95rem;
+      }
+      .read b {
+        font-family: Georgia, serif;
+        font-size: 1.1rem;
+        margin-right: 6px;
+      }
+      .read div.z {
+        grid-column: 1/-1;
+        background: var(--sun-bg);
+      }
+      /* caixas de significado */
+      .why {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--sun);
+        background: var(--sun-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 10px 0;
+      }
+      .ans {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--leaf);
+        background: var(--leaf-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 12px 0 6px;
+        font-weight: 700;
+        font-size: 1.05rem;
+      }
+      .check {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--coral);
+        background: var(--coral-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 8px 0;
+      }
+      .say {
+        border: 2px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 8px 0;
+        background: var(--paper);
+      }
+      .say b {
+        color: var(--leaf);
+      }
+      /* passos numerados */
+      .steps {
+        counter-reset: s;
+        padding: 0;
+        margin: 10px 0;
+        list-style: none;
+      }
+      .steps li {
+        counter-increment: s;
+        position: relative;
+        padding: 6px 0 6px 44px;
+        margin: 4px 0;
+      }
+      .steps li::before {
+        content: counter(s);
+        position: absolute;
+        left: 0;
+        top: 6px;
+        width: 30px;
+        height: 30px;
+        border: 2px solid var(--line);
+        border-radius: 50%;
+        background: var(--sun);
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      footer {
+        margin-top: 50px;
+        font-size: 0.85rem;
+        color: var(--muted);
+        border-top: 2px solid var(--line);
+        padding-top: 12px;
+      }
+      @media (max-width: 600px) {
+        h1 {
+          font-size: 1.6rem;
+        }
+        .formula {
+          font-size: 1.1rem;
+        }
+        .calc {
+          font-size: 1rem;
+        }
+      }
+      code {
+        font-family: ui-monospace, Menlo, monospace;
+        font-size: 0.9em;
+        background: var(--sun-bg);
+        border-radius: 4px;
+        padding: 0 4px;
+      }
+      .nav {
+        font-size: 0.95rem;
+      }
+      .nav a {
+        color: var(--sky);
+        font-weight: 700;
+      }
+      .faq details {
+        border: 2px solid var(--line);
+        border-radius: 10px;
+        margin: 10px 0;
+        overflow: hidden;
+        background: #fff;
+      }
+      .faq.f1 details {
+        box-shadow: 4px 4px 0 var(--sky);
+      }
+      .faq.f2 details {
+        box-shadow: 4px 4px 0 var(--teal);
+      }
+      .faq.f3 details {
+        box-shadow: 4px 4px 0 var(--grape);
+      }
+      .faq summary {
+        font-weight: 700;
+      }
+      .faq .n {
+        display: inline-block;
+        min-width: 2em;
+        font-weight: 800;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>77 perguntas que a banca pode fazer na arguição</h1>
+        <p class="lead">
+          Perguntas prováveis dos professores Marcelo e Diogo sobre o problema,
+          o algoritmo exato, o algoritmo genético, o código e os resultados.
+          Tente responder em voz alta antes de abrir a resposta. As páginas de
+          estudo <a href="algoritmo-exato.html">do algoritmo exato</a> e
+          <a href="algoritmo-genetico.html">do algoritmo genético</a> explicam
+          cada tema em detalhe.
+        </p>
+      </header>
+      <div class="card sun">
+        <ol class="steps">
+          <li>
+            <b>Responda curto.</b> A banca avalia domínio do problema, clareza
+            da estratégia e capacidade de responder (enunciado, seção 4). Duas
+            ou três frases bastam.
+          </li>
+          <li>
+            <b>Cada um domina a própria parte.</b> O enunciado libera o uso de
+            IA, mas pede que o grupo justifique o código e as decisões
+            matemáticas (seção 2).
+          </li>
+          <li>
+            <b>Use números.</b> Quando a pergunta for sobre resultados, cite a
+            instância, o objetivo e a porcentagem do melhor valor oficial.
+          </li>
+        </ol>
+      </div>
+      <p class="nav">
+        <a href="#problema">O problema</a> ·
+        <a href="#modelo">Modelo matemático e complexidade</a> ·
+        <a href="#exato">Algoritmo exato</a> ·
+        <a href="#genetico">Algoritmo genético</a> ·
+        <a href="#implementacao">Implementação e qualidade</a> ·
+        <a href="#resultados">Resultados e discussão crítica</a> ·
+        <a href="#ia">Uso de IA e domínio do código</a>
+      </p>
+      <h2 id="problema">O problema (12)</h2>
+      <div class="faq f1">
+        <details>
+          <summary>
+            <span class="n">1</span> Explique o problema em uma frase.
+          </summary>
+          <div class="body">
+            Escolher um grupo de pedidos (a onda) e os corredores onde buscar os
+            itens, para coletar o maior número de unidades por corredor
+            visitado, respeitando o tamanho da onda e o estoque.
+          </div>
+        </details>
+        <details>
+          <summary><span class="n">2</span> O que é uma onda (wave)?</summary>
+          <div class="body">
+            É um subconjunto dos pedidos pendentes que o armazém coleta de uma
+            vez. Juntar pedidos numa onda evita que o coletor percorra os mesmos
+            corredores várias vezes.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">3</span> O que é um corredor no modelo?
+          </summary>
+          <div class="body">
+            É um conjunto de prateleiras com estoque de vários itens. A
+            descrição oficial trata o corredor como a unidade de deslocamento,
+            então visitar menos corredores quer dizer andar menos.
+          </div>
+        </details>
+        <details>
+          <summary><span class="n">4</span> Qual é a função objetivo?</summary>
+          <div class="body">
+            Maximizar o total de unidades dos pedidos da onda dividido pelo
+            número de corredores visitados (função (1) da descrição oficial).
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">5</span> Por que dividir por corredores e não só
+            maximizar unidades?
+          </summary>
+          <div class="body">
+            Porque o custo da coleta é o deslocamento. Uma onda grande que exige
+            todos os corredores pode ser pior que uma onda menor concentrada em
+            poucos corredores. A razão mede eficiência.
+          </div>
+        </details>
+        <details>
+          <summary><span class="n">6</span> Quais são as restrições?</summary>
+          <div class="body">
+            (2) a onda tem pelo menos LB unidades, (3) a onda tem no máximo UB
+            unidades e (4) os corredores visitados têm estoque suficiente de
+            cada item pedido pela onda.
+          </div>
+        </details>
+        <details>
+          <summary><span class="n">7</span> O que são LB e UB?</summary>
+          <div class="body">
+            LB (lower bound) é o limite inferior e UB (upper bound) é o limite
+            superior do total de unidades da onda. Eles vêm em cada instância e
+            representam limites operacionais do armazém.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">8</span> Um pedido pode entrar pela metade na onda?
+          </summary>
+          <div class="body">
+            Cada pedido entra inteiro ou fica de fora, por isso a variável do
+            pedido vale 0 ou 1.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">9</span> Mostre o exemplo 5×5 da descrição oficial.
+          </summary>
+          <div class="body">
+            Com LB = 5 e UB = 12, os pedidos 0, 1, 2 e 4 somam 10 unidades e
+            cabem no estoque dos corredores 1 e 3. O objetivo fica 10/2 = 5, que
+            é o ótimo do exemplo.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">10</span> O que acontece com uma solução inválida?
+          </summary>
+          <div class="body">
+            Ela vale zero na instância (enunciado, seção 4). Por isso toda
+            solução gravada passa antes no checker.py oficial.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">11</span> Qual é o tamanho das instâncias?
+          </summary>
+          <div class="body">
+            Vão de 1.841 pedidos e 163 corredores até 68.064 pedidos e 483
+            corredores. Rodamos as 30 instâncias dos conjuntos B e X, que são os
+            da fase final do desafio.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">12</span> Qual é o formato da saída?
+          </summary>
+          <div class="body">
+            Um arquivo .txt com o número de pedidos, os índices dos pedidos, o
+            número de corredores e os índices dos corredores, um por linha
+            (seção 3.2 do regulamento).
+          </div>
+        </details>
+      </div>
+      <h2 id="modelo">Modelo matemático e complexidade (10)</h2>
+      <div class="faq f2">
+        <details>
+          <summary>
+            <span class="n">13</span> Quais são as variáveis do modelo?
+          </summary>
+          <div class="body">
+            x_o vale 1 se o pedido o entra na onda e y_a vale 1 se o corredor a
+            é visitado. Todas são binárias.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">14</span> Escreva a restrição de estoque.
+          </summary>
+          <div class="body">
+            Para cada item i, a soma de u_oi · x_o sobre os pedidos é menor ou
+            igual à soma de u_ai · y_a sobre os corredores.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">15</span> Por que existe a restrição de pelo menos
+            um corredor?
+          </summary>
+          <div class="body">
+            Para o denominador do objetivo nunca ser zero. Ela também garante
+            corredores ≥ 1 na prova do limite superior do algoritmo exato.
+          </div>
+        </details>
+        <details>
+          <summary><span class="n">16</span> O problema é linear?</summary>
+          <div class="body">
+            As restrições são lineares, mas o objetivo é uma fração entre duas
+            somas de variáveis. Isso é um problema de programação fracionária
+            inteira.
+          </div>
+        </details>
+        <details>
+          <summary><span class="n">17</span> O problema é NP-difícil?</summary>
+          <div class="body">
+            A descrição oficial não afirma isso. Nossa justificativa é uma
+            inferência. Mesmo com a onda fixa, escolher o menor conjunto de
+            corredores que cobre a demanda generaliza o problema de cobertura de
+            conjuntos (set cover), que é NP-difícil.
+          </div>
+        </details>
+        <details>
+          <summary><span class="n">18</span> Quantas soluções existem?</summary>
+          <div class="body">
+            Cada pedido entra ou não, então existem 2^n ondas possíveis com n
+            pedidos, antes mesmo de escolher corredores. Com 68.064 pedidos,
+            testar todas é impossível.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">19</span> Por que não usar força bruta nas
+            instâncias pequenas?
+          </summary>
+          <div class="body">
+            A menor instância tem 1.841 pedidos, e só 2^100 já passa de 10^30
+            combinações. O algoritmo exato usa branch-and-cut, que descarta
+            partes inteiras do espaço sem visitá-las.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">20</span> Dado um conjunto de corredores, achar a
+            melhor onda é fácil?
+          </summary>
+          <div class="body">
+            É difícil em geral. Escolher pedidos que caibam no estoque e no
+            limite superior parece um problema da mochila com várias dimensões.
+            Por isso nosso decodificador usa uma regra gulosa (pedidos maiores
+            primeiro) em vez de resolver isso de forma exata.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">21</span> Qual é a complexidade de uma geração do
+            algoritmo genético?
+          </summary>
+          <div class="body">
+            O(P · (A + S + I + E + O)), com P indivíduos, A corredores, S linhas
+            de estoque, I itens, E linhas de pedido e O pedidos. Está na
+            docstring de solve em genetic_algorithm.py.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">22</span> Qual é a complexidade do decodificador?
+          </summary>
+          <div class="body">
+            Linear no tamanho da instância por avaliação: O(S + I) para somar o
+            estoque, O(E + O) para aceitar pedidos e O(O) para o limite
+            superior. A ordenação dos pedidos é feita uma vez, em build_arrays.
+          </div>
+        </details>
+      </div>
+      <h2 id="exato">Algoritmo exato (15)</h2>
+      <div class="faq f3">
+        <details>
+          <summary>
+            <span class="n">23</span> O que é um algoritmo exato?
+          </summary>
+          <div class="body">
+            Um algoritmo que encontra a melhor solução e prova que nenhuma outra
+            é melhor. A heurística acha soluções boas, mas sem essa prova.
+          </div>
+        </details>
+        <details>
+          <summary><span class="n">24</span> O que é o HiGHS?</summary>
+          <div class="body">
+            Um solver gratuito (licença MIT), escrito em C++, que resolve
+            programação linear, quadrática e inteira mista. No Python usamos o
+            pacote highspy.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">25</span> Como o HiGHS resolve um problema inteiro?
+          </summary>
+          <div class="body">
+            Por branch-and-cut, uma busca em árvore que resolve versões
+            relaxadas (com frações permitidas) para calcular limites e corta
+            ramos que não podem conter o ótimo.
+          </div>
+        </details>
+        <details>
+          <summary><span class="n">26</span> O que é o dual bound?</summary>
+          <div class="body">
+            É o limite superior que o HiGHS garante para o objetivo de uma
+            rodada. Nenhuma solução passa dele. Lemos esse valor em
+            getInfo().mip_dual_bound.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">27</span> Por que o HiGHS não resolve a fração
+            direto?
+          </summary>
+          <div class="body">
+            Ele aceita objetivos lineares e quadráticos convexos. Uma divisão
+            entre duas somas de variáveis não é nenhum dos dois.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">28</span> Explique o método de Dinkelbach.
+          </summary>
+          <div class="body">
+            Começa com λ = 0 e, a cada rodada, maximiza unidades − λ ·
+            corredores. Se o máximo F(λ) é positivo, existe onda com razão maior
+            que λ, e λ passa a ser a razão dessa onda. Quando F(λ) ≤ 10^−6, λ é
+            o ótimo.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">29</span> Por que F(λ) = 0 prova o ótimo?
+          </summary>
+          <div class="body">
+            Se nenhuma onda tem unidades − λ · corredores &gt; 0, dividindo por
+            corredores (positivo) nenhuma onda tem razão maior que λ.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">30</span> Por que o Dinkelbach termina?
+          </summary>
+          <div class="body">
+            λ cresce estritamente a cada rodada com F(λ) &gt; 0 e existe um
+            número finito de ondas, então λ não pode crescer para sempre.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">31</span> Quantas rodadas foram no exemplo 5×5?
+          </summary>
+          <div class="body">
+            Três. λ foi de 0 para 2,4, depois para 5, e a terceira rodada deu
+            F(5) = 0.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">32</span> O que o algoritmo exato grava quando os
+            600 segundos acabam?
+          </summary>
+          <div class="body">
+            O limite inferior λ, que é a razão da melhor onda válida achada, e o
+            limite superior λ + F̄, onde F̄ é o dual bound da rodada interrompida.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">33</span> Prove que λ + F̄ é um limite superior.
+          </summary>
+          <div class="body">
+            Para toda onda, unidades − λ · corredores ≤ F̄. Dividindo por
+            corredores ≥ 1, a razão fica ≤ λ + F̄/corredores ≤ λ + F̄, porque F̄ ≥
+            0.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">34</span> Por que HiGHS e não CPLEX ou Gurobi?
+          </summary>
+          <div class="body">
+            O HiGHS é gratuito e instala junto do projeto pelo uv, sem licença.
+            O enunciado permite qualquer um desses solvers.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">35</span> Por que Dinkelbach e não a linearização de
+            Charnes e Cooper?
+          </summary>
+          <div class="body">
+            Charnes e Cooper funciona bem com variáveis contínuas. Com variáveis
+            binárias, exige variáveis e restrições extras para os produtos. O
+            Dinkelbach mantém o modelo do mesmo tamanho e só troca os pesos do
+            objetivo.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">36</span> Se o algoritmo exato existe, por que o
+            algoritmo genético?
+          </summary>
+          <div class="body">
+            Nas instâncias grandes o algoritmo exato pode não achar nem uma onda
+            válida em 600 segundos. O algoritmo genético acha ondas boas em
+            todas. O algoritmo exato serve de régua para medir o algoritmo
+            genético.
+          </div>
+        </details>
+        <details>
+          <summary><span class="n">37</span> O que o mip_rel_gap muda?</summary>
+          <div class="body">
+            Por padrão, o HiGHS para uma rodada quando a lacuna relativa chega a
+            10^−4 e chama isso de ótimo. Por isso o limite superior gravado
+            precisa vir do dual bound, que continua correto.
+          </div>
+        </details>
+      </div>
+      <h2 id="genetico">Algoritmo genético (19)</h2>
+      <div class="faq f1">
+        <details>
+          <summary>
+            <span class="n">38</span> O que é um algoritmo genético?
+          </summary>
+          <div class="body">
+            Uma heurística inspirada na evolução. Mantém uma população de
+            soluções, escolhe as melhores como pais, mistura e altera seus bits
+            e repete por gerações.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">39</span> O que é o cromossomo no nosso algoritmo?
+          </summary>
+          <div class="body">
+            Um vetor de bits com um bit por corredor. O bit 1 quer dizer que a
+            onda visita o corredor.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">40</span> Por que o cromossomo representa corredores
+            e não pedidos?
+          </summary>
+          <div class="body">
+            O número de corredores é o denominador do objetivo, então o
+            cromossomo controla diretamente a parte mais importante. Também há
+            bem menos corredores que pedidos, o que deixa o cromossomo curto. A
+            primeira versão, com um bit por pedido, ficou abaixo de 7% do melhor
+            valor oficial.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">41</span> Como os corredores viram uma onda?
+          </summary>
+          <div class="body">
+            O decodificador soma o estoque dos corredores visitados, aceita
+            pedidos do maior para o menor enquanto cabem no estoque e para antes
+            de passar do limite superior.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">42</span> Quais são os quatro passos do
+            decodificador?
+          </summary>
+          <div class="body">
+            (1) somar o estoque por item, (2) manter os pedidos que cabem
+            sozinhos, (3) disputar o estoque de cada item em ordem de prioridade
+            e (4) cortar pelo limite superior com uma soma acumulada.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">43</span> Por que os pedidos maiores têm prioridade?
+          </summary>
+          <div class="body">
+            Pedidos com mais unidades aumentam o numerador do objetivo mais
+            depressa. É uma regra gulosa simples e rápida, mas pode deixar de
+            fora combinações melhores de pedidos menores.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">44</span> O decodificador sempre gera onda válida?
+          </summary>
+          <div class="body">
+            Ele respeita o estoque e o limite superior por construção. O limite
+            inferior não é garantido, então uma onda curta recebe aptidão
+            negativa.
+          </div>
+        </details>
+        <details>
+          <summary><span class="n">45</span> Qual é a aptidão?</summary>
+          <div class="body">
+            Unidades divididas por corredores visitados quando a onda atinge o
+            limite inferior. Abaixo dele, menos a quantidade de unidades que
+            falta.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">46</span> Por que penalizar em vez de reparar a onda
+            curta?
+          </summary>
+          <div class="body">
+            A penalidade é simples e ainda ordena as soluções inválidas: quem
+            está mais perto do limite inferior tem aptidão maior. A seleção
+            empurra a população para ondas válidas.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">47</span> Como funciona a seleção por torneio?
+          </summary>
+          <div class="body">
+            Sorteia tournament_size indivíduos sem repetição e o de maior
+            aptidão vira pai. Repete para a mãe.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">48</span> Como funciona o cruzamento uniforme?
+          </summary>
+          <div class="body">
+            Cada bit do filho vem do pai ou da mãe com chance 1/2.
+          </div>
+        </details>
+        <details>
+          <summary><span class="n">49</span> Como funciona a mutação?</summary>
+          <div class="body">
+            Cada bit do filho troca de valor com probabilidade mutation_rate.
+          </div>
+        </details>
+        <details>
+          <summary><span class="n">50</span> O algoritmo tem elitismo?</summary>
+          <div class="body">
+            A população é trocada inteira pelos filhos a cada geração, sem
+            elitismo. A melhor onda já vista fica guardada à parte, então ela
+            nunca se perde.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">51</span> Como a população inicial é criada?
+          </summary>
+          <div class="body">
+            Cada indivíduo sorteia sua própria fração de corredores visitados,
+            entre nenhum e todos, para a primeira geração ter ondas de vários
+            tamanhos.
+          </div>
+        </details>
+        <details>
+          <summary><span class="n">52</span> Quais são os parâmetros?</summary>
+          <div class="body">
+            population_size, tournament_size, mutation_rate, max_generations,
+            seed e time_limit_seconds. Todos ficam no arquivo de configuração.
+          </div>
+        </details>
+        <details>
+          <summary><span class="n">53</span> Quando o algoritmo para?</summary>
+          <div class="body">
+            Depois de max_generations gerações ou quando o relógio chega a
+            time_limit_seconds menos 5 segundos de margem para gravar a saída.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">54</span> A mesma semente dá o mesmo resultado?
+          </summary>
+          <div class="body">
+            Dá a mesma sequência de sorteios, porque todo sorteio usa
+            np.random.default_rng(seed). Como a parada depende do relógio, o
+            número de gerações pode mudar entre máquinas.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">55</span> Por que a taxa de mutação mudou tanto o
+            resultado na instância X?
+          </summary>
+          <div class="body">
+            Com taxa alta, cada filho liga vários corredores ao acaso e a
+            população não mantém ondas de poucos corredores. Com 0,002 a onda
+            ficou com 3 corredores, e com 0,01 ficou com 26.
+          </div>
+        </details>
+        <details>
+          <summary><span class="n">56</span> Por que usar NumPy?</summary>
+          <div class="body">
+            Cada passo do decodificador vira uma operação sobre vetores
+            inteiros, feita em código compilado. Na b_instance_0001 isso deu
+            perto de 2 mil avaliações por segundo (23.980 gerações de 50 filhos
+            em 600 segundos). Na x_instance_0014, a maior medida, foram perto de
+            50 por segundo.
+          </div>
+        </details>
+      </div>
+      <h2 id="implementacao">Implementação e qualidade (8)</h2>
+      <div class="faq f2">
+        <details>
+          <summary>
+            <span class="n">57</span> Como vocês garantem que a solução é
+            válida?
+          </summary>
+          <div class="body">
+            Toda solução passa no checker.py oficial. Os testes também usam
+            is_feasible, que confere as restrições (2), (3) e (4).
+          </div>
+        </details>
+        <details>
+          <summary><span class="n">58</span> Que testes existem?</summary>
+          <div class="body">
+            Testes com pytest, incluindo um teste de propriedade com Hypothesis
+            que gera instâncias pequenas ao acaso e confere que toda onda com
+            aptidão positiva é válida.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">59</span> O que é um teste de propriedade?
+          </summary>
+          <div class="body">
+            Um teste que descreve uma regra que vale para qualquer entrada e
+            deixa a biblioteca gerar centenas de entradas, em vez de escrever
+            cada caso à mão.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">60</span> Que ferramentas de qualidade vocês usam?
+          </summary>
+          <div class="body">
+            Ruff (estilo e erros comuns), complexipy (complexidade cognitiva de
+            no máximo 15 por função), Vulture (código morto) e pytest. Todas
+            passam antes de cada pull request.
+          </div>
+        </details>
+        <details>
+          <summary><span class="n">61</span> Como o tempo é medido?</summary>
+          <div class="body">
+            Com time.perf_counter(), o relógio de alta precisão do Python, do
+            início ao fim de cada execução.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">62</span> Como vocês rodam as 30 instâncias?
+          </summary>
+          <div class="body">
+            Um arquivo de configuração lista instâncias, métodos e parâmetros, e
+            o batch_runner roda todas as combinações e grava um .txt e um .json
+            por execução.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">63</span> Por que o .json além do .txt?
+          </summary>
+          <div class="body">
+            O .txt é a solução no formato oficial. O .json guarda objetivo,
+            tempo, parâmetros, limites do algoritmo exato e histórico do
+            algoritmo genético para montar tabelas e gráficos.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">64</span> Como vocês dividiram o trabalho?
+          </summary>
+          <div class="body">
+            Uma issue por parte: base, algoritmo exato, algoritmo genético,
+            lotes, linha de comando e resultados, slides. As dependências entre
+            issues definiram a ordem.
+          </div>
+        </details>
+      </div>
+      <h2 id="resultados">Resultados e discussão crítica (9)</h2>
+      <div class="faq f3">
+        <details>
+          <summary>
+            <span class="n">65</span> Com o que vocês compararam os resultados?
+          </summary>
+          <div class="body">
+            Com o melhor valor oficial de cada instância (best_objectives.csv e
+            final_phase.pdf), em porcentagem do melhor valor.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">66</span> Quais resultados vocês já mediram?
+          </summary>
+          <div class="body">
+            Com 600 segundos, b_instance_0001 chegou a 629,50 contra 631,50
+            (99,7%) e x_instance_0014 chegou a 1617,00 contra 1633,67 (99,0%). A
+            tabela das 30 instâncias sai de results/summary.md.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">67</span> Onde o algoritmo genético fica longe do
+            melhor valor e por quê?
+          </summary>
+          <div class="body">
+            Responder com a tabela final. As causas prováveis são a regra gulosa
+            do decodificador e taxas de mutação que espalham corredores demais.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">68</span> Os resultados são estatisticamente
+            confiáveis?
+          </summary>
+          <div class="body">
+            Uma execução por instância é pouco para afirmar diferenças pequenas.
+            Repetir com outras sementes mostraria a variação.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">69</span> Como vocês escolheram os parâmetros?
+          </summary>
+          <div class="body">
+            Testes curtos em poucas instâncias com o lote configurável. A rodada
+            final usa uma única combinação para todas as instâncias.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">70</span> Os 600 segundos são justos?
+          </summary>
+          <div class="body">
+            É o limite do desafio oficial. O enunciado da disciplina não fixa um
+            limite, então seguimos o desafio até o professor responder.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">71</span> O que vocês mudariam com mais tempo?
+          </summary>
+          <div class="body">
+            Uma busca local depois do decodificador para trocar pedidos e
+            remover corredores sobrando, e usar a melhor onda do algoritmo
+            genético como ponto de partida do algoritmo exato.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">72</span> O algoritmo exato provou ótimo em quais
+            instâncias?
+          </summary>
+          <div class="body">
+            Responder com a coluna de status da tabela final. Onde não provou,
+            mostrar o limite inferior e o limite superior.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">73</span> Qual algoritmo vocês submetem para a nota
+            de solução?
+          </summary>
+          <div class="body">
+            O de maior objetivo em cada instância, como decidido no plano. A
+            tabela final marca o vencedor de cada linha.
+          </div>
+        </details>
+      </div>
+      <h2 id="ia">Uso de IA e domínio do código (4)</h2>
+      <div class="faq f1">
+        <details>
+          <summary><span class="n">74</span> Vocês usaram IA?</summary>
+          <div class="body">
+            Sim, como o enunciado permite, para ideação, modelagem e código.
+            Cada integrante revisou e consegue explicar a parte que entregou.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">75</span> Explique a linha que soma o estoque dos
+            corredores visitados.
+          </summary>
+          <div class="body">
+            np.bincount soma stock_units multiplicado pelo bit do corredor de
+            cada linha de estoque, agrupando por item. Corredores não visitados
+            contribuem com zero.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">76</span> O que aconteceria sem a margem de 5
+            segundos?
+          </summary>
+          <div class="body">
+            A execução poderia passar dos 600 segundos enquanto grava os
+            arquivos de saída.
+          </div>
+        </details>
+        <details>
+          <summary>
+            <span class="n">77</span> Se eu mudar UB para um valor menor, o que
+            muda no código?
+          </summary>
+          <div class="body">
+            Nada no código. O passo 4 do decodificador corta mais pedidos e o
+            algoritmo exato recebe uma restrição (3) mais apertada.
+          </div>
+        </details>
+      </div>
+      <footer>
+        Fontes: enunciado da disciplina (seções 2 a 4), descrição oficial do
+        problema, issues #7 e #11 a #15,
+        <code>src/order_selection/genetic_algorithm.py</code> na
+        <code>main</code> (commit 1d55666) e as páginas de estudo do algoritmo
+        exato e do algoritmo genético. Os resultados citados vêm das execuções
+        de 600 segundos de 2026-11-21. A afirmação de que o problema é
+        NP-difícil é uma inferência do grupo e não aparece na descrição oficial.
+        As respostas sobre a tabela final dependem de
+        <code>results/summary.md</code>, que ainda não existe.
+      </footer>
+    </div>
+  </body>
+</html>

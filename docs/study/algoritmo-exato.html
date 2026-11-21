@@ -1,0 +1,1332 @@
+<!doctype html>
+<!-- Material de estudo do algoritmo exato (issue #12). Explica o que é um algoritmo exato, o que é o HiGHS, o método de Dinkelbach, o exemplo oficial 5×5 rodado no highspy, os limites quando o tempo acaba, o uso, os motivos da escolha e as perguntas prováveis da banca. -->
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Algoritmo exato com HiGHS e Dinkelbach | TPF de APA</title>
+    <style>
+      :root {
+        --ink: #1f2433;
+        --muted: #5f6675;
+        --paper: #fffdf7;
+        --line: #1f2433;
+        --coral: #ff6b57;
+        --coral-bg: #ffe3dd;
+        --sun: #ffc531;
+        --sun-bg: #fff3c7;
+        --teal: #15a39a;
+        --teal-bg: #d4f3ef;
+        --grape: #7b4fd6;
+        --grape-bg: #e9dffb;
+        --sky: #2f80ed;
+        --sky-bg: #dbe9ff;
+        --leaf: #2e9e4f;
+        --leaf-bg: #dcf5e3;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      body {
+        margin: 0;
+        font:
+          17px/1.6 system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+      }
+      .wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 28px 18px 80px;
+      }
+      header {
+        border: 2px solid var(--line);
+        border-radius: 14px;
+        padding: 22px 24px;
+        background: #fff;
+        box-shadow: 6px 6px 0 var(--teal);
+      }
+      h1 {
+        font-size: 2rem;
+        line-height: 1.15;
+        margin: 0 0 8px;
+      }
+      .lead {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.05rem;
+      }
+      .lead a {
+        color: var(--sky);
+        font-weight: 700;
+      }
+      h2 {
+        font-size: 1.6rem;
+        margin: 40px 0 12px;
+        line-height: 1.2;
+      }
+      h3 {
+        font-size: 1.1rem;
+        margin: 18px 0 6px;
+      }
+      p {
+        margin: 0 0 12px;
+      }
+      /* etiquetas e cartões */
+      .tag {
+        display: inline-block;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border: 2px solid var(--line);
+        border-radius: 6px;
+        padding: 2px 10px;
+        margin: 0 6px 8px 0;
+        background: #fff;
+      }
+      .tag.f1 {
+        background: var(--sky-bg);
+      }
+      .tag.f2 {
+        background: var(--teal-bg);
+      }
+      .tag.f3 {
+        background: var(--grape-bg);
+      }
+      .card {
+        border: 2px solid var(--line);
+        border-radius: 12px;
+        padding: 16px 18px;
+        background: #fff;
+        margin: 14px 0;
+        overflow-x: auto;
+      }
+      .card.sun {
+        background: var(--sun-bg);
+      }
+      /* fórmulas e contas */
+      .formula {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 1.25rem;
+        background: #fff;
+        border: 2px dashed var(--line);
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin: 10px 0;
+        overflow-x: auto;
+        text-align: center;
+      }
+      .calc {
+        font-family: Georgia, serif;
+        font-size: 1.1rem;
+        line-height: 1.3;
+        background: var(--paper);
+        border: 2px dashed var(--line);
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin: 6px 0;
+        overflow-x: auto;
+      }
+      .frac {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        vertical-align: middle;
+        margin: 0 0.2em;
+        line-height: 1.1;
+      }
+      .frac > .num {
+        border-bottom: 2px solid currentColor;
+        padding: 0 0.3em 0.1em;
+      }
+      .frac > .den {
+        padding: 0.1em 0.3em 0;
+      }
+      .sq {
+        display: inline-flex;
+        align-items: center;
+        vertical-align: middle;
+        margin: 0 0.1em;
+      }
+      .sq::before {
+        content: "√";
+        font-size: 1.35em;
+        line-height: 1;
+        margin-right: 0.05em;
+      }
+      .sq > span {
+        display: inline-flex;
+        align-items: center;
+        border-top: 2px solid currentColor;
+        padding: 0.1em 0.3em 0;
+      }
+      .formulas {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 10px;
+      }
+      .formulas div {
+        border: 2px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+      }
+      .formulas .f1 {
+        background: var(--sky-bg);
+      }
+      .formulas .f2 {
+        background: var(--teal-bg);
+      }
+      .formulas .f3 {
+        background: var(--grape-bg);
+      }
+      .formulas b {
+        display: block;
+        margin-bottom: 4px;
+      }
+      .formulas .formula {
+        font-size: 1.05rem;
+        padding: 8px 10px;
+      }
+      /* tabelas */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 10px 0;
+        background: #fff;
+        font-size: 0.95rem;
+      }
+      th,
+      td {
+        border: 2px solid var(--line);
+        padding: 8px 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: var(--sun-bg);
+      }
+      td.c {
+        text-align: center;
+        font-family: Georgia, serif;
+        font-size: 1.05rem;
+      }
+      td.hit {
+        background: var(--sun);
+        font-weight: 800;
+      }
+      /* bloco de exercício/tópico com resolução recolhível */
+      .ex {
+        border: 3px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+        margin: 26px 0;
+        overflow: hidden;
+      }
+      .ex.f1 {
+        box-shadow: 8px 8px 0 var(--sky);
+      }
+      .ex.f2 {
+        box-shadow: 8px 8px 0 var(--teal);
+      }
+      .ex.f3 {
+        box-shadow: 8px 8px 0 var(--grape);
+      }
+      .ex .head {
+        padding: 14px 18px;
+        border-bottom: 2px solid var(--line);
+      }
+      .ex.f1 .head {
+        background: var(--sky-bg);
+      }
+      .ex.f2 .head {
+        background: var(--teal-bg);
+      }
+      .ex.f3 .head {
+        background: var(--grape-bg);
+      }
+      .ex .head h2 {
+        margin: 0 0 6px;
+        font-size: 1.35rem;
+      }
+      .ex blockquote {
+        margin: 0;
+        padding: 10px 14px;
+        border-left: 6px solid var(--line);
+        background: #fff;
+        border-radius: 0 8px 8px 0;
+        font-style: italic;
+      }
+      details {
+        border-top: 2px solid var(--line);
+      }
+      summary {
+        cursor: pointer;
+        padding: 12px 18px;
+        font-weight: 800;
+        background: var(--sun-bg);
+        list-style: none;
+      }
+      summary::before {
+        content: "▸ ";
+      }
+      details[open] summary::before {
+        content: "▾ ";
+      }
+      summary::-webkit-details-marker {
+        display: none;
+      }
+      .body {
+        padding: 14px 18px 18px;
+      }
+      /* leitura dos dados */
+      .read {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 8px;
+        margin: 8px 0 14px;
+      }
+      .read div {
+        border: 2px solid var(--line);
+        border-radius: 8px;
+        padding: 8px 10px;
+        background: var(--paper);
+        font-size: 0.95rem;
+      }
+      .read b {
+        font-family: Georgia, serif;
+        font-size: 1.1rem;
+        margin-right: 6px;
+      }
+      .read div.z {
+        grid-column: 1/-1;
+        background: var(--sun-bg);
+      }
+      /* caixas de significado */
+      .why {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--sun);
+        background: var(--sun-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 10px 0;
+      }
+      .ans {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--leaf);
+        background: var(--leaf-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 12px 0 6px;
+        font-weight: 700;
+        font-size: 1.05rem;
+      }
+      .check {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--coral);
+        background: var(--coral-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 8px 0;
+      }
+      .say {
+        border: 2px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 8px 0;
+        background: var(--paper);
+      }
+      .say b {
+        color: var(--leaf);
+      }
+      /* passos numerados */
+      .steps {
+        counter-reset: s;
+        padding: 0;
+        margin: 10px 0;
+        list-style: none;
+      }
+      .steps li {
+        counter-increment: s;
+        position: relative;
+        padding: 6px 0 6px 44px;
+        margin: 4px 0;
+      }
+      .steps li::before {
+        content: counter(s);
+        position: absolute;
+        left: 0;
+        top: 6px;
+        width: 30px;
+        height: 30px;
+        border: 2px solid var(--line);
+        border-radius: 50%;
+        background: var(--sun);
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      footer {
+        margin-top: 50px;
+        font-size: 0.85rem;
+        color: var(--muted);
+        border-top: 2px solid var(--line);
+        padding-top: 12px;
+      }
+      @media (max-width: 600px) {
+        h1 {
+          font-size: 1.6rem;
+        }
+        .formula {
+          font-size: 1.1rem;
+        }
+        .calc {
+          font-size: 1rem;
+        }
+      }
+      /* código, diagramas e perguntas */
+      code {
+        font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+        font-size: 0.9em;
+        background: var(--sun-bg);
+        border-radius: 4px;
+        padding: 0 4px;
+      }
+      pre {
+        background: #fff;
+        border: 2px solid var(--line);
+        border-radius: 10px;
+        padding: 12px 14px;
+        overflow-x: auto;
+        box-shadow: 6px 6px 0 var(--sky);
+      }
+      pre code {
+        background: none;
+        padding: 0;
+        font-size: 0.85rem;
+      }
+      svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        margin: 14px 0;
+      }
+      .faq details {
+        border: 2px solid var(--line);
+        border-radius: 10px;
+        margin: 10px 0;
+        overflow: hidden;
+        background: #fff;
+      }
+      .card-details {
+        border: 2px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 14px 0;
+      }
+      .wrap > details {
+        border: 2px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 14px 0;
+        background: #fff;
+      }
+      ul {
+        margin: 0 0 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>
+          Como o algoritmo exato do grupo usa o HiGHS e o método de Dinkelbach
+        </h1>
+        <p class="lead">
+          Esta página explica, do zero, o algoritmo exato planejado na issue #12
+          para <code>src/order_selection/exact_algorithm.py</code>. Ela mostra o
+          que é um algoritmo exato, o que é o HiGHS, como o método de Dinkelbach
+          resolve o objetivo em forma de fração, como o grupo vai usar o
+          resultado e quais perguntas a banca pode fazer. A página irmã é
+          <a href="algoritmo-genetico.html"
+            >o algoritmo genético sobre corredores</a
+          >. Leia na ordem. As explicações longas abrem com um clique.
+        </p>
+      </header>
+
+      <div class="check">
+        <b>Estado do código em 2026-11-21.</b>
+        <code>exact_algorithm.py</code> ainda tem só a docstring do módulo. Esta
+        página descreve o plano da issue #12, conferido na documentação do HiGHS
+        e num teste com o <code>highspy</code> 1.16.0 no exemplo oficial 5×5.
+        Quando a issue #12 for integrada, os trechos de código daqui devem ser
+        trocados pelo código real.
+      </div>
+
+      <h2>Roteiro de leitura</h2>
+      <div class="card sun">
+        <ol class="steps">
+          <li>
+            <b>O que o algoritmo exato entrega?</b> A melhor onda possível, com
+            prova de que nenhuma outra é melhor, ou dois limites quando o tempo
+            acaba (seções 1 e 7).
+          </li>
+          <li>
+            <b>Quem faz a busca?</b> O HiGHS, um programa gratuito que resolve
+            problemas de programação linear inteira (seções 2 e 3).
+          </li>
+          <li>
+            <b>Qual é a dificuldade?</b> O objetivo é uma divisão, e o HiGHS só
+            aceita somas com pesos. O método de Dinkelbach troca a divisão por
+            uma sequência de somas (seções 4 e 5).
+          </li>
+          <li>
+            <b>Funciona mesmo?</b> O exemplo oficial 5×5 termina em 3 rodadas
+            com objetivo 5, o mesmo da descrição oficial (seção 6).
+          </li>
+          <li>
+            <b>Como usar e defender?</b> A interface da função, os motivos da
+            escolha e as perguntas prováveis da banca (seções 8 a 10).
+          </li>
+        </ol>
+      </div>
+
+      <h2>1. O que é um algoritmo exato</h2>
+      <p>
+        Um <b>algoritmo exato</b> encontra a melhor solução de um problema de
+        otimização e prova que ela é a melhor. Uma <b>heurística</b>, como o
+        algoritmo genético, encontra soluções boas depressa, mas não sabe dizer
+        quão longe está da melhor.
+      </p>
+      <p>
+        No nosso problema, "melhor" quer dizer a onda com mais unidades
+        coletadas por corredor visitado. O algoritmo exato responde a duas
+        perguntas que o algoritmo genético sozinho não responde:
+      </p>
+      <ul>
+        <li>Qual é o ótimo desta instância?</li>
+        <li>
+          Se o tempo acabou antes, entre quais dois valores o ótimo com certeza
+          está?
+        </li>
+      </ul>
+      <div class="why">
+        <b>Pra que serve no trabalho.</b> Ele é a régua. Com ele, a apresentação
+        pode dizer "o algoritmo genético chegou a 99% do ótimo provado" em vez
+        de só "chegou a 99% do melhor valor oficial". Nas instâncias grandes,
+        onde ele não termina, os limites dele mostram quanto espaço ainda pode
+        existir acima da melhor onda conhecida.
+      </div>
+      <p>
+        Esse tipo de ferramenta aparece em sistemas reais. O SciPy, a biblioteca
+        científica do Python, usa o HiGHS nas funções
+        <code>scipy.optimize.linprog</code> e <code>scipy.optimize.milp</code>.
+        Empresas de logística usam programação linear inteira para montar rotas,
+        escalas de funcionários e cortes de material.
+      </p>
+
+      <h2>2. O que é o HiGHS</h2>
+      <p>
+        O <b>HiGHS</b> é um <b>solver</b> (em português, "resolvedor"). É um
+        programa que recebe um modelo matemático e devolve a melhor solução
+        dele. O nome se lê como a palavra inglesa "highs".
+      </p>
+      <div class="read">
+        <div><b>Licença</b> MIT, gratuita e de código aberto</div>
+        <div>
+          <b>Linguagem</b> C++ e um pouco de C, sem dependências externas
+        </div>
+        <div>
+          <b>No Python</b> pacote <code>highspy</code> (o projeto pede
+          <code>highspy&gt;=1.11</code> e instalou a 1.16.0)
+        </div>
+        <div><b>Resolve</b> LP, QP e MIP (explicados abaixo)</div>
+        <div class="z">
+          <b>Como resolve MIP</b> branch-and-cut, uma busca em árvore que corta
+          partes do espaço de soluções que não podem conter o ótimo
+        </div>
+      </div>
+      <p>As três siglas da tabela:</p>
+      <ul>
+        <li>
+          <b>LP</b> (Linear Programming, programação linear) usa variáveis
+          contínuas, objetivo e restrições formados por somas com pesos.
+        </li>
+        <li>
+          <b>QP</b> (Quadratic Programming, programação quadrática) permite que
+          o objetivo tenha termos ao quadrado. Nós não usamos.
+        </li>
+        <li>
+          <b>MIP</b> (Mixed Integer Programming, programação inteira mista) é
+          igual à LP, mas algumas variáveis só podem valer números inteiros. O
+          nosso modelo é um MIP em que todas as variáveis valem 0 ou 1.
+        </li>
+      </ul>
+
+      <h2>3. Programação linear inteira em poucos minutos</h2>
+      <p>Um modelo de programação linear inteira tem três partes:</p>
+      <div class="formulas">
+        <div class="f1">
+          <b>Variáveis</b>As decisões. Aqui, x<sub>o</sub> = 1 se o pedido o
+          entra na onda e y<sub>a</sub> = 1 se o corredor a é visitado.
+        </div>
+        <div class="f2">
+          <b>Restrições</b>As regras que toda solução precisa cumprir, escritas
+          como somas com pesos comparadas com números.
+        </div>
+        <div class="f3">
+          <b>Objetivo</b>A conta que o solver maximiza ou minimiza. Precisa ser
+          uma soma com pesos.
+        </div>
+      </div>
+      <h3>Como o HiGHS prova que achou o ótimo</h3>
+      <p>Durante a busca, o HiGHS guarda dois números:</p>
+      <ul>
+        <li>
+          <b>Limite inferior</b> (em maximização) é o valor da melhor solução
+          válida já encontrada. O ótimo é pelo menos esse valor.
+        </li>
+        <li>
+          <b>Limite superior</b>, que a documentação chama de
+          <b>dual bound</b> (<code>mip_dual_bound</code>), é um valor que, por
+          conta matemática, nenhuma solução consegue passar. O HiGHS calcula
+          esse valor deixando as variáveis assumirem frações, o que é mais fácil
+          de resolver e nunca dá menos que o ótimo inteiro.
+        </li>
+      </ul>
+      <p>
+        A busca em árvore aperta os dois números. Quando eles se encontram, o
+        ótimo está provado. A diferença entre eles é o <b>gap</b> (lacuna).
+      </p>
+      <svg
+        viewBox="0 0 640 130"
+        role="img"
+        aria-label="Linha com o limite inferior à esquerda, o limite superior à direita e o ótimo entre eles"
+      >
+        <line
+          x1="40"
+          y1="70"
+          x2="600"
+          y2="70"
+          stroke="#1f2433"
+          stroke-width="3"
+        />
+        <rect
+          x="160"
+          y="56"
+          width="320"
+          height="28"
+          rx="6"
+          fill="#fff3c7"
+          stroke="#1f2433"
+          stroke-width="2"
+        />
+        <circle
+          cx="160"
+          cy="70"
+          r="9"
+          fill="#2e9e4f"
+          stroke="#1f2433"
+          stroke-width="2"
+        />
+        <circle
+          cx="480"
+          cy="70"
+          r="9"
+          fill="#ff6b57"
+          stroke="#1f2433"
+          stroke-width="2"
+        />
+        <text
+          x="160"
+          y="40"
+          text-anchor="middle"
+          font-size="15"
+          font-weight="700"
+          fill="#1f2433"
+        >
+          limite inferior
+        </text>
+        <text
+          x="160"
+          y="110"
+          text-anchor="middle"
+          font-size="13"
+          fill="#5f6675"
+        >
+          melhor onda achada
+        </text>
+        <text
+          x="480"
+          y="40"
+          text-anchor="middle"
+          font-size="15"
+          font-weight="700"
+          fill="#1f2433"
+        >
+          limite superior
+        </text>
+        <text
+          x="480"
+          y="110"
+          text-anchor="middle"
+          font-size="13"
+          fill="#5f6675"
+        >
+          ninguém passa daqui
+        </text>
+        <text
+          x="320"
+          y="75"
+          text-anchor="middle"
+          font-size="14"
+          font-weight="700"
+          fill="#1f2433"
+        >
+          gap: o ótimo está aqui
+        </text>
+      </svg>
+
+      <h2>4. O nosso modelo</h2>
+      <p>
+        O modelo segue a descrição oficial do problema. Para cada pedido o e
+        item i, u<sub>oi</sub> é a quantidade de unidades pedidas. Para cada
+        corredor a, u<sub>ai</sub> é o estoque do item i. LB e UB são o limite
+        inferior e o limite superior de unidades da onda.
+      </p>
+      <div class="formula">
+        maximizar
+        <span class="frac"
+          ><span class="num"
+            >Σ<sub>o</sub> Σ<sub>i</sub> u<sub>oi</sub> · x<sub>o</sub></span
+          ><span class="den">Σ<sub>a</sub> y<sub>a</sub></span></span
+        >
+        &nbsp;(1)
+      </div>
+      <table>
+        <tr>
+          <th>Regra</th>
+          <th>Conta</th>
+          <th>Em palavras</th>
+        </tr>
+        <tr>
+          <td>(2)</td>
+          <td class="c">
+            Σ<sub>o</sub> Σ<sub>i</sub> u<sub>oi</sub> x<sub>o</sub> ≥ LB
+          </td>
+          <td>A onda tem pelo menos LB unidades.</td>
+        </tr>
+        <tr>
+          <td>(3)</td>
+          <td class="c">
+            Σ<sub>o</sub> Σ<sub>i</sub> u<sub>oi</sub> x<sub>o</sub> ≤ UB
+          </td>
+          <td>A onda tem no máximo UB unidades.</td>
+        </tr>
+        <tr>
+          <td>(4)</td>
+          <td class="c">
+            Σ<sub>o</sub> u<sub>oi</sub> x<sub>o</sub> ≤ Σ<sub>a</sub> u<sub
+              >ai</sub
+            >
+            y<sub>a</sub>, para cada item i
+          </td>
+          <td>
+            Os corredores visitados têm estoque para tudo o que a onda pede.
+          </td>
+        </tr>
+        <tr>
+          <td>extra</td>
+          <td class="c">Σ<sub>a</sub> y<sub>a</sub> ≥ 1</td>
+          <td>
+            Pelo menos um corredor, para o denominador de (1) nunca ser zero.
+          </td>
+        </tr>
+      </table>
+      <div class="why">
+        <b>Por que a fração atrapalha.</b> O HiGHS aceita objetivos como 3x<sub
+          >0</sub
+        >
+        + 2x<sub>1</sub> − 5y<sub>0</sub>, que são somas com pesos fixos. O
+        objetivo (1) divide uma soma de variáveis por outra soma de variáveis, e
+        o HiGHS não aceita isso diretamente.
+      </div>
+
+      <h2>5. O método de Dinkelbach</h2>
+      <p>
+        Werner Dinkelbach publicou em 1967 um jeito de resolver objetivos em
+        forma de fração com uma sequência de problemas sem fração. A ideia é uma
+        pergunta de sim ou não:
+      </p>
+      <div class="formula">
+        Existe uma onda com
+        <span class="frac"
+          ><span class="num">unidades</span
+          ><span class="den">corredores</span></span
+        >
+        &gt; λ ?
+      </div>
+      <p>
+        Multiplicando os dois lados por "corredores", que é sempre positivo, a
+        pergunta vira "existe uma onda com unidades − λ · corredores &gt; 0?".
+        Essa conta é uma soma com pesos, então o HiGHS consegue maximizá-la.
+        Chamamos o máximo dela de F(λ).
+      </p>
+      <div class="formula">F(λ) = máximo de ( unidades − λ · corredores )</div>
+      <ul>
+        <li>
+          Se F(λ) &gt; 0, existe uma onda com razão maior que λ. A onda que o
+          HiGHS devolveu é uma delas.
+        </li>
+        <li>Se F(λ) = 0, nenhuma onda passa de λ. Então λ é o ótimo.</li>
+      </ul>
+      <h3>Os passos</h3>
+      <ol class="steps">
+        <li>Começar com λ = 0.</li>
+        <li>
+          Pedir ao HiGHS o máximo de <i>unidades − λ · corredores</i> com as
+          restrições (2), (3), (4) e a extra.
+        </li>
+        <li>
+          Se F(λ) ≤ 10<sup>−6</sup>, parar. A última solução tem razão λ e é
+          ótima. A tolerância 10<sup>−6</sup> absorve erros de arredondamento.
+        </li>
+        <li>
+          Senão, trocar λ pela razão unidades/corredores da solução encontrada e
+          voltar ao passo 2.
+        </li>
+      </ol>
+      <details class="card-details">
+        <summary>Por que o método sempre termina</summary>
+        <div class="body">
+          <p>
+            Cada rodada com F(λ) &gt; 0 devolve uma onda com razão estritamente
+            maior que λ, então λ só cresce. O número de ondas possíveis é
+            finito, então λ não pode crescer para sempre. Na prática, o método
+            costuma terminar em poucas rodadas, porque cada rodada dá um salto
+            grande (no exemplo 5×5, de 0 para 2,4 e de 2,4 para 5).
+          </p>
+          <p>
+            O modelo também não muda de uma rodada para outra. Só os pesos do
+            objetivo mudam: cada x<sub>o</sub> continua com peso igual às
+            unidades do pedido, e cada y<sub>a</sub> passa a ter peso −λ. Por
+            isso a issue #12 pede para construir o modelo uma vez e trocar só os
+            pesos com <code>changeColCost</code>.
+          </p>
+        </div>
+      </details>
+
+      <h2>6. O exemplo oficial 5×5, rodado no HiGHS</h2>
+      <div class="ex f1">
+        <div class="head">
+          <span class="tag f1">Exemplo oficial</span>
+          <h2>Dinkelbach no exemplo da descrição oficial</h2>
+          <blockquote>
+            5 pedidos, 5 itens, 5 corredores, LB = 5 e UB = 12. A descrição
+            oficial mostra uma solução com objetivo 5: pedidos 0, 1, 2 e 4 com
+            os corredores 1 e 3.
+          </blockquote>
+        </div>
+        <details open>
+          <summary>Ver as rodadas</summary>
+          <div class="body">
+            <div class="read">
+              <div><b>pedido 0</b> 4 unidades</div>
+              <div><b>pedido 1</b> 2 unidades</div>
+              <div><b>pedido 2</b> 3 unidades</div>
+              <div><b>pedido 3</b> 5 unidades</div>
+              <div><b>pedido 4</b> 1 unidade</div>
+            </div>
+            <table>
+              <tr>
+                <th>Rodada</th>
+                <th>λ</th>
+                <th>Onda devolvida</th>
+                <th>F(λ)</th>
+                <th>Razão da onda</th>
+              </tr>
+              <tr>
+                <td class="c">1</td>
+                <td class="c">0</td>
+                <td>pedidos 0, 2, 3 · corredores 0 a 4 · 12 unidades</td>
+                <td class="c">12 − 0 · 5 = 12</td>
+                <td class="c">12/5 = 2,4</td>
+              </tr>
+              <tr>
+                <td class="c">2</td>
+                <td class="c">2,4</td>
+                <td>pedidos 0, 1, 2, 4 · corredores 1 e 3 · 10 unidades</td>
+                <td class="c">10 − 2,4 · 2 = 5,2</td>
+                <td class="c">10/2 = 5</td>
+              </tr>
+              <tr>
+                <td class="c">3</td>
+                <td class="c">5</td>
+                <td>pedidos 1, 2 · corredor 4 · 5 unidades</td>
+                <td class="c hit">5 − 5 · 1 = 0</td>
+                <td class="c">5/1 = 5</td>
+              </tr>
+            </table>
+            <svg
+              viewBox="0 0 640 110"
+              role="img"
+              aria-label="λ cresce de 0 para 2,4 e depois para 5"
+            >
+              <line
+                x1="40"
+                y1="60"
+                x2="600"
+                y2="60"
+                stroke="#1f2433"
+                stroke-width="3"
+              />
+              <circle
+                cx="60"
+                cy="60"
+                r="10"
+                fill="#dbe9ff"
+                stroke="#1f2433"
+                stroke-width="2"
+              />
+              <circle
+                cx="300"
+                cy="60"
+                r="10"
+                fill="#dbe9ff"
+                stroke="#1f2433"
+                stroke-width="2"
+              />
+              <circle
+                cx="560"
+                cy="60"
+                r="12"
+                fill="#2e9e4f"
+                stroke="#1f2433"
+                stroke-width="2"
+              />
+              <path
+                d="M75 45 Q180 5 285 45"
+                fill="none"
+                stroke="#2f80ed"
+                stroke-width="3"
+              />
+              <path
+                d="M315 45 Q430 5 545 45"
+                fill="none"
+                stroke="#2f80ed"
+                stroke-width="3"
+              />
+              <text
+                x="60"
+                y="95"
+                text-anchor="middle"
+                font-size="15"
+                font-weight="700"
+                fill="#1f2433"
+              >
+                λ = 0
+              </text>
+              <text
+                x="300"
+                y="95"
+                text-anchor="middle"
+                font-size="15"
+                font-weight="700"
+                fill="#1f2433"
+              >
+                λ = 2,4
+              </text>
+              <text
+                x="560"
+                y="95"
+                text-anchor="middle"
+                font-size="15"
+                font-weight="700"
+                fill="#1f2433"
+              >
+                λ = 5, ótimo
+              </text>
+            </svg>
+            <div class="ans">
+              Ótimo provado: 5 unidades por corredor, em 3 rodadas.
+            </div>
+            <div class="say">
+              <b>Lendo o resultado.</b> Na rodada 3, o HiGHS provou que nenhuma
+              onda tem unidades − 5 · corredores maior que zero. Então nenhuma
+              onda passa de 5 unidades por corredor.
+            </div>
+            <div class="why">
+              <b>Dois detalhes.</b> Na rodada 1, com λ = 0, os corredores não
+              custam nada, então o HiGHS pode marcar corredores à toa (aqui, os
+              5). A rodada 2 corrige isso, porque agora cada corredor custa 2,4.
+              Na rodada 3, o HiGHS devolveu outra onda ótima (pedidos 1 e 2 com
+              o corredor 4), também com razão 5. Um problema pode ter várias
+              soluções ótimas.
+            </div>
+            <div class="check">
+              <b>Conferência.</b> O objetivo 5 bate com a solução da descrição
+              oficial e com o teste
+              <code
+                >test_example_solution_has_objective_five_and_passes_the_checker</code
+              >
+              de <code>tests/test_instance.py</code>. As rodadas vêm de um
+              script com <code>highspy</code> 1.16.0 rodado em 2026-11-21. A
+              escolha dos corredores na rodada 1 pode mudar em outra versão do
+              HiGHS, mas o ótimo continua 5.
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <h2>7. Quando os 600 segundos acabam</h2>
+      <p>
+        Nas instâncias grandes, uma rodada do HiGHS pode não terminar a tempo. O
+        algoritmo exato passa a cada rodada só o tempo que ainda resta, com
+        <code>setOptionValue("time_limit", restante)</code>, e quando o tempo
+        acaba ele grava dois limites para o objetivo:
+      </p>
+      <div class="formulas">
+        <div class="f1">
+          <b>Limite inferior</b>
+          <div class="formula">λ</div>
+          A razão da melhor onda válida encontrada até ali.
+        </div>
+        <div class="f2">
+          <b>Limite superior</b>
+          <div class="formula">λ + F̄</div>
+          F̄ é o <code>mip_dual_bound</code> da rodada interrompida.
+        </div>
+      </div>
+      <details>
+        <summary>Por que λ + F̄ é um limite superior válido</summary>
+        <div class="body">
+          <ol class="steps">
+            <li>
+              O HiGHS garante que nenhuma onda tem unidades − λ · corredores
+              maior que F̄.
+              <div class="calc">unidades − λ · corredores ≤ F̄</div>
+            </li>
+            <li>
+              Dividindo tudo por "corredores", que é pelo menos 1, sai esta
+              conta.
+              <div class="calc">unidades / corredores ≤ λ + F̄ / corredores</div>
+            </li>
+            <li>
+              Como corredores ≥ 1 e F̄ ≥ 0, dividir F̄ por corredores só diminui o
+              valor.
+              <div class="calc">λ + F̄ / corredores ≤ λ + F̄</div>
+            </li>
+          </ol>
+          <div class="ans">Toda onda tem razão no máximo λ + F̄.</div>
+          <p>
+            F̄ nunca é negativo porque a melhor onda já encontrada continua
+            válida e dá unidades − λ · corredores = 0. A issue #12 pede essa
+            conta num comentário do código, porque a banca pode perguntar.
+          </p>
+        </div>
+      </details>
+      <p>
+        Se a rodada interrompida já tinha achado uma onda com razão maior que λ,
+        essa onda passa a ser a melhor antes de gravar os limites. Se nenhuma
+        onda válida apareceu, a função devolve <code>None</code> com status
+        <code>"no_solution"</code>.
+      </p>
+
+      <h2>8. Como usar</h2>
+      <h3>A interface planejada na issue #12</h3>
+      <pre><code>def solve(instance: Instance, parameters: dict) -&gt; tuple[Solution | None, dict]: ...</code></pre>
+      <ul>
+        <li>
+          <code>parameters["time_limit_seconds"]</code>: tempo total de todas as
+          rodadas (600 na rodada final). O algoritmo exato não usa semente.
+        </li>
+        <li>
+          Devolve a melhor solução, ou <code>None</code> se nenhuma onda válida
+          apareceu no tempo.
+        </li>
+        <li>
+          O dicionário traz <code>status</code> (<code>"optimal"</code>,
+          <code>"time_limit"</code> ou <code>"no_solution"</code>),
+          <code>iterations</code>, <code>objective_lower_bound</code> e
+          <code>objective_upper_bound</code>. A issue #14 grava esse dicionário
+          no <code>.json</code> de cada execução.
+        </li>
+      </ul>
+      <h3>Esboço com o highspy</h3>
+      <p>
+        O trecho abaixo é o script usado na seção 6, encurtado. Ele mostra as
+        chamadas do <code>highspy</code>, e o código final da issue #12 vai ter
+        funções menores, tipos e o controle de tempo.
+      </p>
+      <pre><code>h = highspy.Highs()
+h.setOptionValue("output_flag", False)
+x = [h.addBinary() for _ in orders]    # x[o] = 1: order o in the wave
+y = [h.addBinary() for _ in aisles]    # y[a] = 1: aisle a visited
+total = sum(u * xo for u, xo in zip(units, x))
+h.addConstr(total &gt;= wave_min_units)   # constraint (2)
+h.addConstr(total &lt;= wave_max_units)   # constraint (3)
+for i in range(n_items):               # constraint (4)
+    h.addConstr(sum(o.get(i, 0) * x[k] for k, o in enumerate(orders))
+                &lt;= sum(a.get(i, 0) * y[k] for k, a in enumerate(aisles)))
+h.addConstr(sum(y) &gt;= 1)
+h.changeObjectiveSense(highspy.ObjSense.kMaximize)
+
+lam = 0.0
+while True:
+    for k, u in enumerate(units):
+        h.changeColCost(k, u)                 # weight of x[k]
+    for k in range(len(aisles)):
+        h.changeColCost(len(orders) + k, -lam)  # weight of y[k]
+    h.run()
+    if h.getObjectiveValue() &lt;= 1e-6:
+        break                                 # lam is optimal
+    lam = chosen_units / chosen_aisles        # read from h.getSolution()</code></pre>
+      <h3>No projeto, depois das issues #12, #14 e #15</h3>
+      <pre><code>uv run python -m order_selection configs/run.json</code></pre>
+      <p>
+        Com <code>"methods": ["exact"]</code> no arquivo de configuração, o
+        programa grava <code>results/&lt;instância&gt;_exact.txt</code> e
+        <code>.json</code>, e o <code>checker.py</code> oficial confere o
+        <code>.txt</code>.
+      </p>
+
+      <h2>9. Por que escolher o HiGHS e o Dinkelbach</h2>
+      <table>
+        <tr>
+          <th>Alternativa</th>
+          <th>O que acontece</th>
+          <th>Decisão</th>
+        </tr>
+        <tr>
+          <td>Testar todas as ondas</td>
+          <td>
+            Com n pedidos existem 2<sup>n</sup> subconjuntos. Com 68.064
+            pedidos, isso é impossível em qualquer computador.
+          </td>
+          <td>Descartada</td>
+        </tr>
+        <tr>
+          <td>CPLEX ou Gurobi</td>
+          <td>
+            Solvers comerciais, mais rápidos em muitos casos, que exigem licença
+            (há licenças acadêmicas).
+          </td>
+          <td>Descartada para todo o grupo instalar com um comando</td>
+        </tr>
+        <tr>
+          <td>HiGHS</td>
+          <td>
+            Gratuito (MIT), instala com <code>uv</code> junto do projeto, roda
+            em Linux, macOS e Windows, e o enunciado da disciplina permite
+            Python.
+          </td>
+          <td class="hit">Escolhida</td>
+        </tr>
+        <tr>
+          <td>Linearizar a fração de uma vez (Charnes e Cooper)</td>
+          <td>
+            Funciona bem com variáveis contínuas. Com variáveis 0 ou 1, exige
+            variáveis e restrições extras para cada produto de variáveis, e o
+            modelo cresce.
+          </td>
+          <td>Descartada</td>
+        </tr>
+        <tr>
+          <td>Dinkelbach</td>
+          <td>
+            Mantém o modelo do mesmo tamanho, muda só os pesos do objetivo e
+            devolve limites quando o tempo acaba.
+          </td>
+          <td class="hit">Escolhido</td>
+        </tr>
+      </table>
+
+      <h2>10. Perguntas que a banca pode fazer</h2>
+      <div class="faq">
+        <details>
+          <summary>
+            Se vocês têm um algoritmo exato, por que precisam do algoritmo
+            genético?
+          </summary>
+          <div class="body">
+            O algoritmo exato prova o ótimo nas instâncias pequenas, mas nas
+            grandes ele pode não achar nem uma onda válida em 600 segundos. O
+            algoritmo genético acha ondas boas em todas as instâncias. Um mede o
+            outro: o algoritmo exato dá a régua, e o algoritmo genético é a
+            solução proposta.
+          </div>
+        </details>
+        <details>
+          <summary>O que quer dizer "ótimo provado"?</summary>
+          <div class="body">
+            Quer dizer que o limite inferior e o limite superior ficaram iguais.
+            A melhor onda achada tem o mesmo valor que o teto que nenhuma onda
+            consegue passar.
+          </div>
+        </details>
+        <details>
+          <summary>Por que não colocar a fração direto no HiGHS?</summary>
+          <div class="body">
+            O HiGHS resolve objetivos lineares (somas com pesos) e quadráticos
+            convexos. Uma divisão entre duas somas de variáveis não é nenhum dos
+            dois. O Dinkelbach troca a divisão por uma sequência de objetivos
+            lineares.
+          </div>
+        </details>
+        <details>
+          <summary>Por que λ começa em 0?</summary>
+          <div class="body">
+            Toda onda válida tem razão maior que zero, então λ = 0 é um valor
+            seguro. A primeira rodada vira "maximizar as unidades", e a razão
+            dessa onda é o primeiro λ de verdade.
+          </div>
+        </details>
+        <details>
+          <summary>Quantas rodadas o Dinkelbach faz?</summary>
+          <div class="body">
+            Não existe um número fixo. No exemplo 5×5 foram 3. O método costuma
+            terminar em poucas rodadas porque λ dá saltos grandes, mas cada
+            rodada é um MIP inteiro, e nas instâncias grandes uma só rodada pode
+            gastar os 600 segundos.
+          </div>
+        </details>
+        <details>
+          <summary>Por que a restrição de pelo menos um corredor?</summary>
+          <div class="body">
+            Sem ela, a onda vazia teria zero corredores, e o objetivo dividiria
+            por zero. Como LB é positivo, a onda vazia já seria inválida, mas a
+            restrição deixa isso explícito e garante corredores ≥ 1 na prova do
+            limite superior.
+          </div>
+        </details>
+        <details>
+          <summary>O limite superior λ + F̄ não é frouxo demais?</summary>
+          <div class="body">
+            Pode ser, porque a conta troca F̄/corredores por F̄. Ele é um limite
+            seguro e simples de provar. Quando o algoritmo termina, F̄ chega a
+            perto de zero e os dois limites se encontram.
+          </div>
+        </details>
+        <details>
+          <summary>O que acontece se o HiGHS não achar nenhuma onda?</summary>
+          <div class="body">
+            A função devolve <code>None</code> com status
+            <code>"no_solution"</code>, o <code>.json</code> grava
+            <code>objective</code> igual a <code>null</code> e nenhum
+            <code>.txt</code> é gravado. A tabela final mostra isso. A entrega
+            não depende do algoritmo exato, porque ele é referência.
+          </div>
+        </details>
+        <details>
+          <summary>Por que o HiGHS e não CPLEX ou Gurobi?</summary>
+          <div class="body">
+            O HiGHS é gratuito, de código aberto e instala com o projeto, sem
+            licença. O enunciado da disciplina permite Python, e a regra do
+            grupo é que o enunciado da disciplina vale acima do regulamento do
+            desafio.
+          </div>
+        </details>
+        <details>
+          <summary>O resultado depende de semente?</summary>
+          <div class="body">
+            O algoritmo exato não sorteia nada, então não usa semente. O valor
+            ótimo é sempre o mesmo. A onda devolvida pode mudar entre versões do
+            HiGHS quando existem várias ondas ótimas, como no exemplo 5×5.
+          </div>
+        </details>
+      </div>
+
+      <h2>11. Limitações e armadilhas</h2>
+      <ul>
+        <li>
+          <b>Gap padrão do HiGHS.</b> O HiGHS para cada rodada quando a lacuna
+          relativa chega a 10<sup>−4</sup> (opção <code>mip_rel_gap</code>,
+          valor padrão conferido no <code>highspy</code> 1.16.0) e chama isso de
+          ótimo. Uma rodada pode então devolver F um pouco abaixo do máximo
+          real. A issue #12 deve decidir se zera essa opção ou se grava sempre λ
+          + F̄ como limite superior.
+        </li>
+        <li>
+          <b>Instâncias grandes.</b> Com 68.064 pedidos, o modelo tem dezenas de
+          milhares de variáveis 0 ou 1, e a primeira rodada pode não terminar.
+        </li>
+        <li>
+          <b>Tempo total.</b> As 30 instâncias levam perto de 5 horas com 600
+          segundos cada. O plano manda rodar com antecedência.
+        </li>
+        <li>
+          <b>Tempo por rodada.</b> Cada rodada recebe só o tempo que resta.
+          Passar 600 segundos a cada rodada estouraria o limite da instância.
+        </li>
+        <li>
+          <b>Validação.</b> Toda solução gravada passa no
+          <code>checker.py</code> oficial, porque uma solução inválida vale zero
+          na instância (enunciado, seção 4).
+        </li>
+      </ul>
+
+      <h2>Resumo das decisões</h2>
+      <table>
+        <tr>
+          <th>Decisão</th>
+          <th>Escolha</th>
+          <th>Motivo</th>
+        </tr>
+        <tr>
+          <td>Solver</td>
+          <td>HiGHS pelo <code>highspy</code></td>
+          <td>Gratuito, instala com o projeto, resolve MIP</td>
+        </tr>
+        <tr>
+          <td>Objetivo em fração</td>
+          <td>Método de Dinkelbach</td>
+          <td>Modelo do mesmo tamanho, só os pesos mudam</td>
+        </tr>
+        <tr>
+          <td>Parada</td>
+          <td>F(λ) ≤ 10<sup>−6</sup></td>
+          <td>Tolerância para arredondamento</td>
+        </tr>
+        <tr>
+          <td>Tempo</td>
+          <td>600 segundos por instância, divididos entre as rodadas</td>
+          <td>Limite do desafio, até o professor responder</td>
+        </tr>
+        <tr>
+          <td>Tempo esgotado</td>
+          <td>Limite inferior λ e limite superior λ + F̄</td>
+          <td>Mostram quão longe o algoritmo genético pode estar do ótimo</td>
+        </tr>
+        <tr>
+          <td>Sem solução</td>
+          <td><code>None</code> e status <code>"no_solution"</code></td>
+          <td>O algoritmo exato é referência, não entrega</td>
+        </tr>
+      </table>
+
+      <footer>
+        Fontes: issue #12 (texto de 2026-11-21) e
+        <code>docs/plano-implementacao.md</code> na <code>main</code> (commit
+        1d55666). Descrição oficial do problema
+        (<code>docs/reference/pt_problem_description.pdf</code>), objetivo (1),
+        restrições (2) a (4) e exemplo 5×5. Documentação do HiGHS consultada
+        pelo Context7 (<code>/ergo-code/highs</code>): README ("About HiGHS"),
+        <code>docs/src/solvers.md</code> e
+        <code>docs/src/interfaces/python/model-py.md</code>. W. Dinkelbach, "On
+        Nonlinear Fractional Programming", Management Science 13(7), 1967. As
+        rodadas da seção 6 e o valor padrão de <code>mip_rel_gap</code> foram
+        obtidos rodando o <code>highspy</code> 1.16.0 em 2026-11-21. O uso do
+        HiGHS pelo SciPy e o fato de CPLEX e Gurobi serem comerciais são
+        conhecimento geral e não foram conferidos em fonte nesta página.
+      </footer>
+    </div>
+  </body>
+</html>
