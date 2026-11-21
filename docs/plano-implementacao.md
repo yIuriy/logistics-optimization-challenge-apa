@@ -37,7 +37,9 @@ TPF/
 │   ├── exact_algorithm.py        Dinkelbach com HiGHS
 │   ├── genetic_algorithm.py      cromossomo, decodificador, evolução
 │   └── checker.py                checker.py oficial copiado sem mudanças
-├── tests/test_instance.py        testes de exemplo e de propriedade
+├── tests/
+│   ├── test_instance.py          testes de exemplo e de propriedade
+│   └── test_genetic_algorithm.py testes do decodificador e da evolução
 └── pyproject.toml
 ```
 
@@ -47,7 +49,7 @@ Cada `.txt` segue o formato oficial lido pelo `checker.py`. Cada `.json` guarda 
 
 ## Dependências externas
 
-- `highspy`: solver gratuito de Programação Linear Inteira que resolve o modelo exato.
+- `highspy`: solver gratuito de Programação Linear Inteira que resolve o algoritmo exato.
 - `pytest`: roda os testes. Fica no grupo de desenvolvimento.
 - `hypothesis`: gera entradas aleatórias para os testes de propriedade. Fica no grupo de desenvolvimento.
 - `numpy`: faz as operações sobre vetores do algoritmo genético. O `checker.py` oficial já depende dela.
@@ -56,9 +58,9 @@ JSON, `itertools` e `time` vêm da biblioteca padrão.
 
 ## Algoritmos
 
-**Exato.** O Dinkelbach maximiza "unidades − λ·corredores" com as restrições (2), (3) e (4) da descrição oficial e depois atualiza λ para unidades/corredores da solução encontrada. Ele para quando o máximo chega a zero. Se os 600 s acabarem, o limite inferior é o λ atual e o limite superior é λ + F̄, onde F̄ é o limite superior que o HiGHS devolve para a última rodada. Essa conta vale porque o número de corredores de qualquer solução é pelo menos 1.
+**Algoritmo exato.** O Dinkelbach maximiza "unidades − λ·corredores" com as restrições (2), (3) e (4) da descrição oficial e depois atualiza λ para unidades/corredores da solução encontrada. Ele para quando o máximo chega a zero. Se os 600 s acabarem, o limite inferior é o λ atual e o limite superior é λ + F̄, onde F̄ é o limite superior que o HiGHS devolve para a última rodada. Essa conta vale porque o número de corredores de qualquer solução é pelo menos 1.
 
-**Genético.** O indivíduo é um vetor de bits sobre os corredores, e o bit 1 quer dizer que a onda visita o corredor. Um decodificador transforma os corredores em pedidos. Ele soma o estoque dos corredores visitados, fica com os pedidos que cabem nesse estoque, divide o estoque disputado pela ordem de prioridade dos pedidos (do maior para o menor) e para de acrescentar pedidos ao chegar a UB. A onda respeita o estoque e UB por construção. Se ficar abaixo de LB, a aptidão é menos o que falta para LB. Caso contrário, é unidades/corredores. O resto é torneio, cruzamento uniforme, mutação por troca de bit e parada por número de gerações, com o limite de tempo como trava. Os parâmetros (tamanho da população, tamanho do torneio, taxa de mutação, número máximo de gerações, semente e tempo limite) vêm do JSON de configuração.
+**Algoritmo genético.** O indivíduo é um vetor de bits sobre os corredores, e o bit 1 quer dizer que a onda visita o corredor. Um decodificador transforma os corredores em pedidos. Ele soma o estoque dos corredores visitados, fica com os pedidos que cabem nesse estoque, divide o estoque disputado pela ordem de prioridade dos pedidos (do maior para o menor) e para de acrescentar pedidos ao chegar a UB. A onda respeita o estoque e UB por construção. Se ficar abaixo de LB, a aptidão é menos o que falta para LB. Caso contrário, é unidades/corredores. O resto é torneio, cruzamento uniforme, mutação por troca de bit e parada por número de gerações, com o limite de tempo como trava. Os parâmetros (tamanho da população, tamanho do torneio, taxa de mutação, número máximo de gerações, semente e tempo limite) vêm do JSON de configuração.
 
 ## Passos e critério de pronto
 
@@ -76,14 +78,16 @@ Todo passo só termina com `ruff check .`, `complexipy .`, `vulture .` e `pytest
 
 A base (passos 1 a 3) já estará pronta quando a divisão começar.
 
-1. **Slides.** A apresentação inteira, com a tabela de resultados recebida do integrante 5.
-2. **Exato.** `exact_algorithm.py` (passo 5).
-3. **Genético.** `genetic_algorithm.py` (passo 4).
-4. **Lotes.** `batch_runner.py` e os JSON de `configs/` (parte do passo 6).
-5. **CLI e resultados.** `cli.py` (parte do passo 6), as 60 rodadas e a tabela contra os valores oficiais (passo 7).
+1. **Slides.** A apresentação inteira (issue #7), com a tabela de resultados recebida do integrante 5.
+2. **Algoritmo exato.** `exact_algorithm.py` (passo 5, issue #12).
+3. **Algoritmo genético.** `genetic_algorithm.py` (passo 4, issue #13).
+4. **Lotes.** `batch_runner.py` e os JSON de `configs/` (parte do passo 6, issue #14).
+5. **CLI e resultados.** `cli.py` (parte do passo 6), as 60 rodadas e a tabela contra os valores oficiais (passo 7, issue #15).
+
+Duas issues extras ainda sem responsável completam a divisão. A #17 gera os gráficos dos slides em `charts.py`, e a #18 cria uma interface web em React para mostrar os resultados e rodar o algoritmo genético com parâmetros escolhidos na tela.
 
 ## Riscos
 
-- A qualidade do genético foi medida só em `b_instance_0001` e `x_instance_0014`, ambas acima de 99% do melhor valor oficial. As outras 28 instâncias ainda não foram rodadas.
+- A qualidade do algoritmo genético foi medida só em `b_instance_0001` e `x_instance_0014`, ambas acima de 99% do melhor valor oficial. As outras 28 instâncias ainda não foram rodadas.
 - O limite de 600 s é uma suposição até o professor responder.
 - Uma instância nova apresentada na hora não cabe em 600 s dentro dos 5 minutos de apresentação.

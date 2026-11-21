@@ -4,7 +4,7 @@ Solver for the **Wave Order Picking** problem of the [SBPO 2025 / Mercado Livre 
 
 **Goal:** choose a subset of orders (the _wave_) and a subset of warehouse aisles that maximize _units picked per aisle visited_, respecting the wave size limits and the stock of each item. Details in [docs/problem.md](docs/problem.md).
 
-**Approach:** an exact model solved by HiGHS with the Dinkelbach method as the reference, and a genetic algorithm that chooses aisles as the proposed solution. The full plan, with every decision, is in [docs/plano-implementacao.md](docs/plano-implementacao.md).
+**Approach:** an exact algorithm solved by HiGHS with the Dinkelbach method as the reference, and a genetic algorithm that chooses aisles as the proposed solution. The full plan, with every decision, is in [docs/plano-implementacao.md](docs/plano-implementacao.md).
 
 ## Quick start
 
@@ -17,7 +17,7 @@ uv run python src/order_selection/checker.py <instance> <solution>
 ## Repository
 
 ```
-src/order_selection/   package (instance files, exact model, genetic algorithm, batch runner, CLI)
+src/order_selection/   package (instance files, exact algorithm, genetic algorithm, batch runner, CLI)
 tests/                 unit and property tests
 data/                  the 30 instances of datasets B and X (prefix b_ or x_) and best_objectives.csv
 configs/               batch configuration files

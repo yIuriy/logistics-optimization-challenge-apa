@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Course project (APA, UNIPAMPA): solve the SBPO 2025 / Mercado Livre **Wave Order Picking** problem in Python with an exact model (HiGHS and the Dinkelbach method) as the reference and a genetic algorithm as the proposed solution. Five students, graded on solution quality against other groups **and** on each member defending the code in a 5-minute presentation.
+Course project (APA, UNIPAMPA): solve the SBPO 2025 / Mercado Livre **Wave Order Picking** problem in Python with an exact algorithm (HiGHS and the Dinkelbach method) as the reference and a genetic algorithm as the proposed solution. Five students, graded on solution quality against other groups **and** on each member defending the code in a 5-minute presentation.
 
 Read first: `docs/plano-implementacao.md` (every decision and the task split), `docs/problem.md` (the problem), `docs/workflow.md` (team rules). The course statement overrides the challenge rules. Where it says nothing, the challenge README and rules apply (600 seconds per instance, official output format).
 
@@ -28,6 +28,8 @@ uv run python src/order_selection/checker.py <instance> <solution>
 
 - **Do not modify `src/order_selection/checker.py` or `data/`.** They are the official files.
 - A solution must pass the official checker. An infeasible solution scores zero.
+- Every change keeps the objective (1), the constraints (2), (3) and (4) and the file formats of `docs/reference/pt_problem_description.pdf`, and the rules of the course statement (Moodle page). When a rule changes, the issue, `docs/plano-implementacao.md` and the code change in the same pull request.
+- Portuguese text writes "algoritmo exato" and "algoritmo genético" in full, never "exato" or "genético" alone.
 - Keep the `instance.py` interface stable, because every other module builds on it.
 - Every random draw uses a seeded generator (`random.Random(seed)` or `np.random.default_rng(seed)`), and every duration uses `time.perf_counter()`.
 

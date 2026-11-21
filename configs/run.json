@@ -7,6 +7,7 @@
     "population_size": [50],
     "tournament_size": [3],
     "mutation_rate": [0.01],
+    "max_generations": [1000000],
     "seed": [1]
   }
 }
