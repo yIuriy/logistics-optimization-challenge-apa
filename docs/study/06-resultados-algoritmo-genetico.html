@@ -1,0 +1,2318 @@
+<!doctype html>
+<!-- Material de estudo com os resultados do algoritmo genético nas 30 instâncias B e X (results/, commit 85d9a38, 2026-11-21). Mostra a média contra o melhor valor oficial, os padrões por tamanho e estagnação, as piores instâncias e as limitações da rodada. -->
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Resultados do algoritmo genético | TPF de APA</title>
+    <style>
+      :root {
+        --ink: #1f2433;
+        --muted: #5f6675;
+        --paper: #fffdf7;
+        --line: #1f2433;
+        --coral: #ff6b57;
+        --coral-bg: #ffe3dd;
+        --sun: #ffc531;
+        --sun-bg: #fff3c7;
+        --teal: #15a39a;
+        --teal-bg: #d4f3ef;
+        --grape: #7b4fd6;
+        --grape-bg: #e9dffb;
+        --sky: #2f80ed;
+        --sky-bg: #dbe9ff;
+        --leaf: #2e9e4f;
+        --leaf-bg: #dcf5e3;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      body {
+        margin: 0;
+        font:
+          17px/1.6 system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+      }
+      .wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 28px 18px 80px;
+      }
+      header {
+        border: 2px solid var(--line);
+        border-radius: 14px;
+        padding: 22px 24px;
+        background: #fff;
+        box-shadow: 6px 6px 0 var(--teal);
+      }
+      h1 {
+        font-size: 2rem;
+        line-height: 1.15;
+        margin: 0 0 8px;
+      }
+      .lead {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.05rem;
+      }
+      .lead a {
+        color: var(--sky);
+        font-weight: 700;
+      }
+      h2 {
+        font-size: 1.6rem;
+        margin: 40px 0 12px;
+        line-height: 1.2;
+      }
+      h3 {
+        font-size: 1.1rem;
+        margin: 18px 0 6px;
+      }
+      p {
+        margin: 0 0 12px;
+      }
+      /* etiquetas e cartões */
+      .tag {
+        display: inline-block;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border: 2px solid var(--line);
+        border-radius: 6px;
+        padding: 2px 10px;
+        margin: 0 6px 8px 0;
+        background: #fff;
+      }
+      .tag.f1 {
+        background: var(--sky-bg);
+      }
+      .tag.f2 {
+        background: var(--teal-bg);
+      }
+      .tag.f3 {
+        background: var(--grape-bg);
+      }
+      .card {
+        border: 2px solid var(--line);
+        border-radius: 12px;
+        padding: 16px 18px;
+        background: #fff;
+        margin: 14px 0;
+        overflow-x: auto;
+      }
+      .card.sun {
+        background: var(--sun-bg);
+      }
+      /* fórmulas e contas */
+      .formula {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 1.25rem;
+        background: #fff;
+        border: 2px dashed var(--line);
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin: 10px 0;
+        overflow-x: auto;
+        text-align: center;
+      }
+      .calc {
+        font-family: Georgia, serif;
+        font-size: 1.1rem;
+        line-height: 1.3;
+        background: var(--paper);
+        border: 2px dashed var(--line);
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin: 6px 0;
+        overflow-x: auto;
+      }
+      .frac {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        vertical-align: middle;
+        margin: 0 0.2em;
+        line-height: 1.1;
+      }
+      .frac > .num {
+        border-bottom: 2px solid currentColor;
+        padding: 0 0.3em 0.1em;
+      }
+      .frac > .den {
+        padding: 0.1em 0.3em 0;
+      }
+      .sq {
+        display: inline-flex;
+        align-items: center;
+        vertical-align: middle;
+        margin: 0 0.1em;
+      }
+      .sq::before {
+        content: "√";
+        font-size: 1.35em;
+        line-height: 1;
+        margin-right: 0.05em;
+      }
+      .sq > span {
+        display: inline-flex;
+        align-items: center;
+        border-top: 2px solid currentColor;
+        padding: 0.1em 0.3em 0;
+      }
+      .formulas {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 10px;
+      }
+      .formulas div {
+        border: 2px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+      }
+      .formulas .f1 {
+        background: var(--sky-bg);
+      }
+      .formulas .f2 {
+        background: var(--teal-bg);
+      }
+      .formulas .f3 {
+        background: var(--grape-bg);
+      }
+      .formulas b {
+        display: block;
+        margin-bottom: 4px;
+      }
+      .formulas .formula {
+        font-size: 1.05rem;
+        padding: 8px 10px;
+      }
+      /* tabelas */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 10px 0;
+        background: #fff;
+        font-size: 0.95rem;
+      }
+      th,
+      td {
+        border: 2px solid var(--line);
+        padding: 8px 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: var(--sun-bg);
+      }
+      td.c {
+        text-align: center;
+        font-family: Georgia, serif;
+        font-size: 1.05rem;
+      }
+      td.hit {
+        background: var(--sun);
+        font-weight: 800;
+      }
+      /* bloco de exercício/tópico com resolução recolhível */
+      .ex {
+        border: 3px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+        margin: 26px 0;
+        overflow: hidden;
+      }
+      .ex.f1 {
+        box-shadow: 8px 8px 0 var(--sky);
+      }
+      .ex.f2 {
+        box-shadow: 8px 8px 0 var(--teal);
+      }
+      .ex.f3 {
+        box-shadow: 8px 8px 0 var(--grape);
+      }
+      .ex .head {
+        padding: 14px 18px;
+        border-bottom: 2px solid var(--line);
+      }
+      .ex.f1 .head {
+        background: var(--sky-bg);
+      }
+      .ex.f2 .head {
+        background: var(--teal-bg);
+      }
+      .ex.f3 .head {
+        background: var(--grape-bg);
+      }
+      .ex .head h2 {
+        margin: 0 0 6px;
+        font-size: 1.35rem;
+      }
+      .ex blockquote {
+        margin: 0;
+        padding: 10px 14px;
+        border-left: 6px solid var(--line);
+        background: #fff;
+        border-radius: 0 8px 8px 0;
+        font-style: italic;
+      }
+      details {
+        border-top: 2px solid var(--line);
+      }
+      summary {
+        cursor: pointer;
+        padding: 12px 18px;
+        font-weight: 800;
+        background: var(--sun-bg);
+        list-style: none;
+      }
+      summary::before {
+        content: "▸ ";
+      }
+      details[open] summary::before {
+        content: "▾ ";
+      }
+      summary::-webkit-details-marker {
+        display: none;
+      }
+      .body {
+        padding: 14px 18px 18px;
+      }
+      /* leitura dos dados */
+      .read {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 8px;
+        margin: 8px 0 14px;
+      }
+      .read div {
+        border: 2px solid var(--line);
+        border-radius: 8px;
+        padding: 8px 10px;
+        background: var(--paper);
+        font-size: 0.95rem;
+      }
+      .read b {
+        font-family: Georgia, serif;
+        font-size: 1.1rem;
+        margin-right: 6px;
+      }
+      .read div.z {
+        grid-column: 1/-1;
+        background: var(--sun-bg);
+      }
+      /* caixas de significado */
+      .why {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--sun);
+        background: var(--sun-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 10px 0;
+      }
+      .ans {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--leaf);
+        background: var(--leaf-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 12px 0 6px;
+        font-weight: 700;
+        font-size: 1.05rem;
+      }
+      .check {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--coral);
+        background: var(--coral-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 8px 0;
+      }
+      .say {
+        border: 2px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 8px 0;
+        background: var(--paper);
+      }
+      .say b {
+        color: var(--leaf);
+      }
+      /* passos numerados */
+      .steps {
+        counter-reset: s;
+        padding: 0;
+        margin: 10px 0;
+        list-style: none;
+      }
+      .steps li {
+        counter-increment: s;
+        position: relative;
+        padding: 6px 0 6px 44px;
+        margin: 4px 0;
+      }
+      .steps li::before {
+        content: counter(s);
+        position: absolute;
+        left: 0;
+        top: 6px;
+        width: 30px;
+        height: 30px;
+        border: 2px solid var(--line);
+        border-radius: 50%;
+        background: var(--sun);
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      footer {
+        margin-top: 50px;
+        font-size: 0.85rem;
+        color: var(--muted);
+        border-top: 2px solid var(--line);
+        padding-top: 12px;
+      }
+      @media (max-width: 600px) {
+        h1 {
+          font-size: 1.6rem;
+        }
+        .formula {
+          font-size: 1.1rem;
+        }
+        .calc {
+          font-size: 1rem;
+        }
+      }
+      .scroll {
+        overflow-x: auto;
+        margin: 10px 0;
+      }
+      .scroll svg {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      code {
+        overflow-wrap: anywhere;
+      }
+      td code {
+        white-space: nowrap;
+        overflow-wrap: normal;
+      }
+      .ex .body {
+        padding: 14px 18px 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>
+          Resultados do algoritmo genético nas 30 instâncias dos conjuntos B e X
+        </h1>
+        <p class="lead">
+          Esta página lê os 30 arquivos de <code>results/</code> e mostra quanto
+          o algoritmo genético chegou perto do melhor valor oficial em cada
+          instância. Comece pelo roteiro, depois veja o gráfico, os três padrões
+          e as limitações. O funcionamento do algoritmo está na
+          <a href="05-algoritmo-genetico.html">página anterior</a>.
+        </p>
+      </header>
+
+      <h2>Antes de ler os números</h2>
+      <div class="card sun">
+        <ol class="steps">
+          <li>
+            <b>O que é o objetivo.</b> É o número de unidades coletadas dividido
+            pelo número de corredores visitados. Quanto maior, melhor. Em
+            <code>x_instance_0004</code>, a onda coleta 3.016 unidades em 16
+            corredores, e 3.016 ÷ 16 = 188,5.
+          </li>
+          <li>
+            <b>O que é o melhor oficial.</b> É o valor de cada instância no
+            arquivo <code>best_objectives.csv</code> do repositório do desafio,
+            copiado em <code>data/</code>. Ele serve de régua, porque o grupo
+            não sabe o ótimo de cada instância.
+          </li>
+          <li>
+            <b>O que é a porcentagem do melhor.</b> É o objetivo do grupo
+            dividido pelo melhor oficial, vezes 100. Em
+            <code>x_instance_0004</code>, 188,5 ÷ 202,75 × 100 = 92,97%. Chegar
+            a 100% quer dizer empatar com o melhor valor conhecido.
+          </li>
+          <li>
+            <b>Quem conferiu.</b> O <code>checker.py</code> oficial leu as 30
+            soluções, aprovou todas e calculou o mesmo objetivo gravado em cada
+            <code>.json</code>.
+          </li>
+        </ol>
+      </div>
+
+      <h2>Como a rodada foi feita</h2>
+      <div class="read">
+        <div>
+          <b>Código</b> commit <code>85d9a38</code> da <code>main</code>
+        </div>
+        <div><b>Data</b> 2026-11-21</div>
+        <div><b>Tempo</b> 600 s por instância</div>
+        <div><b>População</b> 50 indivíduos</div>
+        <div><b>Torneio</b> 3 indivíduos</div>
+        <div><b>Mutação</b> taxa 0,002 por bit</div>
+        <div><b>Semente</b> 1, uma execução por instância</div>
+        <div><b>Máquina</b> 6 execuções ao mesmo tempo</div>
+        <div class="z">
+          <b>Arquivos</b> cada instância tem um <code>.txt</code> com a solução
+          e um <code>.json</code> com o resumo, com nomes como
+          <code>b_instance_0001_genetic_pop50_tour3_mut0.002_seed1.json</code>.
+        </div>
+      </div>
+      <div class="why">
+        <b>Por que gerações quase infinitas.</b> O arquivo de configuração pediu
+        10<sup>9</sup> gerações, um número que nenhuma instância alcança em 600
+        s. Assim, quem encerrou todas as execuções foi o relógio, e cada
+        instância usou o tempo inteiro.
+      </div>
+
+      <h2>O resultado geral</h2>
+      <div class="ans">
+        Média de 98,31% do melhor oficial, com mediana de 98,81%.
+      </div>
+      <div class="read">
+        <div><b>B</b> média 98,85%, de 94,43% a 100,00%</div>
+        <div><b>X</b> média 97,78%, de 92,97% a 100,00%</div>
+        <div><b>26</b> instâncias com pelo menos 95%</div>
+        <div><b>14</b> instâncias com pelo menos 99%</div>
+        <div><b>5</b> instâncias empatadas com o melhor oficial</div>
+        <div><b>4</b> instâncias abaixo de 95%</div>
+      </div>
+      <p>
+        Cada barra abaixo é uma instância. A escala começa em 90%, então barras
+        curtas ainda passam de 90%.
+      </p>
+      <div class="scroll">
+        <svg
+          viewBox="0 0 640 600"
+          role="img"
+          aria-label="Porcentagem do melhor oficial por instância"
+          style="min-width: 620px"
+        >
+          <line
+            x1="150.0"
+            y1="24"
+            x2="150.0"
+            y2="576"
+            stroke="var(--line)"
+            stroke-width="1"
+            stroke-dasharray="4 4"
+          />
+          <text
+            x="150.0"
+            y="18"
+            font-size="12"
+            text-anchor="middle"
+            fill="var(--ink)"
+          >
+            90%
+          </text>
+          <line
+            x1="244.0"
+            y1="24"
+            x2="244.0"
+            y2="576"
+            stroke="var(--line)"
+            stroke-width="1"
+            stroke-dasharray="4 4"
+          />
+          <text
+            x="244.0"
+            y="18"
+            font-size="12"
+            text-anchor="middle"
+            fill="var(--ink)"
+          >
+            92%
+          </text>
+          <line
+            x1="338.0"
+            y1="24"
+            x2="338.0"
+            y2="576"
+            stroke="var(--line)"
+            stroke-width="1"
+            stroke-dasharray="4 4"
+          />
+          <text
+            x="338.0"
+            y="18"
+            font-size="12"
+            text-anchor="middle"
+            fill="var(--ink)"
+          >
+            94%
+          </text>
+          <line
+            x1="432.0"
+            y1="24"
+            x2="432.0"
+            y2="576"
+            stroke="var(--line)"
+            stroke-width="1"
+            stroke-dasharray="4 4"
+          />
+          <text
+            x="432.0"
+            y="18"
+            font-size="12"
+            text-anchor="middle"
+            fill="var(--ink)"
+          >
+            96%
+          </text>
+          <line
+            x1="526.0"
+            y1="24"
+            x2="526.0"
+            y2="576"
+            stroke="var(--line)"
+            stroke-width="1"
+            stroke-dasharray="4 4"
+          />
+          <text
+            x="526.0"
+            y="18"
+            font-size="12"
+            text-anchor="middle"
+            fill="var(--ink)"
+          >
+            98%
+          </text>
+          <line
+            x1="620.0"
+            y1="24"
+            x2="620.0"
+            y2="576"
+            stroke="var(--line)"
+            stroke-width="2"
+            stroke-dasharray=""
+          />
+          <text
+            x="620.0"
+            y="18"
+            font-size="12"
+            text-anchor="middle"
+            fill="var(--ink)"
+          >
+            100%
+          </text>
+          <text
+            x="142"
+            y="43"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            b_instance_0001
+          </text>
+          <rect
+            x="150"
+            y="32"
+            width="455.0"
+            height="13"
+            fill="var(--sky)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text
+            x="142"
+            y="61"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            b_instance_0002
+          </text>
+          <rect
+            x="150"
+            y="50"
+            width="465.3"
+            height="13"
+            fill="var(--sky)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text
+            x="142"
+            y="79"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            b_instance_0003
+          </text>
+          <rect
+            x="150"
+            y="68"
+            width="208.2"
+            height="13"
+            fill="var(--sky)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text x="362.2" y="79" font-size="11" fill="var(--ink)">94,43</text>
+          <text
+            x="142"
+            y="97"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            b_instance_0004
+          </text>
+          <rect
+            x="150"
+            y="86"
+            width="461.5"
+            height="13"
+            fill="var(--sky)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text
+            x="142"
+            y="115"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            b_instance_0005
+          </text>
+          <rect
+            x="150"
+            y="104"
+            width="470.0"
+            height="13"
+            fill="var(--sky)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text
+            x="142"
+            y="133"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            b_instance_0006
+          </text>
+          <rect
+            x="150"
+            y="122"
+            width="430.5"
+            height="13"
+            fill="var(--sky)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text
+            x="142"
+            y="151"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            b_instance_0007
+          </text>
+          <rect
+            x="150"
+            y="140"
+            width="470.0"
+            height="13"
+            fill="var(--sky)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text
+            x="142"
+            y="169"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            b_instance_0008
+          </text>
+          <rect
+            x="150"
+            y="158"
+            width="424.4"
+            height="13"
+            fill="var(--sky)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text
+            x="142"
+            y="187"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            b_instance_0009
+          </text>
+          <rect
+            x="150"
+            y="176"
+            width="470.0"
+            height="13"
+            fill="var(--sky)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text
+            x="142"
+            y="205"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            b_instance_0010
+          </text>
+          <rect
+            x="150"
+            y="194"
+            width="423.9"
+            height="13"
+            fill="var(--sky)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text
+            x="142"
+            y="223"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            b_instance_0011
+          </text>
+          <rect
+            x="150"
+            y="212"
+            width="398.6"
+            height="13"
+            fill="var(--sky)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text x="552.6" y="223" font-size="11" fill="var(--ink)">98,48</text>
+          <text
+            x="142"
+            y="241"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            b_instance_0012
+          </text>
+          <rect
+            x="150"
+            y="230"
+            width="369.9"
+            height="13"
+            fill="var(--sky)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text x="523.9" y="241" font-size="11" fill="var(--ink)">97,87</text>
+          <text
+            x="142"
+            y="259"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            b_instance_0013
+          </text>
+          <rect
+            x="150"
+            y="248"
+            width="386.3"
+            height="13"
+            fill="var(--sky)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text x="540.3" y="259" font-size="11" fill="var(--ink)">98,22</text>
+          <text
+            x="142"
+            y="277"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            b_instance_0014
+          </text>
+          <rect
+            x="150"
+            y="266"
+            width="447.9"
+            height="13"
+            fill="var(--sky)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text
+            x="142"
+            y="295"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            b_instance_0015
+          </text>
+          <rect
+            x="150"
+            y="284"
+            width="354.8"
+            height="13"
+            fill="var(--sky)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text x="508.8" y="295" font-size="11" fill="var(--ink)">97,55</text>
+          <text
+            x="142"
+            y="313"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            x_instance_0001
+          </text>
+          <rect
+            x="150"
+            y="302"
+            width="388.2"
+            height="13"
+            fill="var(--grape)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text x="542.2" y="313" font-size="11" fill="var(--ink)">98,26</text>
+          <text
+            x="142"
+            y="331"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            x_instance_0002
+          </text>
+          <rect
+            x="150"
+            y="320"
+            width="470.0"
+            height="13"
+            fill="var(--grape)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text
+            x="142"
+            y="349"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            x_instance_0003
+          </text>
+          <rect
+            x="150"
+            y="338"
+            width="458.2"
+            height="13"
+            fill="var(--grape)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text
+            x="142"
+            y="367"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            x_instance_0004
+          </text>
+          <rect
+            x="150"
+            y="356"
+            width="139.6"
+            height="13"
+            fill="var(--grape)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text x="293.6" y="367" font-size="11" fill="var(--ink)">92,97</text>
+          <text
+            x="142"
+            y="385"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            x_instance_0005
+          </text>
+          <rect
+            x="150"
+            y="374"
+            width="470.0"
+            height="13"
+            fill="var(--grape)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text
+            x="142"
+            y="403"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            x_instance_0006
+          </text>
+          <rect
+            x="150"
+            y="392"
+            width="354.4"
+            height="13"
+            fill="var(--grape)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text x="508.4" y="403" font-size="11" fill="var(--ink)">97,54</text>
+          <text
+            x="142"
+            y="421"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            x_instance_0007
+          </text>
+          <rect
+            x="150"
+            y="410"
+            width="367.5"
+            height="13"
+            fill="var(--grape)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text x="521.5" y="421" font-size="11" fill="var(--ink)">97,82</text>
+          <text
+            x="142"
+            y="439"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            x_instance_0008
+          </text>
+          <rect
+            x="150"
+            y="428"
+            width="198.3"
+            height="13"
+            fill="var(--grape)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text x="352.3" y="439" font-size="11" fill="var(--ink)">94,22</text>
+          <text
+            x="142"
+            y="457"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            x_instance_0009
+          </text>
+          <rect
+            x="150"
+            y="446"
+            width="389.2"
+            height="13"
+            fill="var(--grape)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text x="543.2" y="457" font-size="11" fill="var(--ink)">98,28</text>
+          <text
+            x="142"
+            y="475"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            x_instance_0010
+          </text>
+          <rect
+            x="150"
+            y="464"
+            width="214.3"
+            height="13"
+            fill="var(--grape)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text x="368.3" y="475" font-size="11" fill="var(--ink)">94,56</text>
+          <text
+            x="142"
+            y="493"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            x_instance_0011
+          </text>
+          <rect
+            x="150"
+            y="482"
+            width="405.6"
+            height="13"
+            fill="var(--grape)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text x="559.6" y="493" font-size="11" fill="var(--ink)">98,63</text>
+          <text
+            x="142"
+            y="511"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            x_instance_0012
+          </text>
+          <rect
+            x="150"
+            y="500"
+            width="391.5"
+            height="13"
+            fill="var(--grape)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text x="545.5" y="511" font-size="11" fill="var(--ink)">98,33</text>
+          <text
+            x="142"
+            y="529"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            x_instance_0013
+          </text>
+          <rect
+            x="150"
+            y="518"
+            width="393.4"
+            height="13"
+            fill="var(--grape)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text x="547.4" y="529" font-size="11" fill="var(--ink)">98,37</text>
+          <text
+            x="142"
+            y="547"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            x_instance_0014
+          </text>
+          <rect
+            x="150"
+            y="536"
+            width="422.1"
+            height="13"
+            fill="var(--grape)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <text x="576.1" y="547" font-size="11" fill="var(--ink)">98,98</text>
+          <text
+            x="142"
+            y="565"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            x_instance_0015
+          </text>
+          <rect
+            x="150"
+            y="554"
+            width="424.9"
+            height="13"
+            fill="var(--grape)"
+            stroke="var(--line)"
+            stroke-width="1.5"
+          />
+          <rect
+            x="150"
+            y="580"
+            width="14"
+            height="12"
+            fill="var(--sky)"
+            stroke="var(--line)"
+          />
+          <text x="170" y="590" font-size="12" fill="var(--ink)">
+            conjunto B
+          </text>
+          <rect
+            x="270"
+            y="580"
+            width="14"
+            height="12"
+            fill="var(--grape)"
+            stroke="var(--line)"
+          />
+          <text x="290" y="590" font-size="12" fill="var(--ink)">
+            conjunto X
+          </text>
+        </svg>
+      </div>
+      <div class="say">
+        <b>Lendo o gráfico.</b> Quase todas as barras encostam na linha de 100%.
+        As quatro mais curtas são as instâncias que a seção das piores detalha.
+      </div>
+
+      <h2>Três padrões nos números</h2>
+
+      <div class="ex f1">
+        <div class="head">
+          <span class="tag f1">Tamanho</span>
+          <h2>As instâncias grandes ainda melhoravam no fim</h2>
+        </div>
+        <div class="body">
+          <p>
+            11 instâncias têm pelo menos 20.000 pedidos. Nelas, cada geração
+            demora mais, porque o decodificador percorre todos os pedidos para
+            montar cada onda. Por isso, essas execuções fizeram só de 748 a
+            2.374 gerações em 600 s, enquanto as menores fizeram de 3.099 a
+            74.568.
+          </p>
+          <table>
+            <tr>
+              <th>Grupo</th>
+              <th>Instâncias</th>
+              <th>Média do % do melhor</th>
+              <th>Melhor achada depois de 400 s</th>
+            </tr>
+            <tr>
+              <td>Menos de 20.000 pedidos</td>
+              <td class="c">19</td>
+              <td class="c">98,63%</td>
+              <td class="c">4 de 19</td>
+            </tr>
+            <tr>
+              <td>20.000 pedidos ou mais</td>
+              <td class="c">11</td>
+              <td class="c">97,77%</td>
+              <td class="c">10 de 11</td>
+            </tr>
+          </table>
+          <div class="say">
+            <b>O que isso sugere.</b> Se a melhor solução apareceu perto dos 600
+            s, a busca ainda estava subindo quando o relógio parou. Mais tempo
+            ou gerações mais rápidas provavelmente ajudariam nessas instâncias.
+            Isso é uma hipótese, porque nenhuma execução mais longa foi feita.
+          </div>
+        </div>
+      </div>
+
+      <div class="ex f2">
+        <div class="head">
+          <span class="tag f2">Estagnação</span>
+          <h2>Algumas execuções pararam de melhorar cedo</h2>
+        </div>
+        <div class="body">
+          <p>
+            Estagnar é passar muito tempo sem achar solução melhor. Em
+            <code>x_instance_0004</code>, a melhor onda apareceu aos 21,9 s, e
+            os outros 578 s não trouxeram melhora. A instância terminou com
+            92,97%, a pior das 30. Em <code>x_instance_0006</code>, a melhor
+            apareceu aos 2 s e ficou em 97,54%.
+          </p>
+          <p>
+            Achar cedo também pode ser bom. Em <code>b_instance_0007</code>, a
+            melhor onda apareceu aos 0,5 s e já empatava com o melhor oficial.
+          </p>
+          <div class="why">
+            <b>Uma explicação provável.</b> <code>x_instance_0004</code> tem 172
+            corredores. Com taxa 0,002, cada filho troca em média 172 × 0,002 ≈
+            0,34 bit, ou seja, a maioria dos filhos nasce sem nenhuma mutação.
+            Quando a população fica parecida, o cruzamento de pais quase iguais
+            gera filhos quase iguais, e a busca fica presa. O grupo ainda não
+            testou essa explicação.
+          </div>
+        </div>
+      </div>
+
+      <div class="ex f3">
+        <div class="head">
+          <span class="tag f3">Corredores</span>
+          <h2>As melhores ondas visitam poucos corredores</h2>
+        </div>
+        <div class="body">
+          <p>
+            As soluções visitam de 1 a 37 corredores, com mediana de 9,5, mesmo
+            em instâncias com 483 corredores. Isso combina com o objetivo,
+            porque cada corredor a mais entra no denominador da fração.
+          </p>
+          <div class="say">
+            <b>Exemplo.</b> Em <code>x_instance_0014</code>, a onda visita 3 dos
+            483 corredores e coleta 4.851 unidades, e 4.851 ÷ 3 = 1.617. Um
+            quarto corredor só compensaria se trouxesse mais de 1.617 unidades
+            novas.
+          </div>
+        </div>
+      </div>
+
+      <p>
+        O gráfico abaixo junta os dois primeiros padrões. Cada ponto é uma
+        instância, com o momento em que a melhor solução apareceu no eixo
+        horizontal e a porcentagem do melhor no vertical.
+      </p>
+      <div class="scroll">
+        <svg
+          viewBox="0 0 640 370"
+          role="img"
+          aria-label="Momento da melhor solução contra porcentagem do melhor"
+          style="min-width: 620px"
+        >
+          <line
+            x1="60"
+            y1="275.0"
+            x2="620"
+            y2="275.0"
+            stroke="var(--muted)"
+            stroke-width="1"
+            stroke-dasharray="4 4"
+          />
+          <text
+            x="54"
+            y="279.0"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+          >
+            92%
+          </text>
+          <line
+            x1="60"
+            y1="215.0"
+            x2="620"
+            y2="215.0"
+            stroke="var(--muted)"
+            stroke-width="1"
+            stroke-dasharray="4 4"
+          />
+          <text
+            x="54"
+            y="219.0"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+          >
+            94%
+          </text>
+          <line
+            x1="60"
+            y1="155.0"
+            x2="620"
+            y2="155.0"
+            stroke="var(--muted)"
+            stroke-width="1"
+            stroke-dasharray="4 4"
+          />
+          <text
+            x="54"
+            y="159.0"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+          >
+            96%
+          </text>
+          <line
+            x1="60"
+            y1="95.0"
+            x2="620"
+            y2="95.0"
+            stroke="var(--muted)"
+            stroke-width="1"
+            stroke-dasharray="4 4"
+          />
+          <text
+            x="54"
+            y="99.0"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+          >
+            98%
+          </text>
+          <line
+            x1="60"
+            y1="35.0"
+            x2="620"
+            y2="35.0"
+            stroke="var(--muted)"
+            stroke-width="1"
+            stroke-dasharray="4 4"
+          />
+          <text
+            x="54"
+            y="39.0"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+          >
+            100%
+          </text>
+          <text
+            x="60.0"
+            y="308"
+            font-size="12"
+            text-anchor="middle"
+            fill="var(--ink)"
+          >
+            0 s
+          </text>
+          <text
+            x="153.3"
+            y="308"
+            font-size="12"
+            text-anchor="middle"
+            fill="var(--ink)"
+          >
+            100 s
+          </text>
+          <text
+            x="246.7"
+            y="308"
+            font-size="12"
+            text-anchor="middle"
+            fill="var(--ink)"
+          >
+            200 s
+          </text>
+          <text
+            x="340.0"
+            y="308"
+            font-size="12"
+            text-anchor="middle"
+            fill="var(--ink)"
+          >
+            300 s
+          </text>
+          <text
+            x="433.3"
+            y="308"
+            font-size="12"
+            text-anchor="middle"
+            fill="var(--ink)"
+          >
+            400 s
+          </text>
+          <text
+            x="526.7"
+            y="308"
+            font-size="12"
+            text-anchor="middle"
+            fill="var(--ink)"
+          >
+            500 s
+          </text>
+          <text
+            x="620.0"
+            y="308"
+            font-size="12"
+            text-anchor="middle"
+            fill="var(--ink)"
+          >
+            600 s
+          </text>
+          <line
+            x1="60"
+            y1="290"
+            x2="620"
+            y2="290"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <line
+            x1="60"
+            y1="20"
+            x2="60"
+            y2="290"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <text
+            x="340.0"
+            y="328"
+            font-size="12"
+            text-anchor="middle"
+            fill="var(--ink)"
+          >
+            segundo em que a melhor solução apareceu
+          </text>
+          <circle
+            cx="61.8"
+            cy="44.6"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <circle
+            cx="327.8"
+            cy="38.0"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <circle
+            cx="476.3"
+            cy="202.1"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <text
+            x="467.3"
+            y="206.1"
+            font-size="11"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            b_0003
+          </text>
+          <circle
+            cx="583.3"
+            cy="40.4"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <circle
+            cx="163.8"
+            cy="35.0"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <circle
+            cx="499.6"
+            cy="60.2"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <circle
+            cx="60.5"
+            cy="35.0"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <circle
+            cx="284.8"
+            cy="64.1"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <circle
+            cx="409.7"
+            cy="35.0"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <circle
+            cx="335.7"
+            cy="64.4"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <rect
+            x="596.1"
+            y="74.6"
+            width="12"
+            height="12"
+            fill="var(--coral)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <rect
+            x="506.5"
+            y="92.9"
+            width="12"
+            height="12"
+            fill="var(--coral)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <rect
+            x="517.9"
+            y="82.4"
+            width="12"
+            height="12"
+            fill="var(--coral)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <rect
+            x="458.4"
+            y="43.1"
+            width="12"
+            height="12"
+            fill="var(--coral)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <circle
+            cx="446.6"
+            cy="108.5"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <circle
+            cx="323.5"
+            cy="87.2"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <circle
+            cx="117.0"
+            cy="35.0"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <circle
+            cx="81.8"
+            cy="42.5"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <circle
+            cx="80.4"
+            cy="245.9"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <text
+            x="89.4"
+            y="249.9"
+            font-size="11"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            x_0004
+          </text>
+          <circle
+            cx="417.6"
+            cy="35.0"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <circle
+            cx="61.8"
+            cy="108.8"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <circle
+            cx="298.2"
+            cy="100.4"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <rect
+            x="521.3"
+            y="202.4"
+            width="12"
+            height="12"
+            fill="var(--coral)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <text
+            x="536.3"
+            y="228.4"
+            font-size="11"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            x_0008
+          </text>
+          <rect
+            x="480.2"
+            y="80.6"
+            width="12"
+            height="12"
+            fill="var(--coral)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <rect
+            x="603.2"
+            y="192.2"
+            width="12"
+            height="12"
+            fill="var(--coral)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <text
+            x="600.2"
+            y="202.2"
+            font-size="11"
+            text-anchor="end"
+            fill="var(--ink)"
+            font-family="ui-monospace,monospace"
+          >
+            x_0010
+          </text>
+          <rect
+            x="554.3"
+            y="70.1"
+            width="12"
+            height="12"
+            fill="var(--coral)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <rect
+            x="483.2"
+            y="79.1"
+            width="12"
+            height="12"
+            fill="var(--coral)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <rect
+            x="362.7"
+            y="77.9"
+            width="12"
+            height="12"
+            fill="var(--coral)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <rect
+            x="474.2"
+            y="59.6"
+            width="12"
+            height="12"
+            fill="var(--coral)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <circle
+            cx="99.8"
+            cy="63.8"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <circle
+            cx="80"
+            cy="356"
+            r="6"
+            fill="var(--teal)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <text x="92" y="360" font-size="12" fill="var(--ink)">
+            menos de 20.000 pedidos
+          </text>
+          <rect
+            x="254"
+            y="350"
+            width="12"
+            height="12"
+            fill="var(--coral)"
+            stroke="var(--line)"
+            stroke-width="2"
+          />
+          <text x="272" y="360" font-size="12" fill="var(--ink)">
+            20.000 pedidos ou mais
+          </text>
+        </svg>
+      </div>
+      <div class="say">
+        <b>Lendo o gráfico.</b> Os pontos à direita são execuções que ainda
+        melhoravam no fim, quase todas de instâncias grandes. O ponto baixo à
+        esquerda é <code>x_instance_0004</code>, que estagnou cedo.
+      </div>
+
+      <h2>As quatro instâncias abaixo de 95%</h2>
+      <div class="scroll">
+        <table>
+          <tr>
+            <th>Instância</th>
+            <th>Pedidos</th>
+            <th>Objetivo</th>
+            <th>Melhor oficial</th>
+            <th>% do melhor</th>
+            <th>Melhor achada aos</th>
+            <th>Padrão</th>
+          </tr>
+          <tr>
+            <td><code>x_instance_0004</code></td>
+            <td class="c">2.732</td>
+            <td class="c">188,50</td>
+            <td class="c">202,75</td>
+            <td class="c">92,97%</td>
+            <td class="c">21,9 s</td>
+            <td>estagnou cedo</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0008</code></td>
+            <td class="c">20.364</td>
+            <td class="c">412,90</td>
+            <td class="c">438,22</td>
+            <td class="c">94,22%</td>
+            <td class="c">500,7 s</td>
+            <td>faltou tempo</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0003</code></td>
+            <td class="c">2.070</td>
+            <td class="c">141,27</td>
+            <td class="c">149,60</td>
+            <td class="c">94,43%</td>
+            <td class="c">446,0 s</td>
+            <td>melhorou tarde</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0010</code></td>
+            <td class="c">44.193</td>
+            <td class="c">912,11</td>
+            <td class="c">964,62</td>
+            <td class="c">94,56%</td>
+            <td class="c">588,4 s</td>
+            <td>faltou tempo</td>
+          </tr>
+        </table>
+      </div>
+      <div class="why">
+        <b>Duas causas diferentes.</b> Em <code>x_instance_0008</code> e
+        <code>x_instance_0010</code>, a melhor apareceu depois de 500 s, então
+        faltou tempo. Em <code>x_instance_0004</code>, sobrou tempo e a busca
+        ficou presa. <code>b_instance_0003</code> fica no meio, com a melhor aos
+        446 s numa instância pequena.
+      </div>
+
+      <h2>Tabela completa</h2>
+      <p>
+        Os valores vêm dos 30 arquivos <code>.json</code>. As células amarelas
+        empatam com o melhor oficial.
+      </p>
+      <div class="scroll">
+        <table>
+          <tr>
+            <th>Instância</th>
+            <th>Pedidos</th>
+            <th>Corredores da instância</th>
+            <th>Corredores visitados</th>
+            <th>Objetivo</th>
+            <th>Melhor oficial</th>
+            <th>% do melhor</th>
+            <th>Gerações</th>
+            <th>Melhor achada aos</th>
+          </tr>
+          <tr>
+            <td><code>b_instance_0001</code></td>
+            <td class="c">11.321</td>
+            <td class="c">185</td>
+            <td class="c">2</td>
+            <td class="c">629,50</td>
+            <td class="c">631,50</td>
+            <td class="c">99,68%</td>
+            <td class="c">18.177</td>
+            <td class="c">1,9 s</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0002</code></td>
+            <td class="c">2.162</td>
+            <td class="c">165</td>
+            <td class="c">11</td>
+            <td class="c">180,45</td>
+            <td class="c">180,64</td>
+            <td class="c">99,90%</td>
+            <td class="c">31.069</td>
+            <td class="c">286,9 s</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0003</code></td>
+            <td class="c">2.070</td>
+            <td class="c">164</td>
+            <td class="c">15</td>
+            <td class="c">141,27</td>
+            <td class="c">149,60</td>
+            <td class="c">94,43%</td>
+            <td class="c">30.636</td>
+            <td class="c">446,0 s</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0004</code></td>
+            <td class="c">2.448</td>
+            <td class="c">163</td>
+            <td class="c">18</td>
+            <td class="c">155,67</td>
+            <td class="c">155,94</td>
+            <td class="c">99,82%</td>
+            <td class="c">22.925</td>
+            <td class="c">560,7 s</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0005</code></td>
+            <td class="c">6.468</td>
+            <td class="c">179</td>
+            <td class="c">3</td>
+            <td class="c">368,00</td>
+            <td class="c">368,00</td>
+            <td class="c hit">100,00%</td>
+            <td class="c">29.345</td>
+            <td class="c">111,2 s</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0006</code></td>
+            <td class="c">1.857</td>
+            <td class="c">165</td>
+            <td class="c">37</td>
+            <td class="c">83,32</td>
+            <td class="c">84,03</td>
+            <td class="c">99,16%</td>
+            <td class="c">20.592</td>
+            <td class="c">471,0 s</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0007</code></td>
+            <td class="c">1.841</td>
+            <td class="c">165</td>
+            <td class="c">1</td>
+            <td class="c">108,00</td>
+            <td class="c">108,00</td>
+            <td class="c hit">100,00%</td>
+            <td class="c">74.568</td>
+            <td class="c">0,5 s</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0008</code></td>
+            <td class="c">12.334</td>
+            <td class="c">398</td>
+            <td class="c">10</td>
+            <td class="c">224,90</td>
+            <td class="c">227,10</td>
+            <td class="c">99,03%</td>
+            <td class="c">7.291</td>
+            <td class="c">240,9 s</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0009</code></td>
+            <td class="c">5.581</td>
+            <td class="c">417</td>
+            <td class="c">14</td>
+            <td class="c">82,50</td>
+            <td class="c">82,50</td>
+            <td class="c hit">100,00%</td>
+            <td class="c">30.923</td>
+            <td class="c">374,7 s</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0010</code></td>
+            <td class="c">14.952</td>
+            <td class="c">482</td>
+            <td class="c">3</td>
+            <td class="c">439,67</td>
+            <td class="c">444,00</td>
+            <td class="c">99,02%</td>
+            <td class="c">3.099</td>
+            <td class="c">295,4 s</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0011</code></td>
+            <td class="c">45.112</td>
+            <td class="c">482</td>
+            <td class="c">10</td>
+            <td class="c">885,10</td>
+            <td class="c">898,80</td>
+            <td class="c">98,48%</td>
+            <td class="c">1.229</td>
+            <td class="c">580,8 s</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0012</code></td>
+            <td class="c">28.263</td>
+            <td class="c">483</td>
+            <td class="c">11</td>
+            <td class="c">555,55</td>
+            <td class="c">567,64</td>
+            <td class="c">97,87%</td>
+            <td class="c">1.812</td>
+            <td class="c">484,8 s</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0013</code></td>
+            <td class="c">38.214</td>
+            <td class="c">483</td>
+            <td class="c">9</td>
+            <td class="c">743,56</td>
+            <td class="c">757,00</td>
+            <td class="c">98,22%</td>
+            <td class="c">1.521</td>
+            <td class="c">497,1 s</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0014</code></td>
+            <td class="c">38.202</td>
+            <td class="c">483</td>
+            <td class="c">6</td>
+            <td class="c">881,00</td>
+            <td class="c">885,17</td>
+            <td class="c">99,53%</td>
+            <td class="c">1.531</td>
+            <td class="c">433,2 s</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0015</code></td>
+            <td class="c">11.541</td>
+            <td class="c">398</td>
+            <td class="c">15</td>
+            <td class="c">162,07</td>
+            <td class="c">166,14</td>
+            <td class="c">97,55%</td>
+            <td class="c">12.382</td>
+            <td class="c">414,2 s</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0001</code></td>
+            <td class="c">1.949</td>
+            <td class="c">164</td>
+            <td class="c">34</td>
+            <td class="c">69,62</td>
+            <td class="c">70,85</td>
+            <td class="c">98,26%</td>
+            <td class="c">33.307</td>
+            <td class="c">282,3 s</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0002</code></td>
+            <td class="c">2.942</td>
+            <td class="c">168</td>
+            <td class="c">3</td>
+            <td class="c">217,67</td>
+            <td class="c">217,67</td>
+            <td class="c hit">100,00%</td>
+            <td class="c">51.947</td>
+            <td class="c">61,0 s</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0003</code></td>
+            <td class="c">11.330</td>
+            <td class="c">180</td>
+            <td class="c">3</td>
+            <td class="c">666,00</td>
+            <td class="c">667,67</td>
+            <td class="c">99,75%</td>
+            <td class="c">15.241</td>
+            <td class="c">23,4 s</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0004</code></td>
+            <td class="c">2.732</td>
+            <td class="c">172</td>
+            <td class="c">16</td>
+            <td class="c">188,50</td>
+            <td class="c">202,75</td>
+            <td class="c">92,97%</td>
+            <td class="c">20.348</td>
+            <td class="c">21,9 s</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0005</code></td>
+            <td class="c">11.024</td>
+            <td class="c">182</td>
+            <td class="c">3</td>
+            <td class="c">628,67</td>
+            <td class="c">628,67</td>
+            <td class="c hit">100,00%</td>
+            <td class="c">14.440</td>
+            <td class="c">383,1 s</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0006</code></td>
+            <td class="c">2.704</td>
+            <td class="c">168</td>
+            <td class="c">15</td>
+            <td class="c">187,13</td>
+            <td class="c">191,86</td>
+            <td class="c">97,54%</td>
+            <td class="c">20.359</td>
+            <td class="c">2,0 s</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0007</code></td>
+            <td class="c">8.725</td>
+            <td class="c">418</td>
+            <td class="c">14</td>
+            <td class="c">112,64</td>
+            <td class="c">115,15</td>
+            <td class="c">97,82%</td>
+            <td class="c">15.022</td>
+            <td class="c">255,2 s</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0008</code></td>
+            <td class="c">20.364</td>
+            <td class="c">482</td>
+            <td class="c">10</td>
+            <td class="c">412,90</td>
+            <td class="c">438,22</td>
+            <td class="c">94,22%</td>
+            <td class="c">2.374</td>
+            <td class="c">500,7 s</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0009</code></td>
+            <td class="c">39.701</td>
+            <td class="c">483</td>
+            <td class="c">8</td>
+            <td class="c">805,75</td>
+            <td class="c">819,88</td>
+            <td class="c">98,28%</td>
+            <td class="c">1.378</td>
+            <td class="c">456,7 s</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0010</code></td>
+            <td class="c">44.193</td>
+            <td class="c">482</td>
+            <td class="c">9</td>
+            <td class="c">912,11</td>
+            <td class="c">964,62</td>
+            <td class="c">94,56%</td>
+            <td class="c">1.086</td>
+            <td class="c">588,4 s</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0011</code></td>
+            <td class="c">38.657</td>
+            <td class="c">483</td>
+            <td class="c">2</td>
+            <td class="c">1.045,50</td>
+            <td class="c">1.060,00</td>
+            <td class="c">98,63%</td>
+            <td class="c">1.221</td>
+            <td class="c">536,0 s</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0012</code></td>
+            <td class="c">52.322</td>
+            <td class="c">483</td>
+            <td class="c">3</td>
+            <td class="c">1.317,33</td>
+            <td class="c">1.339,67</td>
+            <td class="c">98,33%</td>
+            <td class="c">957</td>
+            <td class="c">459,9 s</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0013</code></td>
+            <td class="c">49.992</td>
+            <td class="c">483</td>
+            <td class="c">7</td>
+            <td class="c">1.043,43</td>
+            <td class="c">1.060,71</td>
+            <td class="c">98,37%</td>
+            <td class="c">972</td>
+            <td class="c">330,7 s</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0014</code></td>
+            <td class="c">68.064</td>
+            <td class="c">483</td>
+            <td class="c">3</td>
+            <td class="c">1.617,00</td>
+            <td class="c">1.633,67</td>
+            <td class="c">98,98%</td>
+            <td class="c">748</td>
+            <td class="c">450,2 s</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0015</code></td>
+            <td class="c">2.839</td>
+            <td class="c">171</td>
+            <td class="c">11</td>
+            <td class="c">261,36</td>
+            <td class="c">263,91</td>
+            <td class="c">99,04%</td>
+            <td class="c">14.730</td>
+            <td class="c">42,6 s</td>
+          </tr>
+        </table>
+      </div>
+
+      <h2>O que estes números ainda não mostram</h2>
+      <div class="check">
+        <b>Uma semente só.</b> Cada instância rodou uma vez. Outra semente pode
+        dar outro valor. Num teste anterior em <code>x_instance_0014</code>, a
+        semente 2 chegou a 1.619,67, contra 1.617,00 da semente 1.
+      </div>
+      <div class="check">
+        <b>Máquina dividida.</b> Seis execuções dividiram o processador. Rodando
+        sozinha, cada uma faria mais gerações nos mesmos 600 s.
+      </div>
+      <div class="check">
+        <b>Parâmetros escolhidos numa instância.</b> A taxa 0,002 foi escolhida
+        porque foi a melhor em <code>x_instance_0014</code>. Ela pode não ser a
+        melhor para as outras 29.
+      </div>
+      <div class="check">
+        <b>Sem comparação com o algoritmo exato.</b> O algoritmo exato (issue
+        #12) ainda não rodou, então a única régua é o melhor oficial.
+      </div>
+      <div class="check">
+        <b>Limite de 600 s assumido.</b> O valor vem do desafio oficial, e o
+        professor ainda não confirmou o limite da disciplina.
+      </div>
+
+      <h2>Resumo e armadilhas</h2>
+      <table>
+        <tr>
+          <th>Pergunta da banca</th>
+          <th>Resposta curta</th>
+        </tr>
+        <tr>
+          <td>Quão bom ficou o algoritmo genético?</td>
+          <td>
+            98,31% do melhor oficial em média, com 26 das 30 instâncias acima de
+            95% e todas aprovadas pelo <code>checker.py</code>.
+          </td>
+        </tr>
+        <tr>
+          <td>Onde ele foi pior?</td>
+          <td>
+            Em <code>x_instance_0004</code>, com 92,97%, porque estagnou aos
+            21,9 s.
+          </td>
+        </tr>
+        <tr>
+          <td>Por que as grandes ficaram um pouco abaixo?</td>
+          <td>
+            Fizeram menos gerações e ainda melhoravam quando o tempo acabou.
+          </td>
+        </tr>
+        <tr>
+          <td>Os resultados se repetem?</td>
+          <td>
+            Com a mesma semente e a mesma máquina, sim. O tempo limite pode
+            mudar o número de gerações em outra máquina.
+          </td>
+        </tr>
+      </table>
+      <div class="check">
+        <b>Armadilha.</b> 100% quer dizer empatar com o melhor valor conhecido,
+        e isso não prova que a solução é ótima.
+      </div>
+      <div class="check">
+        <b>Armadilha.</b> A média esconde as quatro instâncias abaixo de 95%.
+        Cite as duas causas quando falar delas.
+      </div>
+
+      <footer>
+        Fontes: os 30 pares em <code>results/</code>, gerados pelo commit
+        <code>85d9a38</code> em 2026-11-21,
+        <code>data/best_objectives.csv</code> e a saída do
+        <code>checker.py</code> oficial. As médias, as contagens e os grupos por
+        tamanho foram calculados a partir dos <code>.json</code>.
+      </footer>
+    </div>
+  </body>
+</html>
