@@ -10,6 +10,7 @@ updating only the aisle objective coefficients between iterations.
 
 import math
 import multiprocessing
+import os
 import queue
 import time
 from collections.abc import Sequence
@@ -28,6 +29,13 @@ SAFETY_MARGIN_SECONDS = 5.0
 # Stopping the worker process this many seconds before the time limit, because a
 # HiGHS round can run past its own time limit (see solve)
 HARD_STOP_MARGIN_SECONDS = 2.0
+
+# Checking this often whether the worker process is still running, so a crash
+# stops solve within half a second instead of at the deadline
+POLL_SECONDS = 0.5
+
+# Operating system number of the standard output stream
+STDOUT_FILE_DESCRIPTOR = 1
 
 # Treating F(lam) at or below this value as zero to absorb floating-point rounding
 OPTIMALITY_TOLERANCE = 1e-6
@@ -362,6 +370,13 @@ def dinkelbach_search(instance: Instance, budget: float, results: Queue) -> None
         results: Queue that receives the messages for the parent process.
     """
     start = time.perf_counter()
+
+    # Sending the worker's standard output to the null device, because HiGHS
+    # prints its banner when the solver object is created, before any option
+    # can turn the log off. Errors still reach the standard error stream
+    null_device = os.open(os.devnull, os.O_WRONLY)
+    os.dup2(null_device, STDOUT_FILE_DESCRIPTOR)
+
     model = build_model(instance)
     state = SearchState(
         best_solution=None,
@@ -438,7 +453,8 @@ def solve(instance: Instance, parameters: dict) -> tuple[Solution | None, dict]:
     HiGHS does not check its time limit during the cut rounds of the root node,
     and on large instances one round can run many seconds past it. The search
     therefore runs in a worker process, and this function stops the worker at a
-    hard deadline, keeping the result of the last complete Dinkelbach round.
+    hard deadline. It keeps the best wave the worker sent, either from a
+    finished round or from a better solution HiGHS found inside a round.
 
     Args:
         instance: The problem instance.
@@ -448,6 +464,10 @@ def solve(instance: Instance, parameters: dict) -> tuple[Solution | None, dict]:
         A pair ``(solution, report)`` where ``solution`` is the best feasible
         ``Solution`` found (or ``None``) and ``report`` holds ``status``,
         ``iterations``, ``objective_lower_bound`` and ``objective_upper_bound``.
+
+    Raises:
+        RuntimeError: If the worker process stops before sending its last
+            message, for example when it runs out of memory.
     """
     start = time.perf_counter()
     time_limit = float(parameters["time_limit_seconds"])
@@ -468,18 +488,46 @@ def solve(instance: Instance, parameters: dict) -> tuple[Solution | None, dict]:
     )
     worker.start()
 
-    # Keeping the newest message until the worker finishes or the deadline comes
+    # Stopping the worker on every exit path, including a crash
     try:
-        while True:
-            solution, report, finished = results.get(
-                timeout=max(0.0, hard_deadline - time.perf_counter())
-            )
-            latest = solution, report
-            if finished:
-                break
-    except queue.Empty:
-        pass
+        return wait_for_results(worker, results, hard_deadline)
     finally:
         worker.terminate()
         worker.join()
+
+
+def wait_for_results(
+    worker: multiprocessing.Process, results: Queue, hard_deadline: float
+) -> tuple[Solution | None, dict]:
+    """Keep the newest message of the worker until it finishes or time runs out.
+
+    Args:
+        worker: The process running ``dinkelbach_search``.
+        results: Queue where the worker sends its messages.
+        hard_deadline: ``time.perf_counter()`` value at which to stop waiting.
+
+    Returns:
+        The last ``(solution, report)`` the worker sent, or ``None`` and a
+        ``"no_solution"`` report when it sent nothing before the deadline.
+
+    Raises:
+        RuntimeError: If the worker stopped before sending its last message.
+    """
+    latest = None, build_report("no_solution", 0, None, None)
+    while (remaining := hard_deadline - time.perf_counter()) > 0.0:
+        # Checking the worker before reading, because a process that already
+        # exited has every message it sent waiting in the queue
+        worker_alive = worker.is_alive()
+        try:
+            solution, report, finished = results.get(
+                timeout=min(POLL_SECONDS, remaining)
+            )
+        except queue.Empty:
+            if not worker_alive:
+                message = f"exact algorithm worker stopped with code {worker.exitcode}"
+                raise RuntimeError(message) from None
+            continue
+        latest = solution, report
+        if finished:
+            break
     return latest
