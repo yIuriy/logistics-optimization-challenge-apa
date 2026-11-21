@@ -83,7 +83,7 @@ def test_decoded_wave_is_feasible_exactly_when_the_fitness_is_positive(
 
 
 def test_decoder_serves_disputed_stock_by_order_priority():
-    # Aisle 0 holds 5 units of item 0, so only one of the two orders of 3 fits
+    # Aisle 0 holds 5 units of item 0, so only one of the orders of 3 and 4 fits
     # and the larger order of 4 comes first
     instance = Instance(
         orders=[{0: 3}, {0: 4}, {1: 1}],
