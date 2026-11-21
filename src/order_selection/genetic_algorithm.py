@@ -1,340 +1,243 @@
-"""Genetic algorithm with a repair step (issue #13).
+"""Genetic algorithm over aisles with a penalty for short waves (issue #13).
 
-The chromosome is a list of bits with one bit per order, where bit 1 puts the
-order in the wave. The aisles stay out of the chromosome because the repair
-chooses them from the orders, so every individual becomes a feasible solution.
+The chromosome is a NumPy boolean vector with one bit per aisle, where bit 1
+means the wave visits that aisle. The number of visited aisles is the
+denominator of the objective, so the search controls it directly. The
+evaluation decodes the chromosome into a wave by adding the orders that the
+stock of the visited aisles can serve, up to the upper limit. A wave below the
+lower limit gets a negative fitness, so the selection pushes the population
+toward feasible waves. Every step of the evaluation is a NumPy vector operation.
 """
 
-import random
 import time
 from dataclasses import dataclass
 
-from order_selection.instance import Instance, Solution, objective
+import numpy as np
+
+from order_selection.instance import Instance, Solution
 
 # Stopping this many seconds before the time limit, to leave time to write the output
 SAFETY_MARGIN_SECONDS = 5
 
 
-@dataclass(frozen=True)
-class RepairTables:
-    """Data the repair reads many times, computed once per instance."""
+@dataclass
+class InstanceArrays:
+    """The instance as flat NumPy arrays, built once per run.
 
-    order_units: list[int]
-    item_stock: dict[int, int]
-    aisles_by_item: dict[int, list[tuple[int, int]]]
+    Each order line (one item of one order) is an entry. The entries are sorted
+    by item and, inside one item, by the priority of their order, and
+    ``item_group_start`` gives the position of the first entry of the same item.
+    ``priority`` lists the orders from the most units to the fewest. Each aisle
+    line (one item stored in one aisle) is a stock entry.
+    """
+
+    entry_order: np.ndarray
+    entry_item: np.ndarray
+    entry_units: np.ndarray
+    item_group_start: np.ndarray
+    order_units: np.ndarray
+    priority: np.ndarray
+    stock_aisle: np.ndarray
+    stock_item: np.ndarray
+    stock_units: np.ndarray
 
 
-def build_repair_tables(instance: Instance) -> RepairTables:
-    """Compute the units of each order, the stock of each item and its aisles."""
-    # Listing, for each item, the aisles that store it and how many units each has
-    aisles_by_item: dict[int, list[tuple[int, int]]] = {}
-    for aisle, stored_units in enumerate(instance.aisles):
-        for item, units in stored_units.items():
-            aisles_by_item.setdefault(item, []).append((aisle, units))
+def build_arrays(instance: Instance) -> InstanceArrays:
+    """Flatten orders and aisles into entries and sort the order entries."""
+    entry_order, entry_item, entry_units = np.array(
+        [
+            (order, item, units)
+            for order, requested_units in enumerate(instance.orders)
+            for item, units in requested_units.items()
+        ],
+        dtype=np.int64,
+    ).T
+    stock_aisle, stock_item, stock_units = np.array(
+        [
+            (aisle, item, units)
+            for aisle, stored_units in enumerate(instance.aisles)
+            for item, units in stored_units.items()
+        ],
+        dtype=np.int64,
+    ).T.reshape(3, -1)
+    order_units = np.bincount(
+        entry_order, weights=entry_units, minlength=len(instance.orders)
+    ).astype(np.int64)
+    priority = np.argsort(-order_units, kind="stable")
+    rank = np.empty_like(priority)
+    rank[priority] = np.arange(len(priority))
 
-    return RepairTables(
-        order_units=[sum(order.values()) for order in instance.orders],
-        item_stock={
-            item: sum(units for _, units in aisle_units)
-            for item, aisle_units in aisles_by_item.items()
-        },
-        aisles_by_item=aisles_by_item,
+    # Sorting the entries by item, then by order priority, and marking where
+    # each item's group starts, so a running sum can restart at every item
+    by_item = np.lexsort((rank[entry_order], entry_item))
+    entry_order, entry_item, entry_units = (
+        entry_order[by_item],
+        entry_item[by_item],
+        entry_units[by_item],
+    )
+    starts_group = np.r_[True, entry_item[1:] != entry_item[:-1]]
+    positions = np.arange(len(entry_item))
+    item_group_start = np.maximum.accumulate(np.where(starts_group, positions, 0))
+    return InstanceArrays(
+        entry_order,
+        entry_item,
+        entry_units,
+        item_group_start,
+        order_units,
+        priority,
+        stock_aisle,
+        stock_item,
+        stock_units,
     )
 
 
-def repair(
-    instance: Instance, bits: list[int], rng: random.Random, tables: RepairTables
-) -> Solution:
-    """Turn any bit vector into a feasible solution, in the four steps of issue #13.
+def evaluate(
+    instance: Instance, arrays: InstanceArrays, chromosome: np.ndarray
+) -> tuple[float, np.ndarray | None]:
+    """Decode the visited aisles into a wave and return its fitness and orders.
+
+    The decoder goes through four vector steps. (1) It sums the stock of the
+    visited aisles per item. (2) It keeps the orders whose every item fits in
+    that stock on its own. (3) Inside each item, it adds the demand of those
+    orders in priority order and drops each order that reaches an item after its
+    stock ran out. (4) It keeps the accepted orders, in priority order, while the
+    running total of units stays within the upper limit.
 
     Args:
         instance: The problem instance.
-        bits: One bit per order, where 1 means the order is in the wave.
-        rng: The random generator of the run, so the same seed repeats the result.
-        tables: The precomputed data of ``build_repair_tables``.
+        arrays: The arrays built by ``build_arrays``.
+        chromosome: One boolean per aisle, true for the visited aisles.
 
     Returns:
-        The selected orders and the visited aisles. Removing any of these aisles
-        leaves some requested item without enough stock.
+        For a wave that reaches the lower limit, the objective (units divided by
+        visited aisles) and the orders of the wave. Otherwise, minus the units
+        missing to reach the lower limit (at least one unit) and ``None``.
     """
-    # Removing random orders while the wave passes the upper limit (step 1)
-    selected_orders = [order for order, bit in enumerate(bits) if bit]
-    rng.shuffle(selected_orders)
-    wave_units = sum(tables.order_units[order] for order in selected_orders)
-    while wave_units > instance.wave_max_units:
-        wave_units -= tables.order_units[selected_orders.pop()]
+    n_orders = len(instance.orders)
+    capacity = np.bincount(
+        arrays.stock_item,
+        weights=arrays.stock_units * chromosome[arrays.stock_aisle],
+        minlength=instance.n_items,
+    )
 
-    # Adding orders up to the lower limit (step 2), and starting again from an
-    # empty wave when the orders already selected leave no way to reach it
-    selected_orders = drop_orders_without_stock(instance, selected_orders, tables)
-    selected_orders = fill_up_to_lower_limit(instance, selected_orders, rng, tables)
-    wave_units = sum(tables.order_units[order] for order in selected_orders)
-    if wave_units < instance.wave_min_units:
-        selected_orders = fill_up_to_lower_limit(instance, [], rng, tables)
+    # Keeping the orders that fit alone, then the ones that still fit after
+    # the orders of higher priority took their share of each item
+    available = capacity[arrays.entry_item]
+    fits_alone = arrays.entry_units <= available
+    order_fits = np.bincount(arrays.entry_order, ~fits_alone, n_orders) == 0
+    demand = arrays.entry_units * order_fits[arrays.entry_order]
+    running = np.cumsum(demand)
+    start = arrays.item_group_start
+    item_running = running - running[start] + demand[start]
+    out_of_stock = item_running > available
+    order_fits &= np.bincount(arrays.entry_order, out_of_stock, n_orders) == 0
 
-    # Choosing aisles greedily (step 3), then dropping the unneeded ones (step 4)
-    requested = requested_units(instance, selected_orders)
-    aisles = choose_aisles(instance, requested, tables)
-    aisles = drop_unneeded_aisles(instance, requested, aisles)
-    return Solution(orders=sorted(selected_orders), aisles=sorted(aisles))
+    # Keeping the accepted orders while the running total stays within the
+    # upper limit, which takes the first ones in priority order
+    accepted = order_fits[arrays.priority]
+    units_in_order = arrays.order_units[arrays.priority] * accepted
+    within_limit = np.cumsum(units_in_order) <= instance.wave_max_units
+    orders = arrays.priority[accepted & within_limit]
+    wave_units = int(arrays.order_units[orders].sum())
 
-
-def requested_units(instance: Instance, orders: list[int]) -> dict[int, int]:
-    """Return, item by item, the units the given orders request together."""
-    requested: dict[int, int] = {}
-    for order in orders:
-        for item, units in instance.orders[order].items():
-            requested[item] = requested.get(item, 0) + units
-    return requested
-
-
-def drop_orders_without_stock(
-    instance: Instance, selected_orders: list[int], tables: RepairTables
-) -> list[int]:
-    """Remove orders while some item is requested beyond the stock of all aisles.
-
-    Args:
-        instance: The problem instance.
-        selected_orders: The orders of the wave, already in random order.
-        tables: The precomputed data of ``build_repair_tables``.
-
-    Returns:
-        The orders that remain, whose items all fit in the total stock.
-    """
-    requested = requested_units(instance, selected_orders)
-    kept_orders = []
-    for order in selected_orders:
-        # Dropping the order when one of its items still lacks stock, so each
-        # short item loses orders only until its demand fits the stock
-        order_items = instance.orders[order]
-        if any(
-            requested[item] > tables.item_stock.get(item, 0) for item in order_items
-        ):
-            for item, units in order_items.items():
-                requested[item] -= units
-        else:
-            kept_orders.append(order)
-    return kept_orders
+    shortfall = max(1, instance.wave_min_units) - wave_units
+    if shortfall > 0:
+        return -shortfall, None
+    return wave_units / int(chromosome.sum()), orders
 
 
-def fill_up_to_lower_limit(
-    instance: Instance,
-    selected_orders: list[int],
-    rng: random.Random,
-    tables: RepairTables,
-) -> list[int]:
-    """Add random orders until the wave reaches ``wave_min_units``.
-
-    An order enters only when the wave stays within ``wave_max_units`` and every
-    item it requests still fits in the total stock of the aisles.
-
-    Args:
-        instance: The problem instance.
-        selected_orders: The orders already in the wave.
-        rng: The random generator of the run.
-        tables: The precomputed data of ``build_repair_tables``.
-
-    Returns:
-        The orders of the wave, which may still fall short of the lower limit
-        when no remaining order fits.
-    """
-    requested = requested_units(instance, selected_orders)
-    wave_units = sum(requested.values())
-    already_selected = set(selected_orders)
-    candidates = [
-        order for order in range(len(instance.orders)) if order not in already_selected
-    ]
-    rng.shuffle(candidates)
-
-    for order in candidates:
-        if wave_units >= instance.wave_min_units:
-            break
-        order_items = instance.orders[order]
-        fits_upper_limit = (
-            wave_units + tables.order_units[order] <= instance.wave_max_units
-        )
-        if fits_upper_limit and all(
-            requested.get(item, 0) + units <= tables.item_stock.get(item, 0)
-            for item, units in order_items.items()
-        ):
-            selected_orders = [*selected_orders, order]
-            wave_units += tables.order_units[order]
-            for item, units in order_items.items():
-                requested[item] = requested.get(item, 0) + units
-    return selected_orders
-
-
-def choose_aisles(
-    instance: Instance, requested: dict[int, int], tables: RepairTables
-) -> list[int]:
-    """Choose, one at a time, the aisle that covers the most missing units.
-
-    Args:
-        instance: The problem instance.
-        requested: The units the wave requests of each item.
-        tables: The precomputed data of ``build_repair_tables``.
-
-    Returns:
-        The chosen aisles, in the order they were chosen.
-    """
-    missing = {item: units for item, units in requested.items() if units > 0}
-    chosen_aisles: list[int] = []
-    while missing:
-        # Adding up, for each aisle not chosen yet, the missing units it covers,
-        # where an aisle covers at most the units still missing of each item
-        covered_units: dict[int, int] = {}
-        for item, missing_units in missing.items():
-            for aisle, units in tables.aisles_by_item[item]:
-                if aisle not in chosen_aisles:
-                    covered_units[aisle] = covered_units.get(aisle, 0) + min(
-                        missing_units, units
-                    )
-
-        # Taking the best aisle and keeping only the items it did not fully cover
-        best_aisle = max(covered_units, key=covered_units.__getitem__)
-        chosen_aisles.append(best_aisle)
-        best_aisle_units = instance.aisles[best_aisle]
-        missing = {
-            item: missing_units - best_aisle_units.get(item, 0)
-            for item, missing_units in missing.items()
-            if missing_units > best_aisle_units.get(item, 0)
-        }
-    return chosen_aisles
-
-
-def drop_unneeded_aisles(
-    instance: Instance, requested: dict[int, int], aisles: list[int]
-) -> list[int]:
-    """Remove each aisle whose stock the wave does not need.
-
-    The aisles chosen last are tried first. Once an aisle stays, it stays needed,
-    because later removals only lower the stock of the remaining aisles.
-
-    Args:
-        instance: The problem instance.
-        requested: The units the wave requests of each item.
-        aisles: The aisles chosen by ``choose_aisles``.
-
-    Returns:
-        The aisles kept, where removing any one leaves some item short.
-    """
-    available = units_stored_in_aisles(instance, aisles)
-    kept_aisles = []
-    for aisle in reversed(aisles):
-        stored_units = instance.aisles[aisle]
-        if all(
-            available[item] - units >= requested.get(item, 0)
-            for item, units in stored_units.items()
-        ):
-            for item, units in stored_units.items():
-                available[item] -= units
-        else:
-            kept_aisles.append(aisle)
-    return kept_aisles
-
-
-def units_stored_in_aisles(instance: Instance, aisles: list[int]) -> dict[int, int]:
-    """Return, item by item, the units the given aisles store together."""
-    available: dict[int, int] = {}
-    for aisle in aisles:
-        for item, units in instance.aisles[aisle].items():
-            available[item] = available.get(item, 0) + units
-    return available
-
-
-def solve(instance: Instance, parameters: dict) -> tuple[Solution, dict]:
-    """Run the genetic algorithm until the time limit and return the best solution.
+def solve(instance: Instance, parameters: dict) -> tuple[Solution | None, dict]:
+    """Run the genetic algorithm for a number of generations and return the best wave.
 
     Each generation builds ``population_size`` children. A child takes two
     parents chosen by tournament, mixes them by uniform crossover, flips each
-    bit with probability ``mutation_rate`` and goes through ``repair``.
+    aisle bit with probability ``mutation_rate`` and goes through ``evaluate``.
+    The run stops after ``max_generations`` generations, or earlier when the
+    clock reaches ``time_limit_seconds`` minus a safety margin.
 
-    Time complexity, with O orders, A aisles, I items and P individuals:
+    The time complexity uses O orders, A aisles, I items, E order lines, S aisle
+    lines and P individuals. The steps below are NumPy vector operations.
 
-    - Repair: steps 1 and 2 go through the bit vector and the requested items,
-      O(O * I) in the worst case. Step 3 chooses at most A aisles, and each choice
-      goes through the aisles of every missing item, O(A * I), so O(A² * I).
-      Step 4 costs O(A * I). In total, O(O * I + A² * I).
-    - One generation: P children, each with O(O) for crossover and mutation and
-      one repair, so O(P * (O * I + A² * I)).
+    - Crossover and mutation cost O(A) each.
+    - Evaluation costs O(S + I) for the stock, O(E + O) to accept orders and
+      O(O) for the upper limit.
+    - One generation has P children, so it costs O(P * (A + S + I + E + O)).
 
     Args:
         instance: The problem instance.
         parameters: ``population_size``, ``tournament_size``, ``mutation_rate``,
-            ``seed`` and ``time_limit_seconds``.
+            ``max_generations``, ``seed`` and ``time_limit_seconds``.
 
     Returns:
-        The best solution seen during the whole run, and a dictionary with
-        ``generations`` (complete generations), ``best_found_seconds`` and
-        ``history``, the ``[seconds, objective]`` pairs recorded at each
-        improvement of the best solution.
+        The best feasible solution seen during the run, or ``None`` when no
+        individual was feasible, and a dictionary with ``generations`` (complete
+        generations), ``best_found_seconds`` and ``history``, the
+        ``[seconds, objective]`` pairs recorded at each improvement.
     """
     start = time.perf_counter()
     stop_after_seconds = parameters["time_limit_seconds"] - SAFETY_MARGIN_SECONDS
-    rng = random.Random(parameters["seed"])  # noqa: S311 (search heuristic, not cryptography)
-    tables = build_repair_tables(instance)
-    n_orders = len(instance.orders)
+    rng = np.random.default_rng(parameters["seed"])
+    population_size = parameters["population_size"]
+    n_aisles = len(instance.aisles)
+    arrays = build_arrays(instance)
+    best_fitness, best_solution = 0.0, None
+    history: list[list[float]] = []
 
-    # Starting each bit at 1 with the chance that puts the wave halfway between
-    # the limits, so the individuals are born close to feasible
-    middle_units = (instance.wave_min_units + instance.wave_max_units) / 2
-    chance_of_one = min(1, middle_units / sum(tables.order_units))
-    population = [
-        evaluate(
-            instance,
-            [int(rng.random() < chance_of_one) for _ in range(n_orders)],
-            rng,
-            tables,
-        )
-        for _ in range(parameters["population_size"])
-    ]
-    best = max(population, key=fitness)
-    history = [[time.perf_counter() - start, best[0]]]
+    def evaluate_and_keep_best(chromosome: np.ndarray) -> float:
+        # Evaluating the aisles and keeping the best feasible wave apart,
+        # so no generation can lose it
+        nonlocal best_fitness, best_solution
+        fitness, orders = evaluate(instance, arrays, chromosome)
+        if orders is not None and fitness > best_fitness:
+            best_fitness = fitness
+            aisles = np.flatnonzero(chromosome).tolist()
+            best_solution = Solution(sorted(orders.tolist()), aisles)
+            history.append([time.perf_counter() - start, best_fitness])
+        return fitness
+
+    # Giving each individual its own share of visited aisles, drawn between
+    # none and all, so the first generation tries waves of every size
+    share_of_aisles = rng.random((population_size, 1))
+    population = rng.random((population_size, n_aisles)) < share_of_aisles
+    fitness = np.array([evaluate_and_keep_best(bits) for bits in population])
 
     generations = 0
-    while time.perf_counter() - start < stop_after_seconds:
-        children = []
-        for _ in range(parameters["population_size"]):
+    while generations < parameters["max_generations"]:
+        children = np.empty_like(population)
+        children_fitness = np.empty(population_size)
+        for child in range(population_size):
+            if time.perf_counter() - start > stop_after_seconds:
+                return best_solution, report(generations, history)
+
             # Choosing each parent as the fittest of a random tournament
             mother, father = (
-                max(rng.sample(population, parameters["tournament_size"]), key=fitness)
+                max(
+                    rng.choice(
+                        population_size, parameters["tournament_size"], replace=False
+                    ),
+                    key=lambda individual: fitness[individual],
+                )
                 for _ in range(2)
             )
 
-            # Taking each bit from either parent with the same chance (uniform
-            # crossover), then flipping it with chance mutation_rate (mutation)
-            child_bits = [
-                (mother_bit if rng.random() < 0.5 else father_bit)  # noqa: PLR2004 (half of the bits come from each parent)
-                ^ (rng.random() < parameters["mutation_rate"])
-                for mother_bit, father_bit in zip(mother[1], father[1], strict=True)
-            ]
-            children.append(evaluate(instance, child_bits, rng, tables))
+            # Taking each bit from either parent with chance 1/2 (uniform
+            # crossover), then flipping each bit with the mutation rate
+            from_father = rng.random(n_aisles) < 0.5  # noqa: PLR2004 (half of the bits come from each parent)
+            children[child] = np.where(
+                from_father, population[father], population[mother]
+            )
+            children[child] ^= rng.random(n_aisles) < parameters["mutation_rate"]
+            children_fitness[child] = evaluate_and_keep_best(children[child])
 
-        population = children
+        population, fitness = children, children_fitness
         generations += 1
-        champion = max(population, key=fitness)
-        if champion[0] > best[0]:
-            best = champion
-            history.append([time.perf_counter() - start, best[0]])
+    return best_solution, report(generations, history)
 
-    return best[2], {
+
+def report(generations: int, history: list[list[float]]) -> dict:
+    """Build the run summary that ``solve`` returns next to the solution."""
+    return {
         "generations": generations,
-        "best_found_seconds": history[-1][0],
+        "best_found_seconds": history[-1][0] if history else None,
         "history": history,
     }
-
-
-def evaluate(
-    instance: Instance, bits: list[int], rng: random.Random, tables: RepairTables
-) -> tuple[float, list[int], Solution]:
-    """Repair the bits and return the fitness, the repaired bits and the solution."""
-    solution = repair(instance, bits, rng, tables)
-    repaired_bits = [0] * len(bits)
-    for order in solution.orders:
-        repaired_bits[order] = 1
-    return objective(instance, solution), repaired_bits, solution
-
-
-def fitness(individual: tuple[float, list[int], Solution]) -> float:
-    """Return the objective value stored first in each individual."""
-    return individual[0]

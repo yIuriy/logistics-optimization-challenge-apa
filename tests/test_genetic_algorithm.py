@@ -1,11 +1,9 @@
-import random
-from dataclasses import replace
-
+import numpy as np
 from hypothesis import given
 from hypothesis import strategies as st
 
-from order_selection.genetic_algorithm import build_repair_tables, repair, solve
-from order_selection.instance import Instance, Solution, is_feasible
+from order_selection.genetic_algorithm import build_arrays, evaluate, solve
+from order_selection.instance import Instance, Solution, is_feasible, objective
 
 # Example of section 3.1 of the official rules (5 orders, 5 items, 5 aisles)
 EXAMPLE_INSTANCE = Instance(
@@ -28,15 +26,19 @@ EXAMPLE_INSTANCE = Instance(
     wave_max_units=12,
 )
 
+PARAMETERS = {
+    "population_size": 10,
+    "tournament_size": 3,
+    "mutation_rate": 0.1,
+    "max_generations": 20,
+    "seed": 7,
+    "time_limit_seconds": 600,
+}
+
 
 @st.composite
 def instances_and_bits(draw):
-    """Draw a small instance with a feasible wave and a random bit vector.
-
-    The aisles are random, so some items may lack stock. One extra aisle stores
-    exactly what order 0 requests, and the lower limit is at most the units of
-    the smallest order, so any single order that fits the stock is a feasible wave.
-    """
+    """Draw a small instance with random limits and stock, and random aisle bits."""
     n_items = draw(st.integers(min_value=1, max_value=4))
     item_units = st.dictionaries(
         st.integers(min_value=0, max_value=n_items - 1),
@@ -44,96 +46,87 @@ def instances_and_bits(draw):
         min_size=1,
     )
     orders = draw(st.lists(item_units, min_size=1, max_size=8))
-    aisles = [*draw(st.lists(item_units, max_size=4)), dict(orders[0])]
-    order_units = [sum(order.values()) for order in orders]
+    wave_min_units = draw(st.integers(min_value=1, max_value=20))
     instance = Instance(
         orders=orders,
-        aisles=aisles,
+        aisles=draw(st.lists(item_units, min_size=1, max_size=5)),
         n_items=n_items,
-        wave_min_units=draw(st.integers(min_value=1, max_value=min(order_units))),
-        wave_max_units=draw(
-            st.integers(min_value=order_units[0], max_value=sum(order_units))
-        ),
+        wave_min_units=wave_min_units,
+        wave_max_units=draw(st.integers(min_value=wave_min_units, max_value=40)),
     )
-    bits = draw(st.lists(st.integers(0, 1), min_size=len(orders), max_size=len(orders)))
+    n_aisles = len(instance.aisles)
+    bits = draw(st.lists(st.booleans(), min_size=n_aisles, max_size=n_aisles))
     return instance, bits
 
 
-@given(instance_and_bits=instances_and_bits(), seed=st.integers(0, 1000))
-def test_repair_always_returns_a_feasible_solution(instance_and_bits, seed):
-    instance, bits = instance_and_bits
-    tables = build_repair_tables(instance)
-    solution = repair(instance, bits, random.Random(seed), tables)  # noqa: S311 (test draws, not cryptography)
-    assert is_feasible(instance, solution)
+def evaluate_aisles(instance, aisles):
+    """Decode the given aisles and return the fitness and the solution."""
+    chromosome = np.zeros(len(instance.aisles), dtype=bool)
+    chromosome[aisles] = True
+    fitness, orders = evaluate(instance, build_arrays(instance), chromosome)
+    solution = None if orders is None else Solution(sorted(orders.tolist()), aisles)
+    return fitness, solution
 
 
-@given(instance_and_bits=instances_and_bits(), seed=st.integers(0, 1000))
-def test_removing_any_aisle_after_repair_makes_the_solution_infeasible(
-    instance_and_bits, seed
+@given(instance_and_bits=instances_and_bits())
+def test_decoded_wave_is_feasible_exactly_when_the_fitness_is_positive(
+    instance_and_bits,
 ):
     instance, bits = instance_and_bits
-    tables = build_repair_tables(instance)
-    solution = repair(instance, bits, random.Random(seed), tables)  # noqa: S311 (test draws, not cryptography)
-    for aisle in solution.aisles:
-        other_aisles = [other for other in solution.aisles if other != aisle]
-        assert not is_feasible(instance, replace(solution, aisles=other_aisles))
+    aisles = [aisle for aisle, bit in enumerate(bits) if bit]
+    fitness, solution = evaluate_aisles(instance, aisles)
+    if fitness > 0:
+        assert is_feasible(instance, solution)
+        assert fitness == objective(instance, solution)
+    else:
+        assert solution is None
 
 
-def test_repair_drops_orders_whose_item_lacks_stock():
-    # Two orders want 3 units of item 0 each, but all aisles store only 4
+def test_decoder_serves_disputed_stock_by_order_priority():
+    # Aisle 0 holds 5 units of item 0, so only one of the two orders of 3 fits
+    # and the larger order of 4 comes first
     instance = Instance(
-        orders=[{0: 3}, {0: 3}],
-        aisles=[{0: 4}],
-        n_items=1,
+        orders=[{0: 3}, {0: 4}, {1: 1}],
+        aisles=[{0: 5, 1: 1}],
+        n_items=2,
         wave_min_units=1,
         wave_max_units=10,
     )
-    tables = build_repair_tables(instance)
-    solution = repair(instance, [1, 1], random.Random(0), tables)  # noqa: S311 (test draws, not cryptography)
-    assert len(solution.orders) == 1
-    assert is_feasible(instance, solution)
+    fitness, solution = evaluate_aisles(instance, [0])
+    assert solution == Solution(orders=[1, 2], aisles=[0])
+    assert fitness == 5
 
 
-def test_repair_restarts_from_an_empty_wave_when_the_lower_limit_is_out_of_reach():
-    # Order 0 uses the only unit of item 0 that order 1 also needs, and order 0
-    # alone stays below the lower limit, so the selected wave is a dead end. The
-    # restart draws the orders again, and with seed 1 it tries order 1 first
+def test_decoder_stops_adding_orders_at_the_upper_limit():
     instance = Instance(
-        orders=[{0: 1}, {0: 1, 1: 2}],
-        aisles=[{0: 1, 1: 2}],
-        n_items=2,
-        wave_min_units=3,
-        wave_max_units=3,
+        orders=[{0: 2}, {0: 2}, {0: 2}],
+        aisles=[{0: 9}],
+        n_items=1,
+        wave_min_units=1,
+        wave_max_units=5,
     )
-    tables = build_repair_tables(instance)
-    solution = repair(instance, [1, 0], random.Random(1), tables)  # noqa: S311 (test draws, not cryptography)
-    assert solution == Solution(orders=[1], aisles=[0])
+    fitness, solution = evaluate_aisles(instance, [0])
+    assert solution == Solution(orders=[0, 1], aisles=[0])
+    assert fitness == 4
 
 
 def test_same_seed_gives_same_solution():
-    parameters = {
-        "population_size": 10,
-        "tournament_size": 3,
-        "mutation_rate": 0.1,
-        "seed": 7,
-        "time_limit_seconds": 5,
-    }
-    first_solution, _ = solve(EXAMPLE_INSTANCE, parameters)
-    second_solution, _ = solve(EXAMPLE_INSTANCE, parameters)
+    first_solution, first_report = solve(EXAMPLE_INSTANCE, PARAMETERS)
+    second_solution, second_report = solve(EXAMPLE_INSTANCE, PARAMETERS)
     assert first_solution == second_solution
+    assert first_report["generations"] == second_report["generations"] == 20
 
 
-def test_solve_runs_generations_and_records_an_increasing_history():
-    parameters = {
-        "population_size": 10,
-        "tournament_size": 3,
-        "mutation_rate": 0.1,
-        "seed": 1,
-        "time_limit_seconds": 5.2,
-    }
-    solution, report = solve(EXAMPLE_INSTANCE, parameters)
+def test_solve_returns_a_feasible_solution_and_an_increasing_history():
+    solution, report = solve(EXAMPLE_INSTANCE, PARAMETERS)
     objectives = [objective for _, objective in report["history"]]
+    assert solution is not None
     assert is_feasible(EXAMPLE_INSTANCE, solution)
-    assert report["generations"] > 0
     assert objectives == sorted(set(objectives))
     assert report["best_found_seconds"] == report["history"][-1][0]
+
+
+def test_solve_stops_at_the_time_limit():
+    parameters = {**PARAMETERS, "max_generations": 10**9, "time_limit_seconds": 5.2}
+    _, report = solve(EXAMPLE_INSTANCE, parameters)
+    assert report["generations"] < 10**9
