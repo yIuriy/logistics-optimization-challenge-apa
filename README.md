@@ -1,41 +1,28 @@
 # logistics-optimization-challenge-apa
 
-Heuristic solver for the **Wave Order Picking** problem of the
-[SBPO 2025 / Mercado Livre optimization challenge](https://github.com/mercadolibre/challenge-sbpo-2025),
-developed for the APA course (Algorithm Design and Analysis).
+Solver for the **Wave Order Picking** problem of the [SBPO 2025 / Mercado Livre optimization challenge](https://github.com/mercadolibre/challenge-sbpo-2025), developed for the APA course (Algorithm Design and Analysis).
 
-**Goal:** choose a subset of orders (the *wave*) and a subset of warehouse aisles that
-maximize *units picked per aisle visited*, respecting the wave size limits and the
-stock of each item. Details in [docs/problem.md](docs/problem.md).
+**Goal:** choose a subset of orders (the _wave_) and a subset of warehouse aisles that maximize _units picked per aisle visited_, respecting the wave size limits and the stock of each item. Details in [docs/problem.md](docs/problem.md).
 
-**Approach:** greedy construction (choose aisles → fill orders) + local search over
-the aisle set. Details in [docs/strategy.md](docs/strategy.md).
-
-**Status:** infrastructure ready (reading, validation, benchmark runner, tests); the
-heuristic itself is being implemented — see [docs/issues.md](docs/issues.md).
-Results appear in `results/summary.md` after the first `python -m wop.run`.
+**Approach:** an exact model solved by HiGHS with the Dinkelbach method as the reference, and a genetic algorithm with a repair step as the proposed solution. The full plan, with every decision, is in [docs/plano-implementacao.md](docs/plano-implementacao.md).
 
 ## Quick start
 
 ```bash
-python -m venv .venv
-.venv\Scripts\activate            # Windows  (Linux/macOS: source .venv/bin/activate)
-pip install -r requirements.txt
-pytest
-python -m wop.run --time-limit 60  # solve all instances, keep the best solutions
-python -m wop.check                # validate solutions/ with the official checker
+uv sync
+uv run pytest
+uv run python src/order_selection/checker.py <instance> <solution>
 ```
 
 ## Repository
 
 ```
-wop/            solver package (instance, solution, rankings, construct, local_search, solver, run, check)
-tests/          unit tests (uses the 5x5x5 example from the problem description)
-data/           official instances (datasets a, b, x) and best_objectives.csv  — read-only
-tools/          official checker.py  — read-only
-solutions/      best solution found for each instance
-results/        comparison with the best known values
-docs/           problem, strategy, team workflow, official PDFs
+src/order_selection/   package (instance files, exact model, genetic algorithm, batch runner, CLI)
+tests/                 unit and property tests
+data/                  the 30 instances of datasets B and X (prefix b_ or x_) and best_objectives.csv
+configs/               batch configuration files
+results/               one .txt and .json pair per run
+docs/                  problem, plan, figures and official PDFs
 ```
 
 Team workflow and rules: [docs/workflow.md](docs/workflow.md).
