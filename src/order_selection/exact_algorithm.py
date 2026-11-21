@@ -9,25 +9,16 @@ updating only the aisle objective coefficients between iterations.
 """
 
 import math
-import multiprocessing
-import queue
 import time
-from collections.abc import Sequence
 from dataclasses import dataclass
-from multiprocessing.queues import Queue
 
 import highspy
 import numpy as np
-from highspy.highs import HighsCallbackEvent
 
 from order_selection.instance import Instance, Solution, is_feasible
 
 # Stopping this many seconds before the time limit, to leave time to write the output
 SAFETY_MARGIN_SECONDS = 5.0
-
-# Stopping the worker process this many seconds before the time limit, because a
-# HiGHS round can run past its own time limit (see solve)
-HARD_STOP_MARGIN_SECONDS = 2.0
 
 # Treating F(lam) at or below this value as zero to absorb floating-point rounding
 OPTIMALITY_TOLERANCE = 1e-6
@@ -50,14 +41,6 @@ class ExactModel:
     n_aisles: int
     order_units: np.ndarray
     aisle_columns: np.ndarray
-
-
-@dataclass
-class BestWave:
-    """Best feasible wave seen by the search and its objective ratio."""
-
-    solution: Solution | None
-    ratio: float
 
 
 @dataclass
@@ -220,14 +203,7 @@ def extract_solution(model: ExactModel) -> tuple[Solution, float] | None:
     primal_status = model.highs.getInfo().primal_solution_status
     if primal_status != int(highspy.SolutionStatus.kSolutionStatusFeasible):
         return None
-    return wave_from_values(model, model.highs.getSolution().col_value)
-
-
-def wave_from_values(
-    model: ExactModel, values: Sequence[float]
-) -> tuple[Solution, float] | None:
-    """Turn HiGHS column values into a feasible wave and its objective ratio."""
-    col_values = np.asarray(values, dtype=np.float64)
+    col_values = np.asarray(model.highs.getSolution().col_value, dtype=np.float64)
     orders = np.flatnonzero(col_values[: model.n_orders] > BINARY_THRESHOLD).tolist()
     aisles = np.flatnonzero(col_values[model.n_orders :] > BINARY_THRESHOLD).tolist()
     solution = Solution(orders, aisles)
@@ -347,85 +323,6 @@ def run_dinkelbach_round(
     return None
 
 
-def dinkelbach_search(instance: Instance, budget: float, results: Queue) -> None:
-    """Run the Dinkelbach rounds and send the best result found so far.
-
-    Runs inside a worker process. After every round that ends without
-    finishing, and after every better wave HiGHS finds inside a round, it sends
-    ``(solution, report, False)`` with status ``"time_limit"``, so the parent
-    always holds a valid answer if it has to stop the worker. The last message
-    is ``(solution, report, True)``.
-
-    Args:
-        instance: The problem instance.
-        budget: Seconds this search may use, counted from its own start.
-        results: Queue that receives the messages for the parent process.
-    """
-    start = time.perf_counter()
-    model = build_model(instance)
-    state = SearchState(
-        best_solution=None,
-        lam=0.0,
-        upper_bound=float(instance.wave_max_units),
-        iterations=0,
-    )
-    best = BestWave(solution=None, ratio=0.0)
-
-    def send_improving_wave(event: HighsCallbackEvent) -> None:
-        # Sending each better wave HiGHS finds inside a round, because a round
-        # that the parent stops at the deadline would lose its incumbent
-        candidate = wave_from_values(model, event.data_out.mip_solution)
-        if candidate is not None and candidate[1] > best.ratio:
-            best.solution, best.ratio = candidate
-            results.put((*best_result(state, best, state.upper_bound), False))
-
-    model.highs.cbMipImprovingSolution += send_improving_wave
-
-    while True:
-        remaining = budget - (time.perf_counter() - start)
-        if remaining <= 0.0:
-            results.put((*best_result(state, best, state.upper_bound), True))
-            return
-
-        finished = run_dinkelbach_round(
-            model, state, remaining, instance.wave_max_units
-        )
-        if finished is None:
-            results.put((*best_result(state, best, state.upper_bound), False))
-            continue
-
-        # Keeping an optimal answer, or else the best wave seen in any round
-        solution, report = finished
-        if report["status"] != "optimal":
-            upper_bound = report["objective_upper_bound"] or state.upper_bound
-            solution, report = best_result(state, best, upper_bound)
-        results.put((solution, report, True))
-        return
-
-
-def best_result(
-    state: SearchState, best: BestWave, upper_bound: float
-) -> tuple[Solution | None, dict]:
-    """Return the best wave of the search so far with status ``"time_limit"``.
-
-    Args:
-        state: The Dinkelbach state, whose wave may beat the one in ``best``.
-        best: The best wave seen so far. It is updated in place.
-        upper_bound: An upper bound on the optimal objective proven so far.
-
-    Returns:
-        The best wave and its report, or ``None`` and a ``"no_solution"``
-        report when no feasible wave was seen.
-    """
-    if state.best_solution is not None and state.lam > best.ratio:
-        best.solution, best.ratio = state.best_solution, state.lam
-    if best.solution is None:
-        return None, build_report("no_solution", state.iterations, None, None)
-    return best.solution, build_report(
-        "time_limit", state.iterations, best.ratio, max(best.ratio, upper_bound)
-    )
-
-
 def solve(instance: Instance, parameters: dict) -> tuple[Solution | None, dict]:
     """Solve the wave order picking problem with HiGHS and the Dinkelbach method.
 
@@ -434,11 +331,6 @@ def solve(instance: Instance, parameters: dict) -> tuple[Solution | None, dict]:
     ``"optimal"`` once ``F(lam) <= 1e-6``, with ``"time_limit"`` and valid
     lower/upper bounds if the time budget runs out after finding a feasible
     wave, or with ``"no_solution"`` if no feasible wave is found.
-
-    HiGHS does not check its time limit during the cut rounds of the root node,
-    and on large instances one round can run many seconds past it. The search
-    therefore runs in a worker process, and this function stops the worker at a
-    hard deadline, keeping the result of the last complete Dinkelbach round.
 
     Args:
         instance: The problem instance.
@@ -456,30 +348,29 @@ def solve(instance: Instance, parameters: dict) -> tuple[Solution | None, dict]:
         if time_limit > SAFETY_MARGIN_SECONDS
         else time_limit
     )
-    hard_deadline = start + max(budget, time_limit - HARD_STOP_MARGIN_SECONDS)
 
-    latest = None, build_report("no_solution", 0, None, None)
     if not instance.orders or not instance.aisles:
-        return latest
+        return None, build_report("no_solution", 0, None, None)
 
-    results = multiprocessing.Queue()
-    worker = multiprocessing.Process(
-        target=dinkelbach_search, args=(instance, budget, results), daemon=True
+    model = build_model(instance)
+    state = SearchState(
+        best_solution=None,
+        lam=0.0,
+        upper_bound=float(instance.wave_max_units),
+        iterations=0,
     )
-    worker.start()
 
-    # Keeping the newest message until the worker finishes or the deadline comes
-    try:
-        while True:
-            solution, report, finished = results.get(
-                timeout=max(0.0, hard_deadline - time.perf_counter())
+    while True:
+        remaining = budget - (time.perf_counter() - start)
+        if remaining <= 0.0:
+            if state.best_solution is None:
+                return None, build_report("no_solution", state.iterations, None, None)
+            return state.best_solution, build_report(
+                "time_limit", state.iterations, state.lam, state.upper_bound
             )
-            latest = solution, report
-            if finished:
-                break
-    except queue.Empty:
-        pass
-    finally:
-        worker.terminate()
-        worker.join()
-    return latest
+
+        finished = run_dinkelbach_round(
+            model, state, remaining, instance.wave_max_units
+        )
+        if finished is not None:
+            return finished
