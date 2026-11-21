@@ -74,10 +74,25 @@ def parameter_combinations(config: dict, method: str) -> list[dict]:
     Returns:
         A single dictionary with the time limit for the exact algorithm, or one
         dictionary per element of the product of the ``genetic`` lists.
+
+    Raises:
+        ValueError: If a parameter left out of the file name, such as
+            ``max_generations``, lists more than one value. Two runs would then
+            write the same file, and the second would overwrite the first.
     """
     time_limit = {"time_limit_seconds": config["time_limit_seconds"]}
     if method == "exact":
         return [time_limit]
+
+    # Rejecting lists that parameter_tag cannot tell apart in the file name
+    untagged = [
+        name
+        for name, values in config["genetic"].items()
+        if name not in TAG_PARTS and len(values) > 1
+    ]
+    if untagged:
+        message = f"{untagged} must list one value each, or runs share a file name"
+        raise ValueError(message)
 
     # Crossing every value of every genetic parameter with every other
     names = list(config["genetic"])

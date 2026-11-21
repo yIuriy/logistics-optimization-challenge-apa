@@ -4,6 +4,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
@@ -83,6 +84,13 @@ def test_number_of_runs_is_product_of_list_sizes(lists):
     combinations = parameter_combinations(config, "genetic")
     assert len(combinations) == math.prod(len(values) for values in lists.values())
     assert all(c["time_limit_seconds"] == 10 for c in combinations)
+
+
+def test_two_values_of_an_untagged_parameter_are_rejected():
+    lists = GENETIC_LISTS | {"max_generations": [5, 10]}
+    config = {"time_limit_seconds": 10, "genetic": lists}
+    with pytest.raises(ValueError, match="max_generations"):
+        parameter_combinations(config, "genetic")
 
 
 def test_exact_algorithm_runs_once_and_ignores_genetic_lists():
