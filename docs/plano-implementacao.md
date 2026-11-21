@@ -45,7 +45,7 @@ TPF/
 
 O prefixo `b_` ou `x_` é necessário porque os dois conjuntos repetem nomes como `instance_0001`.
 
-Cada `.txt` segue o formato oficial lido pelo `checker.py`. Cada `.json` guarda os dados da instância (pedidos, itens, corredores, LB e UB), o método, os parâmetros, o objetivo, os limites inferior e superior, o tempo e a porcentagem do melhor valor oficial.
+Cada `.txt` segue o formato oficial lido pelo `checker.py`. Cada `.json` guarda os dados da instância (pedidos, itens, corredores, LB e UB), o método, os parâmetros, o commit que rodou, o objetivo, os corredores visitados, o melhor valor oficial e a porcentagem dele. O algoritmo genético acrescenta as gerações e o segundo em que achou a melhor solução. O algoritmo exato acrescenta os limites inferior e superior, o status e o tempo. O formato completo está na issue #14.
 
 ## Dependências externas
 
