@@ -18,7 +18,7 @@ uv run python src/order_selection/checker.py <instance> <solution>
 | ------------------------------------------ | ------------------------------------------------------------------------ |
 | `src/order_selection/instance.py`          | `Instance`, `Solution`, file reading and writing, objective, feasibility |
 | `src/order_selection/exact_algorithm.py`   | Dinkelbach with HiGHS (issue #12)                                        |
-| `src/order_selection/genetic_algorithm.py` | genetic algorithm with repair (issue #13)                                |
+| `src/order_selection/genetic_algorithm.py` | genetic algorithm over aisles (issue #13)                                |
 | `src/order_selection/batch_runner.py`      | runs every combination of a configuration file (issue #14)               |
 | `src/order_selection/cli.py`               | command line interface (issue #15)                                       |
 | `src/order_selection/checker.py`           | official checker, untouched                                              |
@@ -29,7 +29,7 @@ uv run python src/order_selection/checker.py <instance> <solution>
 - **Do not modify `src/order_selection/checker.py` or `data/`.** They are the official files.
 - A solution must pass the official checker. An infeasible solution scores zero.
 - Keep the `instance.py` interface stable, because every other module builds on it.
-- Every random draw uses `random.Random(seed)`, and every duration uses `time.perf_counter()`.
+- Every random draw uses a seeded generator (`random.Random(seed)` or `np.random.default_rng(seed)`), and every duration uses `time.perf_counter()`.
 
 ## How to help this team
 
