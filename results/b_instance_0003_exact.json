@@ -1,0 +1,21 @@
+{
+  "instance": "b_instance_0003",
+  "n_orders": 2070,
+  "n_items": 5617,
+  "n_aisles": 164,
+  "wave_min_units": 585,
+  "wave_max_units": 2150,
+  "method": "exact",
+  "parameters": {
+    "time_limit_seconds": 600
+  },
+  "source_commit": "e957035",
+  "objective": 134.375,
+  "aisles_visited": 16,
+  "best_official": 149.6,
+  "percent_of_best": 89.82,
+  "lower_bound": 134.375,
+  "upper_bound": 1989.5,
+  "status": "time_limit",
+  "elapsed_seconds": 595.374
+}
