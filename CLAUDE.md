@@ -21,6 +21,8 @@ uv run python src/order_selection/checker.py <instance> <solution>
 | `src/order_selection/genetic_algorithm.py` | genetic algorithm over aisles (issue #13)                                |
 | `src/order_selection/batch_runner.py`      | runs every combination of a configuration file (issue #14)               |
 | `src/order_selection/cli.py`               | command line interface (issue #15)                                       |
+| `src/order_selection/results.py`           | loads the batch `.json` and averages them (issues #17 and #18)           |
+| `src/order_selection/charts.py`            | PNG charts of the slides into `results/figures/` (issue #17)             |
 | `src/order_selection/checker.py`           | official checker, untouched                                              |
 | `data/`                                    | official instances and `best_objectives.csv`, read-only                  |
 
