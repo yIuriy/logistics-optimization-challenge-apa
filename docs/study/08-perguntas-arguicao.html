@@ -1113,10 +1113,11 @@
           </summary>
           <div class="body">
             As 30 instâncias dos conjuntos B e X, com 600 segundos cada,
-            população 50, torneio 3, taxa de mutação 0,002 e semente 1. A média
-            ficou em 98,31% do melhor valor oficial, 26 instâncias passaram de
-            95% e 5 empataram com o melhor. O checker.py aprovou as 30 soluções.
-            A tabela está na página 06 e em results/.
+            população 50, torneio 3, taxa de mutação 0,002 e semente 1. Na
+            rodada final (commit e957035), a média ficou em 98,41% do melhor
+            valor oficial, 26 instâncias passaram de 95% e 5 empataram com o
+            melhor. O checker.py aprovou as 30 soluções. A tabela está em
+            results/summary.md.
           </div>
         </details>
         <details>
@@ -1126,9 +1127,9 @@
           </summary>
           <div class="body">
             Em 4 instâncias, abaixo de 95%. Em x_instance_0004 (92,97%), a
-            melhor solução apareceu aos 21,9 s e a busca estagnou. Em
-            x_instance_0008 e x_instance_0010, ela apareceu depois de 500 s,
-            então faltou tempo. b_instance_0003 (94,43%) melhorou até os 446 s.
+            melhor solução apareceu aos 23,2 s e a busca estagnou. Em
+            x_instance_0008 e x_instance_0010, ela apareceu perto de 500 s,
+            então faltou tempo. b_instance_0003 (94,43%) melhorou até os 554 s.
             A regra gulosa do decodificador também pode deixar ondas melhores de
             fora.
           </div>
@@ -1240,11 +1241,11 @@
         problema, issues #7 e #11 a #15,
         <code>src/order_selection/genetic_algorithm.py</code> na
         <code>main</code> (commit 1d55666) e as páginas de estudo do algoritmo
-        exato e do algoritmo genético. Os resultados citados vêm das execuções
-        de 600 segundos de 2026-11-21. A afirmação de que o problema é
+        exato e do algoritmo genético. Os resultados citados vêm da rodada final
+        de 600 segundos (commit e957035), resumida em
+        <code>results/summary.md</code>. A afirmação de que o problema é
         NP-difícil é uma inferência do grupo e não aparece na descrição oficial.
-        A tabela final vem dos 30 arquivos <code>.json</code> de
-        <code>results/</code>, resumidos na página 06.
+        A página 06 analisa a rodada anterior, de 2026-11-21.
       </footer>
     </div>
   </body>
