@@ -121,7 +121,8 @@ def run_one(
 
     Returns:
         The path of the ``.json`` file. The ``.txt`` is written only when the
-        solver returned a solution.
+        solver returned a solution, and an older ``.txt`` of the same run is
+        removed otherwise.
     """
     instance = read_instance(instance_path)
 
@@ -133,8 +134,13 @@ def run_one(
     stem = f"{instance_path.stem}_{method}"
     if method == "genetic":
         stem += f"_{parameter_tag(parameters)}"
+    # Removing the .txt of an earlier run when this one found nothing, so the
+    # folder never pairs a solution with a .json that says there is none
+    txt_path = results_dir / f"{stem}.txt"
     if solution is not None:
-        write_solution(solution, results_dir / f"{stem}.txt")
+        write_solution(solution, txt_path)
+    else:
+        txt_path.unlink(missing_ok=True)
 
     summary = build_summary(instance_path, instance, method, parameters, solution)
     summary |= method_fields(method, report, elapsed_seconds)
@@ -212,16 +218,23 @@ def best_official(instance_name: str) -> float | None:
     return None
 
 
-def source_commit() -> str | None:
-    """Return the short hash of the current commit, or ``None`` outside git."""
+def source_commit(repository: Path = BEST_OBJECTIVES_PATH.parent) -> str | None:
+    """Return the short hash of the current commit, or ``None`` outside git.
+
+    The hash ends in ``-dirty`` when ``src/`` has changes not yet committed,
+    because then the commit alone does not describe the code that ran.
+    """
+    commands = (
+        ["git", "rev-parse", "--short", "HEAD"],
+        ["git", "status", "--porcelain", "--", ":/src"],
+    )
     try:
-        result = subprocess.run(
-            ["git", "rev-parse", "--short", "HEAD"],  # noqa: S607 (git is on PATH)
-            capture_output=True,
-            text=True,
-            check=True,
-            cwd=BEST_OBJECTIVES_PATH.parent,
+        commit, changes = (
+            subprocess.run(  # noqa: S603 (fixed git commands, no outside input)
+                command, capture_output=True, text=True, check=True, cwd=repository
+            ).stdout.strip()
+            for command in commands
         )
     except (OSError, subprocess.CalledProcessError):
         return None
-    return result.stdout.strip()
+    return f"{commit}-dirty" if changes else commit

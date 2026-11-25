@@ -130,3 +130,10 @@ def test_solve_stops_at_the_time_limit():
     parameters = {**PARAMETERS, "max_generations": 10**9, "time_limit_seconds": 5.2}
     _, report = solve(EXAMPLE_INSTANCE, parameters)
     assert report["generations"] < 10**9
+
+
+def test_limit_shorter_than_the_margin_still_runs_generations():
+    parameters = {**PARAMETERS, "max_generations": 10**9, "time_limit_seconds": 1}
+    solution, report = solve(EXAMPLE_INSTANCE, parameters)
+    assert 0 < report["generations"] < 10**9
+    assert solution is not None

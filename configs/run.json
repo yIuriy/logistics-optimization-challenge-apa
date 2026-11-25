@@ -2,7 +2,7 @@
   "instances": ["data/b_instance_0001.txt"],
   "methods": ["genetic"],
   "time_limit_seconds": 600,
-  "results_dir": "results",
+  "results_dir": "results/run",
   "genetic": {
     "population_size": [50],
     "tournament_size": [3],

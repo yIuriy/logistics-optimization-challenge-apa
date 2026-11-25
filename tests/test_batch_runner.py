@@ -14,6 +14,7 @@ from order_selection.batch_runner import (
     parameter_tag,
     run_batch,
     run_one,
+    source_commit,
 )
 
 ROOT = Path(__file__).parents[1]
@@ -142,6 +143,46 @@ def test_run_one_writes_txt_and_json_that_checker_accepts(tmp_path):
     assert summary["generations"] == 5
     assert summary["objective"] > 0
     assert checker_accepts(instance_path, json_path.with_suffix(".txt"))
+
+
+def test_run_without_solution_removes_the_older_txt(tmp_path):
+    instance_path = write_example(tmp_path)
+    parameters = {name: values[0] for name, values in GENETIC_LISTS.items()}
+    parameters["time_limit_seconds"] = 30
+    json_path = run_one(instance_path, "genetic", parameters, tmp_path)
+    assert json_path.with_suffix(".txt").exists()
+
+    # Raising the lower limit above every unit of the instance, so no wave exists
+    impossible = EXAMPLE_INSTANCE_TEXT.replace("\n5 12\n", "\n100 120\n")
+    instance_path.write_text(impossible, encoding="utf-8")
+    json_path = run_one(instance_path, "genetic", parameters, tmp_path)
+
+    summary = json.loads(json_path.read_text(encoding="utf-8"))
+    assert summary["objective"] is None
+    assert not json_path.with_suffix(".txt").exists()
+
+
+def test_source_commit_marks_uncommitted_changes_in_src(tmp_path):
+    def git(*arguments):
+        subprocess.run(  # noqa: S603 (git commands on a test repository)
+            ["git", "-c", "user.name=test", "-c", "user.email=test@test", *arguments],  # noqa: S607 (git is on PATH)
+            cwd=tmp_path,
+            check=True,
+            capture_output=True,
+        )
+
+    (tmp_path / "src").mkdir()
+    code = tmp_path / "src" / "module.py"
+    code.write_text("value = 1\n", encoding="utf-8")
+    git("init")
+    git("add", ".")
+    git("commit", "-m", "start")
+    (tmp_path / "results.json").write_text("{}\n", encoding="utf-8")
+    assert not source_commit(tmp_path).endswith("-dirty")
+
+    code.write_text("value = 2\n", encoding="utf-8")
+    assert source_commit(tmp_path).endswith("-dirty")
+    assert source_commit(tmp_path.parent / "missing") is None
 
 
 def test_small_batch_writes_one_pair_per_run(tmp_path):

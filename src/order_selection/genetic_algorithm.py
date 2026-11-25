@@ -153,7 +153,8 @@ def solve(instance: Instance, parameters: dict) -> tuple[Solution | None, dict]:
     parents chosen by tournament, mixes them by uniform crossover, flips each
     aisle bit with probability ``mutation_rate`` and goes through ``evaluate``.
     The run stops after ``max_generations`` generations, or earlier when the
-    clock reaches ``time_limit_seconds`` minus a safety margin.
+    clock reaches ``time_limit_seconds`` minus a safety margin. A limit shorter
+    than the margin is used whole, as the exact algorithm does.
 
     The time complexity uses O orders, A aisles, I items, E order lines, S aisle
     lines and P individuals. The steps below are NumPy vector operations.
@@ -175,7 +176,15 @@ def solve(instance: Instance, parameters: dict) -> tuple[Solution | None, dict]:
         ``[seconds, objective]`` pairs recorded at each improvement.
     """
     start = time.perf_counter()
-    stop_after_seconds = parameters["time_limit_seconds"] - SAFETY_MARGIN_SECONDS
+
+    # Keeping the safety margin only when the limit is longer than it, like the
+    # exact algorithm, so a short limit still leaves time for generations
+    time_limit = parameters["time_limit_seconds"]
+    stop_after_seconds = (
+        time_limit - SAFETY_MARGIN_SECONDS
+        if time_limit > SAFETY_MARGIN_SECONDS
+        else time_limit
+    )
     rng = np.random.default_rng(parameters["seed"])
     population_size = parameters["population_size"]
     n_aisles = len(instance.aisles)

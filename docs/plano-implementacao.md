@@ -18,7 +18,7 @@ Plano fechado em 2026-11-20 para o trabalho final de Análise e Projeto de Algor
 ```
 TPF/
 ├── configs/
-│   ├── run.json                  uma instância, um método e os parâmetros dele
+│   ├── run.json                  uma instância, um método e os parâmetros dele, saída em results/run/
 │   └── batch.json                listas de instâncias, métodos e parâmetros
 ├── data/
 │   ├── b_instance_0001.txt ...   as 30 instâncias, com prefixo b_ ou x_
@@ -88,6 +88,6 @@ Duas issues extras ainda sem responsável completam a divisão. A #17 gera os gr
 
 ## Riscos
 
-- Em 2026-11-21 o algoritmo genético rodou as 30 instâncias por 600 s cada, com semente 1, e chegou em média a 98,3% do melhor valor oficial. A pior foi `x_instance_0004`, com 93,0%. Os pares `.txt` e `.json` estão em `results/`.
+- Na rodada final (commit `e957035`), o algoritmo genético rodou as 30 instâncias por 600 s cada, com semente 1, e chegou em média a 98,41% do melhor valor oficial. A pior foi `x_instance_0004`, com 92,97%. Os pares `.txt` e `.json` estão em `results/`, e o resumo em `results/summary.md`. A rodada de 2026-11-21, com os mesmos parâmetros, chegou a 98,31% e está no commit `3fc8a0a`.
 - Sem limite de tempo na avaliação, outros grupos podem rodar por mais tempo e chegar a soluções melhores. Uma rodada final mais longa do algoritmo genético diminui esse risco.
 - Uma instância nova apresentada na hora não cabe em 600 s dentro dos 5 minutos de apresentação.
