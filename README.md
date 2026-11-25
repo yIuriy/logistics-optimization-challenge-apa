@@ -15,10 +15,20 @@ uv run python src/order_selection/checker.py <instance> <solution>
 uv run python -m order_selection.charts   # PNG charts of results/ into results/figures/
 ```
 
+## Web interface
+
+```bash
+cd frontend && npm ci && npm run build && cd ..
+uv run python -m order_selection.server   # open http://localhost:8000
+```
+
+The page shows the final batch of `results/` and runs the genetic algorithm with parameters chosen on screen. Those runs go to `results/web/` (ignored by git), so they never overwrite the final batch. For development, `npm run dev` in `frontend/` forwards `/api` to the server on port 8000.
+
 ## Repository
 
 ```
-src/order_selection/   package (instance files, exact algorithm, genetic algorithm, batch runner, CLI, charts)
+src/order_selection/   package (instance files, exact algorithm, genetic algorithm, batch runner, CLI, charts, web server)
+frontend/              React web interface (Vite, TypeScript, Recharts)
 tests/                 unit and property tests
 data/                  the 30 instances of datasets B and X (prefix b_ or x_) and best_objectives.csv
 configs/               batch configuration files

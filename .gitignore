@@ -7,3 +7,6 @@ __pycache__/
 .DS_Store
 .ruff_cache/
 .hypothesis/
+
+# Runs started from the web interface (issue #18)
+results/web/

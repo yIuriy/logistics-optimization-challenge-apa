@@ -23,6 +23,9 @@ uv run python src/order_selection/checker.py <instance> <solution>
 | `src/order_selection/cli.py`               | command line interface (issue #15)                                       |
 | `src/order_selection/results.py`           | loads the batch `.json` and averages them (issues #17 and #18)           |
 | `src/order_selection/charts.py`            | PNG charts of the slides into `results/figures/` (issue #17)             |
+| `src/order_selection/run_request.py`       | checks a run asked by the web interface (issue #18)                      |
+| `src/order_selection/server.py`            | HTTP server of the web interface (issue #18)                             |
+| `frontend/`                                | React web interface, `npm ci && npm run lint && npm run build` (#18)     |
 | `src/order_selection/checker.py`           | official checker, untouched                                              |
 | `data/`                                    | official instances and `best_objectives.csv`, read-only                  |
 
