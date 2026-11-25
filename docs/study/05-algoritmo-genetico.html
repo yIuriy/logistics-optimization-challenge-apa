@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Material de estudo do algoritmo genético sobre corredores (issue #13, PR #19). Explica o problema, as decisões, o código de src/order_selection/genetic_algorithm.py, os resultados e as limitações, para quem nunca estudou algoritmo genético nem otimização. -->
+<!-- Material de estudo do algoritmo genético sobre corredores (issue #13, PR #19). Explica o problema, as decisões, o código de src/order_selection/genetic_algorithm.py, os testes iniciais, a média da rodada final (commit e957035) e as limitações, para quem nunca estudou algoritmo genético nem otimização. -->
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
@@ -511,13 +511,16 @@
         de 600 segundos por instância.
       </p>
       <p>
-        O grupo usa dois caminhos. O <b>modelo exato</b> (issue #12, HiGHS com o
-        método de Dinkelbach) procura o ótimo com garantia matemática, mas pode
-        não terminar no tempo. O <b>algoritmo genético</b> é uma
-        <b>heurística</b>, ou seja, um método que encontra uma solução boa
-        depressa, sem provar que ela é a melhor. Mais precisamente, ele é uma
-        <b>meta-heurística</b>, uma receita geral de busca que funciona para
-        muitos problemas diferentes e que adaptamos a este.
+        O grupo entrega dois algoritmos. O <b>algoritmo exato</b> (HiGHS com o
+        método de Dinkelbach, explicado na
+        <a href="02-algoritmo-exato.html">página do algoritmo exato</a>) procura
+        o ótimo com garantia matemática, mas pode não terminar no tempo. Na
+        rodada final, ele provou o ótimo em 2 das 30 instâncias. O
+        <b>algoritmo genético</b> é uma <b>heurística</b>, ou seja, um método
+        que encontra uma solução boa depressa, sem provar que ela é a melhor.
+        Mais precisamente, ele é uma <b>meta-heurística</b>, uma receita geral
+        de busca que funciona para muitos problemas diferentes e que adaptamos a
+        este.
       </p>
 
       <h2>3. Algoritmo genético do zero</h2>
@@ -1193,14 +1196,17 @@
               <b>Por que gerações.</b> Com a mesma semente e o mesmo número de
               gerações, duas máquinas diferentes produzem exatamente a mesma
               solução. Se a parada fosse só por tempo, uma máquina mais rápida
-              faria mais gerações e o resultado mudaria.
+              faria mais gerações e o resultado mudaria. Na rodada final, porém,
+              <code>max_generations</code> foi 10<sup>9</sup>, então quem parou
+              as execuções foi o relógio.
             </div>
             <div class="why">
               <b>Por que a trava de tempo.</b> As rodadas do grupo usam os 600
               segundos por instância do desafio, mesmo sem limite na avaliação
               da disciplina. O relógio é conferido antes de cada filho, e os 5
               segundos de margem (<code>SAFETY_MARGIN_SECONDS</code>) deixam
-              tempo para gravar o arquivo de saída.
+              tempo para gravar o arquivo de saída. Se o limite for menor que 5
+              segundos, o código usa o limite inteiro.
             </div>
             <p>
               O tempo é medido com <code>time.perf_counter()</code>, um relógio
@@ -1599,6 +1605,17 @@ population = rng.random((population_size, n_aisles)) &lt; share_of_aisles</code>
       </div>
 
       <h2>6. Resultados medidos</h2>
+      <div class="ans">
+        Na rodada final, com taxa 0,002 nas 30 instâncias, o algoritmo genético
+        chegou a 98,41% do melhor oficial em média e empatou com ele em 5
+        instâncias.
+      </div>
+      <p>
+        Os números por instância estão na
+        <a href="06-resultados-algoritmo-genetico.html">página de resultados</a
+        >. Esta seção mostra os testes iniciais que levaram à taxa 0,002.
+      </p>
+      <h3>Testes iniciais da taxa de mutação</h3>
       <p>
         Execuções de 600 segundos em 2026-11-21, com população 50, torneio 3 e
         semente 1.
@@ -1843,14 +1860,16 @@ population = rng.random((population_size, n_aisles)) &lt; share_of_aisles</code>
       <footer>
         Fontes: <code>src/order_selection/genetic_algorithm.py</code> e
         <code>tests/test_genetic_algorithm.py</code> na
-        <code>main</code> (commit 4e3dea3, PR #19),
-        <code>docs/problem.md</code>, <code>docs/plano-implementacao.md</code> e
-        a issue #13. Os resultados vêm das execuções de 2026-11-21 conferidas
-        nesta sessão. Os exemplos do decodificador (pedidos {1, 2} com aptidão
-        5, e pedidos {3, 4} com aptidão 3 no exemplo oficial) foram recalculados
-        rodando <code>evaluate</code>. O caso da antena Space Technology 5 é um
-        exemplo conhecido da literatura de computação evolutiva e não foi
-        conferido em fonte nesta página.
+        <code>main</code> (commit 4e3dea3, PR #19, mais a mudança do commit
+        4412d58 para limites curtos), <code>docs/problem.md</code>,
+        <code>docs/plano-implementacao.md</code> e a issue #13. Os testes da
+        seção 6 vêm das execuções de 2026-11-21. A média da rodada final vem de
+        <code>results/summary.md</code> (commit e957035). Os exemplos do
+        decodificador (pedidos {1, 2} com aptidão 5, e pedidos {3, 4} com
+        aptidão 3 no exemplo oficial) foram recalculados rodando
+        <code>evaluate</code>. O caso da antena Space Technology 5 é um exemplo
+        conhecido da literatura de computação evolutiva e não foi conferido em
+        fonte nesta página.
       </footer>
     </div>
   </body>

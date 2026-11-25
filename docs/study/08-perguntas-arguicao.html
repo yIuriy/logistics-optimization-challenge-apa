@@ -629,12 +629,12 @@
             Sim. Com LB = UB = total de unidades, a onda precisa levar todos os
             pedidos, e maximizar unidades ÷ corredores vira escolher o menor
             conjunto de corredores que cobre a demanda. Com pedidos e estoques
-            de 1 unidade, isso é a cobertura de conjuntos (set cover), um dos
-            21 problemas NP-completos de Karp (1972). A versão de decisão
-            ("existe onda com objetivo pelo menos k?") é NP-completa, porque o
-            checker.py confere uma resposta em tempo polinomial. A descrição
-            oficial não fala nisso, e a redução é do grupo. A prova passo a
-            passo está na página 01.
+            de 1 unidade, isso é a cobertura de conjuntos (set cover), um dos 21
+            problemas NP-completos de Karp (1972). A versão de decisão ("existe
+            onda com objetivo pelo menos k?") é NP-completa, porque o checker.py
+            confere uma resposta em tempo polinomial. A descrição oficial não
+            fala nisso, e a redução é do grupo. A prova passo a passo está na
+            página 01.
           </div>
         </details>
         <details>
@@ -822,18 +822,21 @@
             algoritmo genético?
           </summary>
           <div class="body">
-            Nas instâncias grandes o algoritmo exato pode não achar nem uma onda
-            válida em 600 segundos. O algoritmo genético acha ondas boas em
-            todas. O algoritmo exato serve de régua para medir o algoritmo
-            genético.
+            Na rodada final, o algoritmo exato provou o ótimo em 2 das 30
+            instâncias e ficou abaixo de 18% do melhor oficial nas 9 instâncias
+            com mais de 35.000 pedidos. O algoritmo genético chegou a 98,41% em
+            média. O grupo entrega os dois, porque um prova o ótimo quando
+            consegue e o outro acha ondas boas em todas as instâncias.
           </div>
         </details>
         <details>
           <summary><span class="n">37</span> O que o mip_rel_gap muda?</summary>
           <div class="body">
             Por padrão, o HiGHS para uma rodada quando a lacuna relativa chega a
-            10^−4 e chama isso de ótimo. Por isso o limite superior gravado
-            precisa vir do dual bound, que continua correto.
+            10^−4 e chama isso de ótimo. O código zera essa opção e usa
+            mip_abs_gap de 10^−7, então uma rodada que termina prova o ótimo de
+            F(λ). Quando o tempo acaba, o limite superior vem do dual bound, que
+            continua correto.
           </div>
         </details>
       </div>
@@ -1116,8 +1119,9 @@
             população 50, torneio 3, taxa de mutação 0,002 e semente 1. Na
             rodada final (commit e957035), a média ficou em 98,41% do melhor
             valor oficial, 26 instâncias passaram de 95% e 5 empataram com o
-            melhor. O checker.py aprovou as 30 soluções. A tabela está em
-            results/summary.md.
+            melhor. O algoritmo exato chegou a 54,48% em média e provou o ótimo
+            em b_instance_0007 (108,00) e x_instance_0002 (217,67). O checker.py
+            aprovou as 60 soluções. A tabela está em results/summary.md.
           </div>
         </details>
         <details>
@@ -1245,7 +1249,7 @@
         de 600 segundos (commit e957035), resumida em
         <code>results/summary.md</code>. A afirmação de que o problema é
         NP-difícil é uma inferência do grupo e não aparece na descrição oficial.
-        A página 06 analisa a rodada anterior, de 2026-11-21.
+        As páginas 02 e 06 analisam a rodada final.
       </footer>
     </div>
   </body>

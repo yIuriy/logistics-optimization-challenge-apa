@@ -1,0 +1,879 @@
+<!doctype html>
+<!-- Roteiro da apresentação do TPF de APA para o deck de 15 slides no Figma Slides. Cinco pessoas, 14 min 30 s no total, com sugestão de fala para cada slide. Números da rodada final (results/, commit e957035). -->
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Roteiro da apresentação | TPF de APA</title>
+    <style>
+      :root {
+        --ink: #1f2433;
+        --muted: #5f6675;
+        --paper: #fffdf7;
+        --line: #1f2433;
+        --coral: #ff6b57;
+        --coral-bg: #ffe3dd;
+        --sun: #ffc531;
+        --sun-bg: #fff3c7;
+        --teal: #15a39a;
+        --teal-bg: #d4f3ef;
+        --grape: #7b4fd6;
+        --grape-bg: #e9dffb;
+        --sky: #2f80ed;
+        --sky-bg: #dbe9ff;
+        --leaf: #2e9e4f;
+        --leaf-bg: #dcf5e3;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      body {
+        margin: 0;
+        font:
+          17px/1.6 system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+      }
+      .wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 28px 18px 80px;
+      }
+      header {
+        border: 2px solid var(--line);
+        border-radius: 14px;
+        padding: 22px 24px;
+        background: #fff;
+        box-shadow: 6px 6px 0 var(--teal);
+      }
+      h1 {
+        font-size: 2rem;
+        line-height: 1.15;
+        margin: 0 0 8px;
+      }
+      .lead {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.05rem;
+      }
+      .lead a {
+        color: var(--sky);
+        font-weight: 700;
+      }
+      h2 {
+        font-size: 1.6rem;
+        margin: 40px 0 12px;
+        line-height: 1.2;
+      }
+      h3 {
+        font-size: 1.1rem;
+        margin: 18px 0 6px;
+      }
+      p {
+        margin: 0 0 12px;
+      }
+      /* etiquetas e cartões */
+      .tag {
+        display: inline-block;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border: 2px solid var(--line);
+        border-radius: 6px;
+        padding: 2px 10px;
+        margin: 0 6px 8px 0;
+        background: #fff;
+      }
+      .tag.f1 {
+        background: var(--sky-bg);
+      }
+      .tag.f2 {
+        background: var(--teal-bg);
+      }
+      .tag.f3 {
+        background: var(--grape-bg);
+      }
+      .card {
+        border: 2px solid var(--line);
+        border-radius: 12px;
+        padding: 16px 18px;
+        background: #fff;
+        margin: 14px 0;
+        overflow-x: auto;
+      }
+      .card.sun {
+        background: var(--sun-bg);
+      }
+      /* fórmulas e contas */
+      .formula {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 1.25rem;
+        background: #fff;
+        border: 2px dashed var(--line);
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin: 10px 0;
+        overflow-x: auto;
+        text-align: center;
+      }
+      .calc {
+        font-family: Georgia, serif;
+        font-size: 1.1rem;
+        line-height: 1.3;
+        background: var(--paper);
+        border: 2px dashed var(--line);
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin: 6px 0;
+        overflow-x: auto;
+      }
+      .frac {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        vertical-align: middle;
+        margin: 0 0.2em;
+        line-height: 1.1;
+      }
+      .frac > .num {
+        border-bottom: 2px solid currentColor;
+        padding: 0 0.3em 0.1em;
+      }
+      .frac > .den {
+        padding: 0.1em 0.3em 0;
+      }
+      .sq {
+        display: inline-flex;
+        align-items: center;
+        vertical-align: middle;
+        margin: 0 0.1em;
+      }
+      .sq::before {
+        content: "√";
+        font-size: 1.35em;
+        line-height: 1;
+        margin-right: 0.05em;
+      }
+      .sq > span {
+        display: inline-flex;
+        align-items: center;
+        border-top: 2px solid currentColor;
+        padding: 0.1em 0.3em 0;
+      }
+      .formulas {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 10px;
+      }
+      .formulas div {
+        border: 2px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+      }
+      .formulas .f1 {
+        background: var(--sky-bg);
+      }
+      .formulas .f2 {
+        background: var(--teal-bg);
+      }
+      .formulas .f3 {
+        background: var(--grape-bg);
+      }
+      .formulas b {
+        display: block;
+        margin-bottom: 4px;
+      }
+      .formulas .formula {
+        font-size: 1.05rem;
+        padding: 8px 10px;
+      }
+      /* tabelas */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 10px 0;
+        background: #fff;
+        font-size: 0.95rem;
+      }
+      th,
+      td {
+        border: 2px solid var(--line);
+        padding: 8px 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: var(--sun-bg);
+      }
+      td.c {
+        text-align: center;
+        font-family: Georgia, serif;
+        font-size: 1.05rem;
+      }
+      td.hit {
+        background: var(--sun);
+        font-weight: 800;
+      }
+      /* bloco de exercício/tópico com resolução recolhível */
+      .ex {
+        border: 3px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+        margin: 26px 0;
+        overflow: hidden;
+      }
+      .ex.f1 {
+        box-shadow: 8px 8px 0 var(--sky);
+      }
+      .ex.f2 {
+        box-shadow: 8px 8px 0 var(--teal);
+      }
+      .ex.f3 {
+        box-shadow: 8px 8px 0 var(--grape);
+      }
+      .ex .head {
+        padding: 14px 18px;
+        border-bottom: 2px solid var(--line);
+      }
+      .ex.f1 .head {
+        background: var(--sky-bg);
+      }
+      .ex.f2 .head {
+        background: var(--teal-bg);
+      }
+      .ex.f3 .head {
+        background: var(--grape-bg);
+      }
+      .ex .head h2 {
+        margin: 0 0 6px;
+        font-size: 1.35rem;
+      }
+      .ex blockquote {
+        margin: 0;
+        padding: 10px 14px;
+        border-left: 6px solid var(--line);
+        background: #fff;
+        border-radius: 0 8px 8px 0;
+        font-style: italic;
+      }
+      details {
+        border-top: 2px solid var(--line);
+      }
+      summary {
+        cursor: pointer;
+        padding: 12px 18px;
+        font-weight: 800;
+        background: var(--sun-bg);
+        list-style: none;
+      }
+      summary::before {
+        content: "▸ ";
+      }
+      details[open] summary::before {
+        content: "▾ ";
+      }
+      summary::-webkit-details-marker {
+        display: none;
+      }
+      .body {
+        padding: 14px 18px 18px;
+      }
+      /* leitura dos dados */
+      .read {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 8px;
+        margin: 8px 0 14px;
+      }
+      .read div {
+        border: 2px solid var(--line);
+        border-radius: 8px;
+        padding: 8px 10px;
+        background: var(--paper);
+        font-size: 0.95rem;
+      }
+      .read b {
+        font-family: Georgia, serif;
+        font-size: 1.1rem;
+        margin-right: 6px;
+      }
+      .read div.z {
+        grid-column: 1/-1;
+        background: var(--sun-bg);
+      }
+      /* caixas de significado */
+      .why {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--sun);
+        background: var(--sun-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 10px 0;
+      }
+      .ans {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--leaf);
+        background: var(--leaf-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 12px 0 6px;
+        font-weight: 700;
+        font-size: 1.05rem;
+      }
+      .check {
+        border: 2px solid var(--line);
+        border-left: 10px solid var(--coral);
+        background: var(--coral-bg);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 8px 0;
+      }
+      .say {
+        border: 2px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 8px 0;
+        background: var(--paper);
+      }
+      .say b {
+        color: var(--leaf);
+      }
+      /* passos numerados */
+      .steps {
+        counter-reset: s;
+        padding: 0;
+        margin: 10px 0;
+        list-style: none;
+      }
+      .steps li {
+        counter-increment: s;
+        position: relative;
+        padding: 6px 0 6px 44px;
+        margin: 4px 0;
+      }
+      .steps li::before {
+        content: counter(s);
+        position: absolute;
+        left: 0;
+        top: 6px;
+        width: 30px;
+        height: 30px;
+        border: 2px solid var(--line);
+        border-radius: 50%;
+        background: var(--sun);
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      footer {
+        margin-top: 50px;
+        font-size: 0.85rem;
+        color: var(--muted);
+        border-top: 2px solid var(--line);
+        padding-top: 12px;
+      }
+      @media (max-width: 600px) {
+        h1 {
+          font-size: 1.6rem;
+        }
+        .formula {
+          font-size: 1.1rem;
+        }
+        .calc {
+          font-size: 1rem;
+        }
+      }
+      h3 {
+        font-size: 1.05rem;
+        margin: 0 0 6px;
+      }
+      .sl {
+        border-bottom: 2px dashed var(--line);
+        padding: 12px 0;
+        break-inside: avoid;
+      }
+      .sl:last-child {
+        border-bottom: 0;
+      }
+      .sl .tela {
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+      .sl .say {
+        font-size: 1.02rem;
+      }
+      @media print {
+        * {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        body {
+          background: #fff;
+        }
+        .wrap {
+          padding: 0 0 20px;
+        }
+        .ex {
+          box-shadow: none;
+        }
+        header {
+          box-shadow: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>Roteiro da apresentação de 14 minutos e meio, slide por slide</h1>
+        <p class="lead">
+          Este roteiro acompanha os 15 slides do Trabalho Prático Final de
+          Análise e Projeto de Algoritmos. Cada pessoa fala cerca de 3 minutos.
+          Para cada slide há o que aparece na tela, uma sugestão de fala e o
+          tempo previsto.
+        </p>
+      </header>
+
+      <h2>Antes de ensaiar</h2>
+      <div class="card sun">
+        <ol class="steps">
+          <li>
+            <b>Use as próprias palavras.</b> As falas são sugestões. O professor
+            pede que o grupo explique com as próprias palavras, então leiam,
+            entendam e reescrevam do seu jeito.
+          </li>
+          <li>
+            <b>Respeite o tempo.</b> A apresentação precisa ficar entre 10 e 20
+            minutos. Este roteiro soma 14 min 30 s, então sobra folga para
+            pausas e para trocar de pessoa.
+          </li>
+          <li>
+            <b>Dê tempo ao problema.</b> O professor pede pelo menos 5 minutos
+            sobre o problema. Os slides 2 a 6 somam 5 min 30 s.
+          </li>
+          <li>
+            <b>Aponte para as figuras.</b> Os slides têm poucas palavras e
+            muitas figuras. Fale olhando para o desenho e mostre com a mão o
+            pedido, o corredor ou a barra de que está falando.
+          </li>
+        </ol>
+      </div>
+
+      <h2>Quem fala quando</h2>
+      <table>
+        <tr>
+          <th>Quem</th>
+          <th>Tempo</th>
+          <th>Slides</th>
+          <th>Assunto</th>
+        </tr>
+        <tr>
+          <td>Pessoa 1</td>
+          <td class="c">0:00 a 3:00</td>
+          <td>1, 2, 3</td>
+          <td>Abertura, problema e objetivo</td>
+        </tr>
+        <tr>
+          <td>Pessoa 2</td>
+          <td class="c">3:00 a 6:00</td>
+          <td>4, 5, 6</td>
+          <td>Exemplo oficial e dificuldade</td>
+        </tr>
+        <tr>
+          <td>Pessoa 3</td>
+          <td class="c">6:00 a 8:30</td>
+          <td>7, 8</td>
+          <td>Entrega e algoritmo exato</td>
+        </tr>
+        <tr>
+          <td>Pessoa 4</td>
+          <td class="c">8:30 a 11:30</td>
+          <td>9, 10, 11</td>
+          <td>Algoritmo genético</td>
+        </tr>
+        <tr>
+          <td>Pessoa 5</td>
+          <td class="c">11:30 a 14:30</td>
+          <td>12, 13, 14, 15</td>
+          <td>Resultados e discussão crítica</td>
+        </tr>
+      </table>
+
+      <div class="ex f1">
+        <div class="head">
+          <span class="tag f1">Pessoa 1 · 0:00 a 3:00</span>
+          <h2>Abertura, problema e objetivo</h2>
+        </div>
+        <div class="body">
+          <div class="sl">
+            <h3>Slide 1. Capa <span class="tag">0:00 a 0:30</span></h3>
+            <p class="tela">
+              Na tela. Título, nomes do grupo e o desenho da onda do exemplo.
+            </p>
+            <div class="say">
+              “Boa tarde. Somos Amanda, Dyonathan, Iuri, Rafaela e Sidnei. Nosso
+              trabalho resolve o Wave Order Picking, um problema do desafio do
+              Simpósio Brasileiro de Pesquisa Operacional de 2025, proposto pelo
+              Mercado Livre. Rodamos dois algoritmos, um genético e um exato,
+              nas 30 instâncias dos conjuntos B e X.”
+            </div>
+            <p class="tela">48 palavras.</p>
+          </div>
+          <div class="sl">
+            <h3>Slide 2. O problema <span class="tag">0:30 a 1:45</span></h3>
+            <p class="tela">
+              Na tela. Pedidos à esquerda, a onda no meio e os corredores à
+              direita, com uma cor por item.
+            </p>
+            <div class="say">
+              “Pensem num armazém do Mercado Livre. Os pedidos chegam o tempo
+              todo, e cada pedido pede algumas unidades de alguns itens. Se o
+              coletor buscasse um pedido por vez, ele passaria pelos mesmos
+              corredores muitas vezes. Por isso o armazém junta vários pedidos
+              numa onda, e o coletor busca tudo numa passada só. Neste desenho,
+              a onda tem os pedidos 0, 1, 2 e 4 e soma 10 unidades. Cada cor é
+              um item guardado nos corredores. A pergunta do problema é quais
+              pedidos entram na onda e quais corredores o coletor visita.”
+            </div>
+            <p class="tela">93 palavras.</p>
+          </div>
+          <div class="sl">
+            <h3>
+              Slide 3. Objetivo e restrições
+              <span class="tag">1:45 a 3:00</span>
+            </h3>
+            <p class="tela">
+              Na tela. A fração unidades sobre corredores e as três regras
+              numeradas.
+            </p>
+            <div class="say">
+              “O objetivo é coletar muitas unidades por corredor visitado. A
+              conta é unidades coletadas dividido por corredores visitados. No
+              exemplo, 10 unidades em 2 corredores dão 5. Cada corredor a mais
+              entra na divisão, então a onda só deve visitar corredores que
+              ajudam. A onda também respeita três regras. Primeiro, o total de
+              unidades fica entre um limite inferior e um limite superior, que
+              no exemplo vão de 5 a 12. Segundo, os corredores visitados
+              precisam ter estoque para tudo o que a onda pede. Terceiro, um
+              pedido entra inteiro ou fica fora. O pedido 3, por exemplo, entra
+              com 5 unidades ou com nenhuma.”
+            </div>
+            <p class="tela">105 palavras.</p>
+          </div>
+          <div class="check">
+            <b>Precisa ser dito.</b> Onda, unidades divididas por corredores, as
+            três regras.
+          </div>
+        </div>
+      </div>
+      <div class="ex f1">
+        <div class="head">
+          <span class="tag f1">Pessoa 2 · 3:00 a 6:00</span>
+          <h2>Exemplo oficial e dificuldade</h2>
+        </div>
+        <div class="body">
+          <div class="sl">
+            <h3>
+              Slide 4. Exemplo oficial <span class="tag">3:00 a 4:00</span>
+            </h3>
+            <p class="tela">
+              Na tela. As tabelas de pedidos e de corredores, a conferência item
+              por item e o objetivo 10 ÷ 2 = 5.
+            </p>
+            <div class="say">
+              “Este é o exemplo da descrição oficial, com 5 pedidos, 5 itens e 5
+              corredores. À esquerda está quanto cada pedido pede de cada item.
+              No meio, quanto cada corredor guarda. A onda roxa tem os pedidos
+              0, 1, 2 e 4, e os corredores amarelos são o 1 e o 3. À direita
+              conferimos item por item. O item 0, por exemplo, é pedido 3 vezes,
+              e os dois corredores guardam 4. Todos os itens cabem. São 10
+              unidades, entre 5 e 12, em 2 corredores. O objetivo é 10 dividido
+              por 2, igual a 5.”
+            </div>
+            <p class="tela">97 palavras.</p>
+          </div>
+          <div class="sl">
+            <h3>
+              Slide 5. Comparando ondas <span class="tag">4:00 a 5:00</span>
+            </h3>
+            <p class="tela">
+              Na tela. Quatro cartões com quatro ondas do mesmo exemplo.
+            </p>
+            <div class="say">
+              “Para ver como a escolha muda o resultado, comparamos quatro ondas
+              do mesmo exemplo. Só o pedido 0 dá 4 unidades, abaixo do mínimo de
+              5, então não vale. Todos os pedidos somam 15, acima do máximo de
+              12, então também não vale. Só o pedido 3 é válido, mas coleta 5
+              unidades em 2 corredores, e o objetivo fica 2,5. Os pedidos 0, 1,
+              2 e 4 coletam 10 unidades nos mesmos 2 corredores, e o objetivo
+              fica 5, o melhor das quatro. No desafio, uma onda que quebra uma
+              regra vale zero.”
+            </div>
+            <p class="tela">94 palavras.</p>
+          </div>
+          <div class="sl">
+            <h3>
+              Slide 6. Por que é difícil <span class="tag">5:00 a 6:00</span>
+            </h3>
+            <p class="tela">
+              Na tela. A ligação com a cobertura de conjuntos e o número 4,9 ×
+              10⁵⁵.
+            </p>
+            <div class="say">
+              “O problema é NP-difícil. Isso quer dizer que ninguém conhece um
+              algoritmo que ache o ótimo de toda instância num tempo que cresce
+              de forma controlada com o tamanho. Mostramos isso com um problema
+              famoso, a cobertura de conjuntos. Cada conjunto vira um corredor,
+              e um único pedido pede uma unidade de cada item. Assim, a melhor
+              onda usa o menor número de corredores, que é a menor cobertura. Na
+              b_instance_0001 existem 185 corredores, o que dá perto de 4,9
+              vezes 10 elevado a 55 jeitos de escolher corredores. Testar todos
+              não cabe em 600 segundos.”
+            </div>
+            <p class="tela">97 palavras.</p>
+          </div>
+          <div class="check">
+            <b>Precisa ser dito.</b> A conta 10 ÷ 2 = 5, por que duas ondas não
+            valem, o número de combinações de corredores.
+          </div>
+        </div>
+      </div>
+      <div class="ex f2">
+        <div class="head">
+          <span class="tag f2">Pessoa 3 · 6:00 a 8:30</span>
+          <h2>Entrega e algoritmo exato</h2>
+        </div>
+        <div class="body">
+          <div class="sl">
+            <h3>Slide 7. Nossa entrega <span class="tag">6:00 a 7:00</span></h3>
+            <p class="tela">
+              Na tela. Dois cartões, um para cada algoritmo, com os números
+              principais.
+            </p>
+            <div class="say">
+              “Por isso entregamos dois algoritmos. O algoritmo exato usa o
+              método de Dinkelbach com o HiGHS, um programa gratuito de
+              otimização. Quando termina dentro do tempo, ele prova que achou o
+              ótimo, e isso aconteceu em 2 das 30 instâncias. Quando o tempo
+              acaba, ele entrega a melhor onda achada e dois limites para o
+              objetivo. O algoritmo genético evolui uma população de 50 ondas e
+              guarda a melhor. Ele chegou a 98,41% do melhor valor oficial, na
+              média das 30 instâncias. Os dois rodaram nas mesmas instâncias,
+              com 600 segundos cada.”
+            </div>
+            <p class="tela">92 palavras.</p>
+          </div>
+          <div class="sl">
+            <h3>
+              Slide 8. Algoritmo exato <span class="tag">7:00 a 8:30</span>
+            </h3>
+            <p class="tela">
+              Na tela. Os três passos do método de Dinkelbach, quando ele para e
+              os limites quando o tempo acaba.
+            </p>
+            <div class="say">
+              “O HiGHS resolve problemas em que o objetivo é uma soma. O nosso
+              objetivo é uma divisão, então usamos o método de Dinkelbach. Ele
+              guarda um número λ, a melhor razão de unidades por corredor achada
+              até agora, que começa em zero. Em cada rodada, o HiGHS procura a
+              onda que maximiza unidades menos λ vezes corredores. Se essa conta
+              dá mais que zero, existe onda melhor que λ. Então λ vira a razão
+              dessa onda e a rodada se repete. Quando o máximo chega a zero,
+              nenhuma onda supera λ, e λ é o ótimo. No exemplo oficial, λ foi de
+              0 para 2,4 e depois para 5. Se os 600 segundos acabam antes, o
+              algoritmo entrega a melhor onda e dois limites. O inferior é o λ
+              da melhor onda. O superior é λ mais o limite dual, o maior valor
+              que o HiGHS ainda não descartou.”
+            </div>
+            <p class="tela">149 palavras.</p>
+          </div>
+          <div class="check">
+            <b>Precisa ser dito.</b> Os dois algoritmos são a entrega,
+            Dinkelbach troca a divisão por uma soma, os dois limites quando o
+            tempo acaba.
+          </div>
+        </div>
+      </div>
+      <div class="ex f2">
+        <div class="head">
+          <span class="tag f2">Pessoa 4 · 8:30 a 11:30</span>
+          <h2>Algoritmo genético</h2>
+        </div>
+        <div class="body">
+          <div class="sl">
+            <h3>
+              Slide 9. Uma onda é um vetor de bits
+              <span class="tag">8:30 a 9:30</span>
+            </h3>
+            <p class="tela">
+              Na tela. O cromossomo com um bit por corredor e a comparação entre
+              a primeira versão e a atual.
+            </p>
+            <div class="say">
+              “No algoritmo genético, cada onda é um vetor de bits com um bit
+              por corredor. O bit 1 quer dizer que o coletor visita o corredor,
+              e o 0 que não visita. Escolhemos corredores porque eles são o
+              denominador do objetivo, então o algoritmo controla direto a parte
+              que mais pesa. Nossa primeira versão tinha um bit por pedido e
+              chegou a só 6,1% do melhor valor oficial na b_instance_0001,
+              porque a onda visitava quase todos os corredores. Com um bit por
+              corredor, a mesma instância chegou a 99,7%.”
+            </div>
+            <p class="tela">89 palavras.</p>
+          </div>
+          <div class="sl">
+            <h3>Slide 10. Uma geração <span class="tag">9:30 a 10:30</span></h3>
+            <p class="tela">
+              Na tela. Os cinco passos de uma geração e o quadro de parâmetros.
+            </p>
+            <div class="say">
+              “Cada geração cria 50 filhos. Para cada filho, um torneio sorteia
+              3 ondas e fica com a melhor. Isso acontece duas vezes, uma para
+              cada pai. No cruzamento uniforme, cada bit do filho vem de um dos
+              pais, com chance de metade. Na mutação, cada bit troca de valor
+              com chance 0,002. O decodificador transforma os corredores do
+              filho em pedidos e calcula a nota. Os 50 filhos substituem a
+              população anterior, e a melhor onda já vista fica guardada à
+              parte. Usamos população 50, torneio 3, mutação 0,002 e semente 1.”
+            </div>
+            <p class="tela">92 palavras.</p>
+          </div>
+          <div class="sl">
+            <h3>
+              Slide 11. Decodificador <span class="tag">10:30 a 11:30</span>
+            </h3>
+            <p class="tela">
+              Na tela. Os quatro passos do decodificador e as duas regras de
+              aptidão.
+            </p>
+            <div class="say">
+              “O decodificador liga os corredores aos pedidos. Ele soma o
+              estoque de cada item nos corredores visitados. Depois fica só com
+              os pedidos que cabem sozinhos nesse estoque. Em cada item, os
+              pedidos com mais unidades pegam o estoque primeiro. Por fim, ele
+              aceita os pedidos por prioridade enquanto o total não passa do
+              limite superior. Se a onda fica dentro dos limites, a nota é
+              unidades dividido por corredores. Se fica abaixo do limite
+              inferior, a nota é negativa, então qualquer onda válida ganha
+              dela.”
+            </div>
+            <p class="tela">86 palavras.</p>
+          </div>
+          <div class="check">
+            <b>Precisa ser dito.</b> Um bit por corredor e por quê, torneio,
+            cruzamento e mutação, o que o decodificador faz.
+          </div>
+        </div>
+      </div>
+      <div class="ex f3">
+        <div class="head">
+          <span class="tag f3">Pessoa 5 · 11:30 a 14:30</span>
+          <h2>Resultados e discussão crítica</h2>
+        </div>
+        <div class="body">
+          <div class="sl">
+            <h3>
+              Slide 12. Resultados do algoritmo genético
+              <span class="tag">11:30 a 12:30</span>
+            </h3>
+            <p class="tela">
+              Na tela. Barras das 30 instâncias, com o eixo começando em 90%, e
+              os cartões de média.
+            </p>
+            <div class="say">
+              “Este gráfico mostra o algoritmo genético nas 30 instâncias, em
+              porcentagem do melhor valor oficial do desafio. O eixo começa em
+              90%. A média foi 98,41%. No conjunto B, a média foi 98,92%, com
+              mínimo de 94,43%. No conjunto X, foi 97,91%, com mínimo de 92,97%.
+              Em 5 instâncias empatamos com o melhor valor oficial, a b_0005, a
+              b_0007, a b_0009, a x_0002 e a x_0005.”
+            </div>
+            <p class="tela">66 palavras.</p>
+          </div>
+          <div class="sl">
+            <h3>
+              Slide 13. Resultados do algoritmo exato
+              <span class="tag">12:30 a 13:30</span>
+            </h3>
+            <p class="tela">
+              Na tela. Barras ordenadas pelo número de pedidos, os 2 ótimos
+              provados e os cartões de resumo.
+            </p>
+            <div class="say">
+              “Aqui está o algoritmo exato, com as instâncias ordenadas da menor
+              para a maior em número de pedidos. A média foi 54,48%, e o tamanho
+              explica quase tudo. Nas 10 instâncias com menos de 3 mil pedidos,
+              ele ficou entre 85,68% e 100%. Ele provou o ótimo em 2, a b_0007
+              com 108 e a x_0002 com 217,67, e nessas duas o algoritmo genético
+              achou o mesmo valor. Nas instâncias com mais de 35 mil pedidos,
+              ficou abaixo de 18%. Nas 28 sem prova, o tempo acabou, e ele
+              entregou a melhor onda achada e os dois limites.”
+            </div>
+            <p class="tela">98 palavras.</p>
+          </div>
+          <div class="sl">
+            <h3>
+              Slide 14. Discussão crítica <span class="tag">13:30 a 14:15</span>
+            </h3>
+            <p class="tela">
+              Na tela. Quatro cartões de limitações e a nota do verificador
+              oficial.
+            </p>
+            <div class="say">
+              “Agora as limitações. Na x_instance_0004, o algoritmo genético
+              achou a melhor onda aos 23,2 segundos e não melhorou depois. Nossa
+              hipótese é que a população perdeu diversidade cedo. Em 21 das 30
+              instâncias, a melhor onda apareceu depois de 300 segundos, então
+              mais tempo pode ajudar. Rodamos só a semente 1, e a variação entre
+              sementes não foi medida. No algoritmo exato, o limite superior da
+              b_instance_0001 ficou em 3.812,28, longe do melhor valor oficial
+              de 631,50. As 60 soluções dos dois algoritmos passaram no
+              verificador oficial.”
+            </div>
+            <p class="tela">87 palavras.</p>
+          </div>
+          <div class="sl">
+            <h3>Slide 15. Fim <span class="tag">14:15 a 14:30</span></h3>
+            <p class="tela">Na tela. Agradecimento e o desenho da capa.</p>
+            <div class="say">“Obrigada. Estamos abertos a perguntas.”</div>
+            <p class="tela">5 palavras.</p>
+          </div>
+          <div class="check">
+            <b>Precisa ser dito.</b> 98,41% e 54,48% de média, os 2 ótimos
+            provados, pelo menos uma limitação.
+          </div>
+        </div>
+      </div>
+
+      <h2>Se a banca perguntar</h2>
+      <div class="why">
+        <b>Perguntas prováveis.</b> As respostas curtas estão em
+        <a href="08-perguntas-arguicao.html">08-perguntas-arguicao.html</a>. Os
+        detalhes dos algoritmos estão nas páginas
+        <a href="02-algoritmo-exato.html">02</a> e
+        <a href="05-algoritmo-genetico.html">05</a>, e os resultados nas páginas
+        <a href="02-algoritmo-exato.html#resultados">02</a> e
+        <a href="06-resultados-algoritmo-genetico.html">06</a>.
+      </div>
+
+      <footer>
+        Fontes: os textos dos 15 slides do deck no Figma Slides, lidos em
+        2026-11-25. Os números vêm de <code>results/summary.md</code> e dos
+        <code>.json</code> da rodada final (commit <code>e957035</code>). As
+        regras de tempo e de linguagem são as que o professor passou ao grupo. A
+        contagem de palavras de cada fala foi feita pelo script que gerou esta
+        página. A afirmação de que o problema é NP-difícil é uma inferência do
+        grupo e não aparece na descrição oficial.
+      </footer>
+    </div>
+  </body>
+</html>

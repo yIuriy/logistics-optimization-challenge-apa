@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Material de estudo com os resultados do algoritmo genético nas 30 instâncias B e X (results/, commit 85d9a38, 2026-11-21). Mostra a média contra o melhor valor oficial, os padrões por tamanho e estagnação, as piores instâncias e as limitações da rodada. -->
+<!-- Material de estudo com os resultados do algoritmo genético nas 30 instâncias B e X, da rodada final (results/, commit e957035). Mostra a média contra o melhor valor oficial, os padrões por tamanho e estagnação, as piores instâncias e as limitações da rodada. -->
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
@@ -420,11 +420,16 @@
           Resultados do algoritmo genético nas 30 instâncias dos conjuntos B e X
         </h1>
         <p class="lead">
-          Esta página lê os 30 arquivos de <code>results/</code> e mostra quanto
-          o algoritmo genético chegou perto do melhor valor oficial em cada
-          instância. Comece pelo roteiro, depois veja o gráfico, os três padrões
-          e as limitações. O funcionamento do algoritmo está na
-          <a href="05-algoritmo-genetico.html">página anterior</a>.
+          Esta página lê os 30 arquivos do algoritmo genético em
+          <code>results/</code>, da rodada final, e mostra quanto ele chegou
+          perto do melhor valor oficial em cada instância. Comece pelo roteiro,
+          depois veja o gráfico, os três padrões e as limitações. O
+          funcionamento do algoritmo está na
+          <a href="05-algoritmo-genetico.html">página anterior</a>, e os
+          resultados do algoritmo exato estão na
+          <a href="02-algoritmo-exato.html#resultados"
+            >página do algoritmo exato</a
+          >.
         </p>
       </header>
 
@@ -441,7 +446,7 @@
             <b>O que é o melhor oficial.</b> É o valor de cada instância no
             arquivo <code>best_objectives.csv</code> do repositório do desafio,
             copiado em <code>data/</code>. Ele serve de régua, porque o grupo
-            não sabe o ótimo de cada instância.
+            não sabe o ótimo da maioria das instâncias.
           </li>
           <li>
             <b>O que é a porcentagem do melhor.</b> É o objetivo do grupo
@@ -459,29 +464,20 @@
 
       <h2>Como a rodada foi feita</h2>
       <div class="read">
-        <div>
-          <b>Código</b> commit <code>85d9a38</code> da <code>main</code>
-        </div>
-        <div><b>Data</b> 2026-11-21</div>
-        <div><b>Tempo</b> 600 s por instância</div>
+        <div><b>Código</b> commit <code>e957035</code>, rodada final</div>
+        <div><b>Tempo</b> limite de 600 s por instância</div>
         <div><b>População</b> 50 indivíduos</div>
         <div><b>Torneio</b> 3 indivíduos</div>
         <div><b>Mutação</b> taxa 0,002 por bit</div>
         <div><b>Semente</b> 1, uma execução por instância</div>
-        <div><b>Máquina</b> 6 execuções ao mesmo tempo</div>
+        <div><b>Máquina</b> AMD Ryzen 5 4500, 6 núcleos, 15,8 GB de RAM</div>
+        <div><b>Paralelismo</b> 5 execuções ao mesmo tempo</div>
         <div class="z">
           <b>Arquivos</b> cada instância tem um <code>.txt</code> com a solução
           e um <code>.json</code> com o resumo, com nomes como
           <code>b_instance_0001_genetic_pop50_tour3_mut0.002_seed1.json</code>.
+          O resumo dos dois algoritmos está em <code>results/summary.md</code>.
         </div>
-      </div>
-      <div class="check">
-        <b>Esta página analisa a rodada de 2026-11-21.</b> Os arquivos dela
-        estão no commit <code>3fc8a0a</code>. A rodada final (commit
-        <code>e957035</code>) repetiu os mesmos parâmetros em outra máquina e
-        substituiu esses arquivos em <code>results/</code>. Ela chegou a 98,41%
-        de média, com as mesmas 4 instâncias abaixo de 95%. Os números finais
-        estão em <code>results/summary.md</code>.
       </div>
       <div class="why">
         <b>Por que gerações quase infinitas.</b> O arquivo de configuração pediu
@@ -489,16 +485,21 @@
         s. Assim, quem encerrou todas as execuções foi o relógio, e cada
         instância usou o tempo inteiro.
       </div>
+      <div class="check">
+        <b>Rodada anterior.</b> A rodada de 2026-11-21, com os mesmos
+        parâmetros, chegou a 98,31% de média e está no commit
+        <code>3fc8a0a</code>. Esta página usa só a rodada final.
+      </div>
 
       <h2>O resultado geral</h2>
       <div class="ans">
-        Média de 98,31% do melhor oficial, com mediana de 98,81%.
+        Média de 98,41% do melhor oficial, com mediana de 99,01%.
       </div>
       <div class="read">
-        <div><b>B</b> média 98,85%, de 94,43% a 100,00%</div>
-        <div><b>X</b> média 97,78%, de 92,97% a 100,00%</div>
+        <div><b>B</b> média 98,92%, de 94,43% a 100,00%</div>
+        <div><b>X</b> média 97,91%, de 92,97% a 100,00%</div>
         <div><b>26</b> instâncias com pelo menos 95%</div>
-        <div><b>14</b> instâncias com pelo menos 99%</div>
+        <div><b>15</b> instâncias com pelo menos 99%</div>
         <div><b>5</b> instâncias empatadas com o melhor oficial</div>
         <div><b>4</b> instâncias abaixo de 95%</div>
       </div>
@@ -768,7 +769,7 @@
           <rect
             x="150"
             y="158"
-            width="424.4"
+            width="426.8"
             height="13"
             fill="var(--sky)"
             stroke="var(--line)"
@@ -806,7 +807,7 @@
           <rect
             x="150"
             y="194"
-            width="423.9"
+            width="459.2"
             height="13"
             fill="var(--sky)"
             stroke="var(--line)"
@@ -845,13 +846,13 @@
           <rect
             x="150"
             y="230"
-            width="369.9"
+            width="385.9"
             height="13"
             fill="var(--sky)"
             stroke="var(--line)"
             stroke-width="1.5"
           />
-          <text x="523.9" y="241" font-size="11" fill="var(--ink)">97,87</text>
+          <text x="539.9" y="241" font-size="11" fill="var(--ink)">98,21</text>
           <text
             x="142"
             y="259"
@@ -1061,13 +1062,13 @@
           <rect
             x="150"
             y="428"
-            width="198.3"
+            width="215.7"
             height="13"
             fill="var(--grape)"
             stroke="var(--line)"
             stroke-width="1.5"
           />
-          <text x="352.3" y="439" font-size="11" fill="var(--ink)">94,22</text>
+          <text x="369.7" y="439" font-size="11" fill="var(--ink)">94,59</text>
           <text
             x="142"
             y="457"
@@ -1101,13 +1102,13 @@
           <rect
             x="150"
             y="464"
-            width="214.3"
+            width="224.2"
             height="13"
             fill="var(--grape)"
             stroke="var(--line)"
             stroke-width="1.5"
           />
-          <text x="368.3" y="475" font-size="11" fill="var(--ink)">94,56</text>
+          <text x="378.2" y="475" font-size="11" fill="var(--ink)">94,77</text>
           <text
             x="142"
             y="493"
@@ -1141,13 +1142,12 @@
           <rect
             x="150"
             y="500"
-            width="391.5"
+            width="450.3"
             height="13"
             fill="var(--grape)"
             stroke="var(--line)"
             stroke-width="1.5"
           />
-          <text x="545.5" y="511" font-size="11" fill="var(--ink)">98,33</text>
           <text
             x="142"
             y="529"
@@ -1161,13 +1161,13 @@
           <rect
             x="150"
             y="518"
-            width="393.4"
+            width="393.9"
             height="13"
             fill="var(--grape)"
             stroke="var(--line)"
             stroke-width="1.5"
           />
-          <text x="547.4" y="529" font-size="11" fill="var(--ink)">98,37</text>
+          <text x="547.9" y="529" font-size="11" fill="var(--ink)">98,38</text>
           <text
             x="142"
             y="547"
@@ -1231,13 +1231,8 @@
           </text>
         </svg>
       </div>
-      <div class="say">
-        <b>Lendo o gráfico.</b> Quase todas as barras encostam na linha de 100%.
-        As quatro mais curtas são as instâncias que a seção das piores detalha.
-      </div>
 
       <h2>Três padrões nos números</h2>
-
       <div class="ex f1">
         <div class="head">
           <span class="tag f1">Tamanho</span>
@@ -1247,9 +1242,8 @@
           <p>
             11 instâncias têm pelo menos 20.000 pedidos. Nelas, cada geração
             demora mais, porque o decodificador percorre todos os pedidos para
-            montar cada onda. Por isso, essas execuções fizeram só de 748 a
-            2.374 gerações em 600 s, enquanto as menores fizeram de 3.099 a
-            74.568.
+            montar cada onda. Por isso, essas execuções fizeram de 1.091 a 3.282
+            gerações em 600 s, enquanto as menores fizeram de 4.841 a 49.924.
           </p>
           <table>
             <tr>
@@ -1261,14 +1255,14 @@
             <tr>
               <td>Menos de 20.000 pedidos</td>
               <td class="c">19</td>
-              <td class="c">98,63%</td>
-              <td class="c">4 de 19</td>
+              <td class="c">98,67%</td>
+              <td class="c">6 de 19</td>
             </tr>
             <tr>
               <td>20.000 pedidos ou mais</td>
               <td class="c">11</td>
-              <td class="c">97,77%</td>
-              <td class="c">10 de 11</td>
+              <td class="c">97,97%</td>
+              <td class="c">8 de 11</td>
             </tr>
           </table>
           <div class="say">
@@ -1279,7 +1273,6 @@
           </div>
         </div>
       </div>
-
       <div class="ex f2">
         <div class="head">
           <span class="tag f2">Estagnação</span>
@@ -1288,14 +1281,14 @@
         <div class="body">
           <p>
             Estagnar é passar muito tempo sem achar solução melhor. Em
-            <code>x_instance_0004</code>, a melhor onda apareceu aos 21,9 s, e
-            os outros 578 s não trouxeram melhora. A instância terminou com
-            92,97%, a pior das 30. Em <code>x_instance_0006</code>, a melhor
-            apareceu aos 2 s e ficou em 97,54%.
+            <code>x_instance_0004</code>, a melhor onda apareceu aos 23,2 s, e o
+            resto do tempo não trouxe melhora. A instância terminou com 92,97%,
+            a pior das 30. Em <code>x_instance_0006</code>, a melhor apareceu
+            aos 2,6 s e ficou em 97,54%.
           </p>
           <p>
             Achar cedo também pode ser bom. Em <code>b_instance_0007</code>, a
-            melhor onda apareceu aos 0,5 s e já empatava com o melhor oficial.
+            melhor onda apareceu aos 0,7 s e já empatava com o melhor oficial.
           </p>
           <div class="why">
             <b>Uma explicação provável.</b> <code>x_instance_0004</code> tem 172
@@ -1307,7 +1300,6 @@
           </div>
         </div>
       </div>
-
       <div class="ex f3">
         <div class="head">
           <span class="tag f3">Corredores</span>
@@ -1327,7 +1319,6 @@
           </div>
         </div>
       </div>
-
       <p>
         O gráfico abaixo junta os dois primeiros padrões. Cada ponto é uma
         instância, com o momento em que a melhor solução apareceu no eixo
@@ -1335,11 +1326,29 @@
       </p>
       <div class="scroll">
         <svg
-          viewBox="0 0 640 370"
+          viewBox="0 0 640 400"
           role="img"
           aria-label="Momento da melhor solução contra porcentagem do melhor"
           style="min-width: 620px"
         >
+          <line
+            x1="60"
+            y1="335.0"
+            x2="620"
+            y2="335.0"
+            stroke="var(--muted)"
+            stroke-width="1"
+            stroke-dasharray="4 4"
+          />
+          <text
+            x="54"
+            y="339.0"
+            font-size="12"
+            text-anchor="end"
+            fill="var(--ink)"
+          >
+            90%
+          </text>
           <line
             x1="60"
             y1="275.0"
@@ -1432,7 +1441,7 @@
           </text>
           <text
             x="60.0"
-            y="308"
+            y="352"
             font-size="12"
             text-anchor="middle"
             fill="var(--ink)"
@@ -1441,7 +1450,7 @@
           </text>
           <text
             x="153.3"
-            y="308"
+            y="352"
             font-size="12"
             text-anchor="middle"
             fill="var(--ink)"
@@ -1450,7 +1459,7 @@
           </text>
           <text
             x="246.7"
-            y="308"
+            y="352"
             font-size="12"
             text-anchor="middle"
             fill="var(--ink)"
@@ -1459,7 +1468,7 @@
           </text>
           <text
             x="340.0"
-            y="308"
+            y="352"
             font-size="12"
             text-anchor="middle"
             fill="var(--ink)"
@@ -1468,7 +1477,7 @@
           </text>
           <text
             x="433.3"
-            y="308"
+            y="352"
             font-size="12"
             text-anchor="middle"
             fill="var(--ink)"
@@ -1477,7 +1486,7 @@
           </text>
           <text
             x="526.7"
-            y="308"
+            y="352"
             font-size="12"
             text-anchor="middle"
             fill="var(--ink)"
@@ -1486,40 +1495,24 @@
           </text>
           <text
             x="620.0"
-            y="308"
+            y="352"
             font-size="12"
             text-anchor="middle"
             fill="var(--ink)"
           >
             600 s
           </text>
-          <line
-            x1="60"
-            y1="290"
-            x2="620"
-            y2="290"
-            stroke="var(--line)"
-            stroke-width="2"
-          />
-          <line
-            x1="60"
-            y1="20"
-            x2="60"
-            y2="290"
-            stroke="var(--line)"
-            stroke-width="2"
-          />
           <text
-            x="340.0"
-            y="328"
+            x="340"
+            y="372"
             font-size="12"
             text-anchor="middle"
             fill="var(--ink)"
           >
-            segundo em que a melhor solução apareceu
+            momento em que a melhor onda apareceu
           </text>
           <circle
-            cx="61.8"
+            cx="62.3"
             cy="44.6"
             r="6"
             fill="var(--teal)"
@@ -1527,7 +1520,7 @@
             stroke-width="2"
           />
           <circle
-            cx="327.8"
+            cx="413.0"
             cy="38.0"
             r="6"
             fill="var(--teal)"
@@ -1535,7 +1528,7 @@
             stroke-width="2"
           />
           <circle
-            cx="476.3"
+            cx="576.8"
             cy="202.1"
             r="6"
             fill="var(--teal)"
@@ -1543,17 +1536,17 @@
             stroke-width="2"
           />
           <text
-            x="467.3"
+            x="586.8"
             y="206.1"
             font-size="11"
-            text-anchor="end"
+            text-anchor="start"
             fill="var(--ink)"
             font-family="ui-monospace,monospace"
           >
             b_0003
           </text>
           <circle
-            cx="583.3"
+            cx="609.5"
             cy="40.4"
             r="6"
             fill="var(--teal)"
@@ -1561,7 +1554,7 @@
             stroke-width="2"
           />
           <circle
-            cx="163.8"
+            cx="187.8"
             cy="35.0"
             r="6"
             fill="var(--teal)"
@@ -1569,7 +1562,7 @@
             stroke-width="2"
           />
           <circle
-            cx="499.6"
+            cx="409.6"
             cy="60.2"
             r="6"
             fill="var(--teal)"
@@ -1577,7 +1570,7 @@
             stroke-width="2"
           />
           <circle
-            cx="60.5"
+            cx="60.7"
             cy="35.0"
             r="6"
             fill="var(--teal)"
@@ -1585,15 +1578,15 @@
             stroke-width="2"
           />
           <circle
-            cx="284.8"
-            cy="64.1"
+            cx="482.7"
+            cy="62.6"
             r="6"
             fill="var(--teal)"
             stroke="var(--line)"
             stroke-width="2"
           />
           <circle
-            cx="409.7"
+            cx="528.7"
             cy="35.0"
             r="6"
             fill="var(--teal)"
@@ -1601,15 +1594,15 @@
             stroke-width="2"
           />
           <circle
-            cx="335.7"
-            cy="64.4"
+            cx="478.6"
+            cy="41.9"
             r="6"
             fill="var(--teal)"
             stroke="var(--line)"
             stroke-width="2"
           />
           <rect
-            x="596.1"
+            x="519.4"
             y="74.6"
             width="12"
             height="12"
@@ -1618,8 +1611,8 @@
             stroke-width="2"
           />
           <rect
-            x="506.5"
-            y="92.9"
+            x="575.2"
+            y="82.7"
             width="12"
             height="12"
             fill="var(--coral)"
@@ -1627,7 +1620,7 @@
             stroke-width="2"
           />
           <rect
-            x="517.9"
+            x="482.5"
             y="82.4"
             width="12"
             height="12"
@@ -1636,7 +1629,7 @@
             stroke-width="2"
           />
           <rect
-            x="458.4"
+            x="429.4"
             y="43.1"
             width="12"
             height="12"
@@ -1645,7 +1638,7 @@
             stroke-width="2"
           />
           <circle
-            cx="446.6"
+            cx="564.0"
             cy="108.5"
             r="6"
             fill="var(--teal)"
@@ -1653,7 +1646,7 @@
             stroke-width="2"
           />
           <circle
-            cx="323.5"
+            cx="342.3"
             cy="87.2"
             r="6"
             fill="var(--teal)"
@@ -1661,7 +1654,7 @@
             stroke-width="2"
           />
           <circle
-            cx="117.0"
+            cx="141.6"
             cy="35.0"
             r="6"
             fill="var(--teal)"
@@ -1669,7 +1662,7 @@
             stroke-width="2"
           />
           <circle
-            cx="81.8"
+            cx="83.4"
             cy="42.5"
             r="6"
             fill="var(--teal)"
@@ -1677,7 +1670,7 @@
             stroke-width="2"
           />
           <circle
-            cx="80.4"
+            cx="81.6"
             cy="245.9"
             r="6"
             fill="var(--teal)"
@@ -1685,16 +1678,17 @@
             stroke-width="2"
           />
           <text
-            x="89.4"
+            x="91.6"
             y="249.9"
             font-size="11"
+            text-anchor="start"
             fill="var(--ink)"
             font-family="ui-monospace,monospace"
           >
             x_0004
           </text>
           <circle
-            cx="417.6"
+            cx="392.9"
             cy="35.0"
             r="6"
             fill="var(--teal)"
@@ -1702,7 +1696,7 @@
             stroke-width="2"
           />
           <circle
-            cx="61.8"
+            cx="62.4"
             cy="108.8"
             r="6"
             fill="var(--teal)"
@@ -1710,7 +1704,7 @@
             stroke-width="2"
           />
           <circle
-            cx="298.2"
+            cx="335.0"
             cy="100.4"
             r="6"
             fill="var(--teal)"
@@ -1718,8 +1712,8 @@
             stroke-width="2"
           />
           <rect
-            x="521.3"
-            y="202.4"
+            x="521.2"
+            y="191.3"
             width="12"
             height="12"
             fill="var(--coral)"
@@ -1727,16 +1721,17 @@
             stroke-width="2"
           />
           <text
-            x="536.3"
-            y="228.4"
+            x="517.2"
+            y="211.3"
             font-size="11"
+            text-anchor="end"
             fill="var(--ink)"
             font-family="ui-monospace,monospace"
           >
             x_0008
           </text>
           <rect
-            x="480.2"
+            x="375.3"
             y="80.6"
             width="12"
             height="12"
@@ -1745,8 +1740,8 @@
             stroke-width="2"
           />
           <rect
-            x="603.2"
-            y="192.2"
+            x="509.2"
+            y="185.9"
             width="12"
             height="12"
             fill="var(--coral)"
@@ -1754,8 +1749,8 @@
             stroke-width="2"
           />
           <text
-            x="600.2"
-            y="202.2"
+            x="505.2"
+            y="185.9"
             font-size="11"
             text-anchor="end"
             fill="var(--ink)"
@@ -1764,7 +1759,7 @@
             x_0010
           </text>
           <rect
-            x="554.3"
+            x="367.0"
             y="70.1"
             width="12"
             height="12"
@@ -1773,8 +1768,8 @@
             stroke-width="2"
           />
           <rect
-            x="483.2"
-            y="79.1"
+            x="476.3"
+            y="41.6"
             width="12"
             height="12"
             fill="var(--coral)"
@@ -1782,8 +1777,8 @@
             stroke-width="2"
           />
           <rect
-            x="362.7"
-            y="77.9"
+            x="573.5"
+            y="77.6"
             width="12"
             height="12"
             fill="var(--coral)"
@@ -1791,7 +1786,7 @@
             stroke-width="2"
           />
           <rect
-            x="474.2"
+            x="342.3"
             y="59.6"
             width="12"
             height="12"
@@ -1800,7 +1795,7 @@
             stroke-width="2"
           />
           <circle
-            cx="99.8"
+            cx="96.3"
             cy="63.8"
             r="6"
             fill="var(--teal)"
@@ -1809,33 +1804,34 @@
           />
           <circle
             cx="80"
-            cy="356"
+            cy="390"
             r="6"
             fill="var(--teal)"
             stroke="var(--line)"
             stroke-width="2"
           />
-          <text x="92" y="360" font-size="12" fill="var(--ink)">
+          <text x="92" y="394" font-size="12" fill="var(--ink)">
             menos de 20.000 pedidos
           </text>
           <rect
             x="254"
-            y="350"
+            y="384"
             width="12"
             height="12"
             fill="var(--coral)"
             stroke="var(--line)"
             stroke-width="2"
           />
-          <text x="272" y="360" font-size="12" fill="var(--ink)">
+          <text x="272" y="394" font-size="12" fill="var(--ink)">
             20.000 pedidos ou mais
           </text>
         </svg>
       </div>
       <div class="say">
         <b>Lendo o gráfico.</b> Os pontos à direita são execuções que ainda
-        melhoravam no fim, quase todas de instâncias grandes. O ponto baixo à
-        esquerda é <code>x_instance_0004</code>, que estagnou cedo.
+        melhoravam no fim, e a maioria dos quadrados coral, que são as
+        instâncias grandes, está lá. O ponto baixo à esquerda é
+        <code>x_instance_0004</code>, que estagnou cedo.
       </div>
 
       <h2>As quatro instâncias abaixo de 95%</h2>
@@ -1856,17 +1852,8 @@
             <td class="c">188,50</td>
             <td class="c">202,75</td>
             <td class="c">92,97%</td>
-            <td class="c">21,9 s</td>
+            <td class="c">23,2 s</td>
             <td>estagnou cedo</td>
-          </tr>
-          <tr>
-            <td><code>x_instance_0008</code></td>
-            <td class="c">20.364</td>
-            <td class="c">412,90</td>
-            <td class="c">438,22</td>
-            <td class="c">94,22%</td>
-            <td class="c">500,7 s</td>
-            <td>faltou tempo</td>
           </tr>
           <tr>
             <td><code>b_instance_0003</code></td>
@@ -1874,32 +1861,41 @@
             <td class="c">141,27</td>
             <td class="c">149,60</td>
             <td class="c">94,43%</td>
-            <td class="c">446,0 s</td>
+            <td class="c">553,7 s</td>
             <td>melhorou tarde</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0008</code></td>
+            <td class="c">20.364</td>
+            <td class="c">414,50</td>
+            <td class="c">438,22</td>
+            <td class="c">94,59%</td>
+            <td class="c">500,6 s</td>
+            <td>faltou tempo</td>
           </tr>
           <tr>
             <td><code>x_instance_0010</code></td>
             <td class="c">44.193</td>
-            <td class="c">912,11</td>
+            <td class="c">914,22</td>
             <td class="c">964,62</td>
-            <td class="c">94,56%</td>
-            <td class="c">588,4 s</td>
+            <td class="c">94,77%</td>
+            <td class="c">487,7 s</td>
             <td>faltou tempo</td>
           </tr>
         </table>
       </div>
       <div class="why">
         <b>Duas causas diferentes.</b> Em <code>x_instance_0008</code> e
-        <code>x_instance_0010</code>, a melhor apareceu depois de 500 s, então
-        faltou tempo. Em <code>x_instance_0004</code>, sobrou tempo e a busca
-        ficou presa. <code>b_instance_0003</code> fica no meio, com a melhor aos
-        446 s numa instância pequena.
+        <code>x_instance_0010</code>, instâncias grandes, a melhor apareceu
+        perto dos 500 s, então faltou tempo. Em <code>x_instance_0004</code>,
+        sobrou tempo e a busca ficou presa. <code>b_instance_0003</code> fica no
+        meio, com a melhor aos 553,7 s numa instância pequena.
       </div>
 
       <h2>Tabela completa</h2>
       <p>
-        Os valores vêm dos 30 arquivos <code>.json</code>. As células amarelas
-        empatam com o melhor oficial.
+        Os valores vêm dos 30 arquivos <code>.json</code> do algoritmo genético.
+        As células amarelas empatam com o melhor oficial.
       </p>
       <div class="scroll">
         <table>
@@ -1922,8 +1918,8 @@
             <td class="c">629,50</td>
             <td class="c">631,50</td>
             <td class="c">99,68%</td>
-            <td class="c">18.177</td>
-            <td class="c">1,9 s</td>
+            <td class="c">15.278</td>
+            <td class="c">2,5 s</td>
           </tr>
           <tr>
             <td><code>b_instance_0002</code></td>
@@ -1933,8 +1929,8 @@
             <td class="c">180,45</td>
             <td class="c">180,64</td>
             <td class="c">99,90%</td>
-            <td class="c">31.069</td>
-            <td class="c">286,9 s</td>
+            <td class="c">23.709</td>
+            <td class="c">378,2 s</td>
           </tr>
           <tr>
             <td><code>b_instance_0003</code></td>
@@ -1944,8 +1940,8 @@
             <td class="c">141,27</td>
             <td class="c">149,60</td>
             <td class="c">94,43%</td>
-            <td class="c">30.636</td>
-            <td class="c">446,0 s</td>
+            <td class="c">24.647</td>
+            <td class="c">553,7 s</td>
           </tr>
           <tr>
             <td><code>b_instance_0004</code></td>
@@ -1955,8 +1951,8 @@
             <td class="c">155,67</td>
             <td class="c">155,94</td>
             <td class="c">99,82%</td>
-            <td class="c">22.925</td>
-            <td class="c">560,7 s</td>
+            <td class="c">22.164</td>
+            <td class="c">588,7 s</td>
           </tr>
           <tr>
             <td><code>b_instance_0005</code></td>
@@ -1966,8 +1962,8 @@
             <td class="c">368,00</td>
             <td class="c">368,00</td>
             <td class="c hit">100,00%</td>
-            <td class="c">29.345</td>
-            <td class="c">111,2 s</td>
+            <td class="c">23.406</td>
+            <td class="c">136,9 s</td>
           </tr>
           <tr>
             <td><code>b_instance_0006</code></td>
@@ -1977,8 +1973,8 @@
             <td class="c">83,32</td>
             <td class="c">84,03</td>
             <td class="c">99,16%</td>
-            <td class="c">20.592</td>
-            <td class="c">471,0 s</td>
+            <td class="c">25.791</td>
+            <td class="c">374,6 s</td>
           </tr>
           <tr>
             <td><code>b_instance_0007</code></td>
@@ -1988,19 +1984,19 @@
             <td class="c">108,00</td>
             <td class="c">108,00</td>
             <td class="c hit">100,00%</td>
-            <td class="c">74.568</td>
-            <td class="c">0,5 s</td>
+            <td class="c">49.924</td>
+            <td class="c">0,7 s</td>
           </tr>
           <tr>
             <td><code>b_instance_0008</code></td>
             <td class="c">12.334</td>
             <td class="c">398</td>
             <td class="c">10</td>
-            <td class="c">224,90</td>
+            <td class="c">225,00</td>
             <td class="c">227,10</td>
-            <td class="c">99,03%</td>
-            <td class="c">7.291</td>
-            <td class="c">240,9 s</td>
+            <td class="c">99,08%</td>
+            <td class="c">10.309</td>
+            <td class="c">452,9 s</td>
           </tr>
           <tr>
             <td><code>b_instance_0009</code></td>
@@ -2010,19 +2006,19 @@
             <td class="c">82,50</td>
             <td class="c">82,50</td>
             <td class="c hit">100,00%</td>
-            <td class="c">30.923</td>
-            <td class="c">374,7 s</td>
+            <td class="c">23.213</td>
+            <td class="c">502,2 s</td>
           </tr>
           <tr>
             <td><code>b_instance_0010</code></td>
             <td class="c">14.952</td>
             <td class="c">482</td>
             <td class="c">3</td>
-            <td class="c">439,67</td>
+            <td class="c">443,00</td>
             <td class="c">444,00</td>
-            <td class="c">99,02%</td>
-            <td class="c">3.099</td>
-            <td class="c">295,4 s</td>
+            <td class="c">99,77%</td>
+            <td class="c">4.841</td>
+            <td class="c">448,5 s</td>
           </tr>
           <tr>
             <td><code>b_instance_0011</code></td>
@@ -2032,19 +2028,19 @@
             <td class="c">885,10</td>
             <td class="c">898,80</td>
             <td class="c">98,48%</td>
-            <td class="c">1.229</td>
-            <td class="c">580,8 s</td>
+            <td class="c">1.428</td>
+            <td class="c">498,7 s</td>
           </tr>
           <tr>
             <td><code>b_instance_0012</code></td>
             <td class="c">28.263</td>
             <td class="c">483</td>
             <td class="c">11</td>
-            <td class="c">555,55</td>
+            <td class="c">557,45</td>
             <td class="c">567,64</td>
-            <td class="c">97,87%</td>
-            <td class="c">1.812</td>
-            <td class="c">484,8 s</td>
+            <td class="c">98,21%</td>
+            <td class="c">1.963</td>
+            <td class="c">558,5 s</td>
           </tr>
           <tr>
             <td><code>b_instance_0013</code></td>
@@ -2054,8 +2050,8 @@
             <td class="c">743,56</td>
             <td class="c">757,00</td>
             <td class="c">98,22%</td>
-            <td class="c">1.521</td>
-            <td class="c">497,1 s</td>
+            <td class="c">1.644</td>
+            <td class="c">459,1 s</td>
           </tr>
           <tr>
             <td><code>b_instance_0014</code></td>
@@ -2065,8 +2061,8 @@
             <td class="c">881,00</td>
             <td class="c">885,17</td>
             <td class="c">99,53%</td>
-            <td class="c">1.531</td>
-            <td class="c">433,2 s</td>
+            <td class="c">1.650</td>
+            <td class="c">402,2 s</td>
           </tr>
           <tr>
             <td><code>b_instance_0015</code></td>
@@ -2076,8 +2072,8 @@
             <td class="c">162,07</td>
             <td class="c">166,14</td>
             <td class="c">97,55%</td>
-            <td class="c">12.382</td>
-            <td class="c">414,2 s</td>
+            <td class="c">9.090</td>
+            <td class="c">540,0 s</td>
           </tr>
           <tr>
             <td><code>x_instance_0001</code></td>
@@ -2087,8 +2083,8 @@
             <td class="c">69,62</td>
             <td class="c">70,85</td>
             <td class="c">98,26%</td>
-            <td class="c">33.307</td>
-            <td class="c">282,3 s</td>
+            <td class="c">30.862</td>
+            <td class="c">302,4 s</td>
           </tr>
           <tr>
             <td><code>x_instance_0002</code></td>
@@ -2098,8 +2094,8 @@
             <td class="c">217,67</td>
             <td class="c">217,67</td>
             <td class="c hit">100,00%</td>
-            <td class="c">51.947</td>
-            <td class="c">61,0 s</td>
+            <td class="c">36.663</td>
+            <td class="c">87,4 s</td>
           </tr>
           <tr>
             <td><code>x_instance_0003</code></td>
@@ -2109,8 +2105,8 @@
             <td class="c">666,00</td>
             <td class="c">667,67</td>
             <td class="c">99,75%</td>
-            <td class="c">15.241</td>
-            <td class="c">23,4 s</td>
+            <td class="c">14.358</td>
+            <td class="c">25,1 s</td>
           </tr>
           <tr>
             <td><code>x_instance_0004</code></td>
@@ -2120,8 +2116,8 @@
             <td class="c">188,50</td>
             <td class="c">202,75</td>
             <td class="c">92,97%</td>
-            <td class="c">20.348</td>
-            <td class="c">21,9 s</td>
+            <td class="c">19.903</td>
+            <td class="c">23,2 s</td>
           </tr>
           <tr>
             <td><code>x_instance_0005</code></td>
@@ -2131,8 +2127,8 @@
             <td class="c">628,67</td>
             <td class="c">628,67</td>
             <td class="c hit">100,00%</td>
-            <td class="c">14.440</td>
-            <td class="c">383,1 s</td>
+            <td class="c">15.426</td>
+            <td class="c">356,7 s</td>
           </tr>
           <tr>
             <td><code>x_instance_0006</code></td>
@@ -2142,8 +2138,8 @@
             <td class="c">187,13</td>
             <td class="c">191,86</td>
             <td class="c">97,54%</td>
-            <td class="c">20.359</td>
-            <td class="c">2,0 s</td>
+            <td class="c">17.632</td>
+            <td class="c">2,6 s</td>
           </tr>
           <tr>
             <td><code>x_instance_0007</code></td>
@@ -2153,19 +2149,19 @@
             <td class="c">112,64</td>
             <td class="c">115,15</td>
             <td class="c">97,82%</td>
-            <td class="c">15.022</td>
-            <td class="c">255,2 s</td>
+            <td class="c">13.540</td>
+            <td class="c">294,6 s</td>
           </tr>
           <tr>
             <td><code>x_instance_0008</code></td>
             <td class="c">20.364</td>
             <td class="c">482</td>
             <td class="c">10</td>
-            <td class="c">412,90</td>
+            <td class="c">414,50</td>
             <td class="c">438,22</td>
-            <td class="c">94,22%</td>
-            <td class="c">2.374</td>
-            <td class="c">500,7 s</td>
+            <td class="c">94,59%</td>
+            <td class="c">3.282</td>
+            <td class="c">500,6 s</td>
           </tr>
           <tr>
             <td><code>x_instance_0009</code></td>
@@ -2175,19 +2171,19 @@
             <td class="c">805,75</td>
             <td class="c">819,88</td>
             <td class="c">98,28%</td>
-            <td class="c">1.378</td>
-            <td class="c">456,7 s</td>
+            <td class="c">1.902</td>
+            <td class="c">344,3 s</td>
           </tr>
           <tr>
             <td><code>x_instance_0010</code></td>
             <td class="c">44.193</td>
             <td class="c">482</td>
             <td class="c">9</td>
-            <td class="c">912,11</td>
+            <td class="c">914,22</td>
             <td class="c">964,62</td>
-            <td class="c">94,56%</td>
-            <td class="c">1.086</td>
-            <td class="c">588,4 s</td>
+            <td class="c">94,77%</td>
+            <td class="c">1.692</td>
+            <td class="c">487,7 s</td>
           </tr>
           <tr>
             <td><code>x_instance_0011</code></td>
@@ -2197,30 +2193,30 @@
             <td class="c">1.045,50</td>
             <td class="c">1.060,00</td>
             <td class="c">98,63%</td>
-            <td class="c">1.221</td>
-            <td class="c">536,0 s</td>
+            <td class="c">1.957</td>
+            <td class="c">335,4 s</td>
           </tr>
           <tr>
             <td><code>x_instance_0012</code></td>
             <td class="c">52.322</td>
             <td class="c">483</td>
             <td class="c">3</td>
-            <td class="c">1.317,33</td>
+            <td class="c">1.334,00</td>
             <td class="c">1.339,67</td>
-            <td class="c">98,33%</td>
-            <td class="c">957</td>
-            <td class="c">459,9 s</td>
+            <td class="c">99,58%</td>
+            <td class="c">1.437</td>
+            <td class="c">452,5 s</td>
           </tr>
           <tr>
             <td><code>x_instance_0013</code></td>
             <td class="c">49.992</td>
             <td class="c">483</td>
             <td class="c">7</td>
-            <td class="c">1.043,43</td>
+            <td class="c">1.043,57</td>
             <td class="c">1.060,71</td>
-            <td class="c">98,37%</td>
-            <td class="c">972</td>
-            <td class="c">330,7 s</td>
+            <td class="c">98,38%</td>
+            <td class="c">1.392</td>
+            <td class="c">556,6 s</td>
           </tr>
           <tr>
             <td><code>x_instance_0014</code></td>
@@ -2230,8 +2226,8 @@
             <td class="c">1.617,00</td>
             <td class="c">1.633,67</td>
             <td class="c">98,98%</td>
-            <td class="c">748</td>
-            <td class="c">450,2 s</td>
+            <td class="c">1.091</td>
+            <td class="c">308,9 s</td>
           </tr>
           <tr>
             <td><code>x_instance_0015</code></td>
@@ -2241,8 +2237,8 @@
             <td class="c">261,36</td>
             <td class="c">263,91</td>
             <td class="c">99,04%</td>
-            <td class="c">14.730</td>
-            <td class="c">42,6 s</td>
+            <td class="c">16.032</td>
+            <td class="c">38,9 s</td>
           </tr>
         </table>
       </div>
@@ -2254,8 +2250,8 @@
         semente 2 chegou a 1.619,67, contra 1.617,00 da semente 1.
       </div>
       <div class="check">
-        <b>Máquina dividida.</b> Seis execuções dividiram o processador. Rodando
-        sozinha, cada uma faria mais gerações nos mesmos 600 s.
+        <b>Máquina dividida.</b> Cinco execuções dividiram o processador.
+        Rodando sozinha, cada uma faria mais gerações nos mesmos 600 s.
       </div>
       <div class="check">
         <b>Parâmetros escolhidos numa instância.</b> A taxa 0,002 foi escolhida
@@ -2263,13 +2259,19 @@
         melhor para as outras 29.
       </div>
       <div class="check">
-        <b>Sem comparação com o algoritmo exato.</b> O algoritmo exato (issue
-        #12) ainda não rodou, então a única régua é o melhor oficial.
-      </div>
-      <div class="check">
         <b>Limite de 600 s.</b> O valor vem do desafio oficial. O professor
         confirmou que a avaliação da disciplina não tem limite de tempo, então
         uma rodada mais longa pode melhorar esses números.
+      </div>
+      <div class="why">
+        <b>O algoritmo exato rodou na mesma rodada.</b> Os dois algoritmos fazem
+        parte da entrega. O algoritmo exato chegou a 54,48% do melhor oficial em
+        média e provou o ótimo em <code>b_instance_0007</code> e
+        <code>x_instance_0002</code>, onde o algoritmo genético também chegou a
+        100%. Os detalhes estão na
+        <a href="02-algoritmo-exato.html#resultados"
+          >página do algoritmo exato</a
+        >.
       </div>
 
       <h2>Resumo e armadilhas</h2>
@@ -2281,7 +2283,7 @@
         <tr>
           <td>Quão bom ficou o algoritmo genético?</td>
           <td>
-            98,31% do melhor oficial em média, com 26 das 30 instâncias acima de
+            98,41% do melhor oficial em média, com 26 das 30 instâncias acima de
             95% e todas aprovadas pelo <code>checker.py</code>.
           </td>
         </tr>
@@ -2289,7 +2291,7 @@
           <td>Onde ele foi pior?</td>
           <td>
             Em <code>x_instance_0004</code>, com 92,97%, porque estagnou aos
-            21,9 s.
+            23,2 s.
           </td>
         </tr>
         <tr>
@@ -2301,26 +2303,27 @@
         <tr>
           <td>Os resultados se repetem?</td>
           <td>
-            Com a mesma semente e a mesma máquina, sim. O tempo limite pode
-            mudar o número de gerações em outra máquina.
+            Não exatamente. A parada é por tempo, então o número de gerações
+            muda com a carga da máquina, e a melhor onda pode mudar.
           </td>
         </tr>
       </table>
       <div class="check">
         <b>Armadilha.</b> 100% quer dizer empatar com o melhor valor conhecido,
-        e isso não prova que a solução é ótima.
+        e isso não prova que a solução é ótima. Só o algoritmo exato prova o
+        ótimo, e ele provou em 2 instâncias.
       </div>
       <div class="check">
         <b>Armadilha.</b> A média esconde as quatro instâncias abaixo de 95%.
         Cite as duas causas quando falar delas.
       </div>
-
       <footer>
-        Fontes: os 30 pares gerados pelo commit <code>85d9a38</code> em
-        2026-11-21 e guardados no commit <code>3fc8a0a</code>,
-        <code>data/best_objectives.csv</code> e a saída do
-        <code>checker.py</code> oficial. As médias, as contagens e os grupos por
-        tamanho foram calculados a partir dos <code>.json</code>.
+        Fontes: os 30 pares <code>.txt</code> e <code>.json</code> do algoritmo
+        genético gerados pelo commit <code>e957035</code> na rodada final,
+        <code>results/summary.md</code>, <code>data/best_objectives.csv</code> e
+        a saída do <code>checker.py</code> oficial, rodado de novo nas 60
+        soluções em 2026-11-25. As médias, as contagens e os grupos por tamanho
+        foram calculados a partir dos <code>.json</code>.
       </footer>
     </div>
   </body>
