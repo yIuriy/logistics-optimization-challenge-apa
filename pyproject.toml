@@ -4,7 +4,11 @@ version = "0.1.0"
 description = "Wave order picking (SBPO 2025 / Mercado Livre challenge) solved with an exact model and a genetic algorithm"
 requires-python = ">=3.13"
 # highspy solves the exact model. numpy is required by the official checker.py.
-dependencies = ["highspy>=1.11", "numpy>=2.0"]
+dependencies = [
+    "highspy>=1.11",
+    "matplotlib>=3.11.2",
+    "numpy>=2.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.9,<1"]

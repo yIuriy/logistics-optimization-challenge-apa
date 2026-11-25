@@ -12,12 +12,13 @@ Solver for the **Wave Order Picking** problem of the [SBPO 2025 / Mercado Livre 
 uv sync
 uv run pytest
 uv run python src/order_selection/checker.py <instance> <solution>
+uv run python -m order_selection.charts   # PNG charts of results/ into results/figures/
 ```
 
 ## Repository
 
 ```
-src/order_selection/   package (instance files, exact algorithm, genetic algorithm, batch runner, CLI)
+src/order_selection/   package (instance files, exact algorithm, genetic algorithm, batch runner, CLI, charts)
 tests/                 unit and property tests
 data/                  the 30 instances of datasets B and X (prefix b_ or x_) and best_objectives.csv
 configs/               batch configuration files
