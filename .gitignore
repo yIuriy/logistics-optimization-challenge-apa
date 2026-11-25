@@ -10,3 +10,6 @@ __pycache__/
 
 # Runs started from the web interface (issue #18)
 results/web/
+
+# Single runs of configs/run.json, kept apart from the final batch in results/
+results/run/
