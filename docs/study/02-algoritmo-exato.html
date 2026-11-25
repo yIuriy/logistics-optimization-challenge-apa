@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Material de estudo do algoritmo exato (issue #12). Explica o que é um algoritmo exato, o que é o HiGHS, o método de Dinkelbach, o exemplo oficial 5×5 rodado no highspy, os limites quando o tempo acaba, o uso, os motivos da escolha e as perguntas prováveis da banca. -->
+<!-- Material de estudo do algoritmo exato do TPF (src/order_selection/exact_algorithm.py). Explica o que é um algoritmo exato, o que é o HiGHS, o método de Dinkelbach, o exemplo oficial 5×5 rodado no highspy, os limites quando o tempo acaba, o uso, os motivos da escolha, as perguntas prováveis da banca e os resultados da rodada final (commit e957035). -->
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
@@ -451,11 +451,11 @@
           Como o algoritmo exato do grupo usa o HiGHS e o método de Dinkelbach
         </h1>
         <p class="lead">
-          Esta página explica, do zero, o algoritmo exato planejado na issue #12
-          para <code>src/order_selection/exact_algorithm.py</code>. Ela mostra o
-          que é um algoritmo exato, o que é o HiGHS, como o método de Dinkelbach
-          resolve o objetivo em forma de fração, como o grupo vai usar o
-          resultado e quais perguntas a banca pode fazer. A página irmã é
+          Esta página explica, do zero, o algoritmo exato do grupo, em
+          <code>src/order_selection/exact_algorithm.py</code>. Ela mostra o que
+          é um algoritmo exato, o que é o HiGHS, como o método de Dinkelbach
+          resolve o objetivo em forma de fração, o que o algoritmo alcançou na
+          rodada final e quais perguntas a banca pode fazer. A página irmã é
           <a href="05-algoritmo-genetico.html"
             >o algoritmo genético sobre corredores</a
           >. Leia na ordem. As explicações longas abrem com um clique.
@@ -463,12 +463,11 @@
       </header>
 
       <div class="check">
-        <b>Estado do código em 2026-11-21.</b>
-        <code>exact_algorithm.py</code> ainda tem só a docstring do módulo. Esta
-        página descreve o plano da issue #12, conferido na documentação do HiGHS
-        e num teste com o <code>highspy</code> 1.16.0 no exemplo oficial 5×5.
-        Quando a issue #12 for integrada, os trechos de código daqui devem ser
-        trocados pelo código real.
+        <b>Estado do código.</b> O algoritmo exato está implementado e rodou nas
+        30 instâncias na rodada final, no commit <code>e957035</code>. Os
+        trechos de código desta página são versões curtas do código real. O
+        exemplo 5×5 da seção 6 foi rodado à parte, com o
+        <code>highspy</code> 1.16.0, a mesma versão usada no projeto.
       </div>
 
       <h2>Roteiro de leitura</h2>
@@ -496,6 +495,10 @@
             <b>Como usar e defender?</b> A interface da função, os motivos da
             escolha e as perguntas prováveis da banca (seções 8 a 10).
           </li>
+          <li>
+            <b>Quanto ele alcançou?</b> Os números da rodada final, instância
+            por instância (seção 12).
+          </li>
         </ol>
       </div>
 
@@ -519,11 +522,11 @@
         </li>
       </ul>
       <div class="why">
-        <b>Pra que serve no trabalho.</b> Ele é a régua. Com ele, a apresentação
-        pode dizer "o algoritmo genético chegou a 99% do ótimo provado" em vez
-        de só "chegou a 99% do melhor valor oficial". Nas instâncias grandes,
-        onde ele não termina, os limites dele mostram quanto espaço ainda pode
-        existir acima da melhor onda conhecida.
+        <b>Pra que serve no trabalho.</b> Ele é uma das duas entregas do grupo,
+        ao lado do algoritmo genético. Quando termina, ele prova o ótimo, e na
+        rodada final isso aconteceu em <code>b_instance_0007</code> e
+        <code>x_instance_0002</code>. Quando o tempo acaba, os limites dele
+        mostram entre quais valores o ótimo está.
       </div>
       <p>
         Esse tipo de ferramenta aparece em sistemas reais. O SciPy, a biblioteca
@@ -818,8 +821,9 @@
             O modelo também não muda de uma rodada para outra. Só os pesos do
             objetivo mudam: cada x<sub>o</sub> continua com peso igual às
             unidades do pedido, e cada y<sub>a</sub> passa a ter peso −λ. Por
-            isso a issue #12 pede para construir o modelo uma vez e trocar só os
-            pesos com <code>changeColCost</code>.
+            isso o código constrói o modelo uma vez, em
+            <code>build_model</code>, e a cada rodada troca só os pesos dos
+            corredores com <code>changeColsCost</code>.
           </p>
         </div>
       </details>
@@ -1002,7 +1006,9 @@
         <div class="f2">
           <b>Limite superior</b>
           <div class="formula">λ + F̄</div>
-          F̄ é o <code>mip_dual_bound</code> da rodada interrompida.
+          F̄ é o <code>mip_dual_bound</code> da rodada interrompida. Como toda
+          onda tem no máximo UB unidades e pelo menos 1 corredor, a razão também
+          nunca passa de UB, e o código grava o menor dos dois valores.
         </div>
       </div>
       <details>
@@ -1028,8 +1034,8 @@
           <div class="ans">Toda onda tem razão no máximo λ + F̄.</div>
           <p>
             F̄ nunca é negativo porque a melhor onda já encontrada continua
-            válida e dá unidades − λ · corredores = 0. A issue #12 pede essa
-            conta num comentário do código, porque a banca pode perguntar.
+            válida e dá unidades − λ · corredores = 0. Essa conta está na
+            docstring da função <code>compute_upper_bound</code>.
           </p>
         </div>
       </details>
@@ -1039,9 +1045,19 @@
         onda válida apareceu, a função devolve <code>None</code> com status
         <code>"no_solution"</code>.
       </p>
+      <div class="why">
+        <b>Por que um processo separado.</b> O HiGHS não confere o relógio
+        durante os cortes do nó raiz, e numa instância grande uma rodada pode
+        passar vários segundos do limite. Por isso a busca roda num processo
+        filho, e a função <code>solve</code> encerra esse processo 2 segundos
+        antes do limite. Cada onda melhor que o HiGHS acha dentro de uma rodada
+        vai na hora para o processo principal, então ela continua guardada
+        quando o processo filho é encerrado. A busca também deixa 5 segundos de
+        folga para gravar os arquivos.
+      </div>
 
       <h2>8. Como usar</h2>
-      <h3>A interface planejada na issue #12</h3>
+      <h3>A interface em <code>exact_algorithm.py</code></h3>
       <pre><code>def solve(instance: Instance, parameters: dict) -&gt; tuple[Solution | None, dict]: ...</code></pre>
       <ul>
         <li>
@@ -1056,15 +1072,18 @@
           O dicionário traz <code>status</code> (<code>"optimal"</code>,
           <code>"time_limit"</code> ou <code>"no_solution"</code>),
           <code>iterations</code>, <code>objective_lower_bound</code> e
-          <code>objective_upper_bound</code>. A issue #14 grava esse dicionário
-          no <code>.json</code> de cada execução.
+          <code>objective_upper_bound</code>. O programa grava esses valores no
+          <code>.json</code> de cada execução, nos campos <code>status</code>,
+          <code>lower_bound</code> e <code>upper_bound</code>.
         </li>
       </ul>
       <h3>Esboço com o highspy</h3>
       <p>
         O trecho abaixo é o script usado na seção 6, encurtado. Ele mostra as
-        chamadas do <code>highspy</code>, e o código final da issue #12 vai ter
-        funções menores, tipos e o controle de tempo.
+        chamadas do <code>highspy</code>. O código real divide isso em funções
+        menores (<code>build_model</code>, <code>run_dinkelbach_round</code> e
+        <code>compute_upper_bound</code>), monta todas as restrições de uma vez
+        com <code>addRows</code> e controla o tempo.
       </p>
       <pre><code>h = highspy.Highs()
 h.setOptionValue("output_flag", False)
@@ -1089,7 +1108,7 @@ while True:
     if h.getObjectiveValue() &lt;= 1e-6:
         break                                 # lam is optimal
     lam = chosen_units / chosen_aisles        # read from h.getSolution()</code></pre>
-      <h3>No projeto, depois das issues #12, #14 e #15</h3>
+      <h3>No projeto</h3>
       <pre><code>uv run python -m order_selection configs/run.json</code></pre>
       <p>
         Com <code>"methods": ["exact"]</code> no arquivo de configuração, o
@@ -1157,11 +1176,11 @@ while True:
             genético?
           </summary>
           <div class="body">
-            O algoritmo exato prova o ótimo nas instâncias pequenas, mas nas
-            grandes ele pode não achar nem uma onda válida em 600 segundos. O
-            algoritmo genético acha ondas boas em todas as instâncias. Um mede o
-            outro: o algoritmo exato dá a régua, e o algoritmo genético é a
-            solução proposta.
+            O algoritmo exato prova o ótimo quando termina, mas na rodada final
+            isso aconteceu em 2 das 30 instâncias. Nas 9 maiores, ele ficou
+            abaixo de 18% do melhor oficial. O algoritmo genético chegou a
+            98,41% em média. Os dois se completam, porque um prova o ótimo
+            quando consegue e o outro acha ondas boas em todas as instâncias.
           </div>
         </details>
         <details>
@@ -1221,8 +1240,8 @@ while True:
             A função devolve <code>None</code> com status
             <code>"no_solution"</code>, o <code>.json</code> grava
             <code>objective</code> igual a <code>null</code> e nenhum
-            <code>.txt</code> é gravado. A tabela final mostra isso. A entrega
-            não depende do algoritmo exato, porque ele é referência.
+            <code>.txt</code> é gravado. Na rodada final, as 30 instâncias
+            tiveram onda válida.
           </div>
         </details>
         <details>
@@ -1247,20 +1266,23 @@ while True:
       <h2>11. Limitações e armadilhas</h2>
       <ul>
         <li>
-          <b>Gap padrão do HiGHS.</b> O HiGHS para cada rodada quando a lacuna
-          relativa chega a 10<sup>−4</sup> (opção <code>mip_rel_gap</code>,
-          valor padrão conferido no <code>highspy</code> 1.16.0) e chama isso de
-          ótimo. Uma rodada pode então devolver F um pouco abaixo do máximo
-          real. A issue #12 deve decidir se zera essa opção ou se grava sempre λ
-          + F̄ como limite superior.
+          <b>Gap do HiGHS.</b> Por padrão, o HiGHS para cada rodada quando a
+          lacuna relativa chega a 10<sup>−4</sup> (opção
+          <code>mip_rel_gap</code>, valor conferido no
+          <code>highspy</code> 1.16.0) e chama isso de ótimo. O código zera essa
+          opção e usa <code>mip_abs_gap</code> de 10<sup>−7</sup>, então uma
+          rodada que termina prova o ótimo de F(λ).
         </li>
         <li>
           <b>Instâncias grandes.</b> Com 68.064 pedidos, o modelo tem dezenas de
           milhares de variáveis 0 ou 1, e a primeira rodada pode não terminar.
+          Na rodada final, as 9 instâncias com mais de 35.000 pedidos ficaram
+          entre 9,87% e 17,84% do melhor oficial.
         </li>
         <li>
           <b>Tempo total.</b> As 30 instâncias levam perto de 5 horas com 600
-          segundos cada. O plano manda rodar com antecedência.
+          segundos cada, porque a rodada final rodou o algoritmo exato uma
+          instância por vez.
         </li>
         <li>
           <b>Tempo por rodada.</b> Cada rodada recebe só o tempo que resta.
@@ -1272,6 +1294,338 @@ while True:
           na instância (enunciado, seção 4).
         </li>
       </ul>
+      <h2 id="resultados">12. Resultados na rodada final</h2>
+      <p>
+        O algoritmo exato rodou nas 30 instâncias com 600 segundos cada, uma por
+        vez, no commit <code>e957035</code>. O <code>checker.py</code> oficial
+        aprovou as 30 soluções.
+      </p>
+      <div class="ans">
+        Média de 54,48% do melhor oficial, com o ótimo provado em 2 das 30
+        instâncias.
+      </div>
+      <div class="read">
+        <div><b>B</b> média 58,34%</div>
+        <div><b>X</b> média 50,62%</div>
+        <div>
+          <b>Ótimo provado</b> <code>b_instance_0007</code> com 108,00 e
+          <code>x_instance_0002</code> com 217,67
+        </div>
+        <div><b>Tempo esgotado</b> 28 instâncias</div>
+        <div>
+          <b>Pequenas</b> 10 instâncias com menos de 3.000 pedidos, de 85,68% a
+          100,00%
+        </div>
+        <div>
+          <b>Grandes</b> 9 instâncias com mais de 35.000 pedidos, de 9,87% a
+          17,84%
+        </div>
+      </div>
+      <p>
+        O tamanho decide quase tudo. Cada pedido e cada corredor viram uma
+        variável 0 ou 1, então uma instância com dezenas de milhares de pedidos
+        gera um modelo enorme. Nas pequenas, 600 segundos bastaram para chegar
+        perto do melhor oficial ou provar o ótimo. Nas grandes, a melhor onda
+        ficou longe.
+      </p>
+      <div class="say">
+        <b>O limite superior também ficou largo.</b> Em
+        <code>b_instance_0001</code>, a melhor onda tem razão 440,89, o melhor
+        oficial é 631,50 e o limite superior gravado é 3.812,28. O algoritmo só
+        garante que o ótimo está entre 440,89 e 3.812,28, então nessa instância
+        ele não sabe quanto falta.
+      </div>
+      <div class="why">
+        <b>O que isso diz sobre o algoritmo genético.</b> Nas duas instâncias
+        com ótimo provado, o algoritmo genético achou o mesmo valor. Então ali
+        os 100% dele são o ótimo. Os resultados completos do algoritmo genético
+        estão na
+        <a href="06-resultados-algoritmo-genetico.html">página de resultados</a
+        >.
+      </div>
+      <div style="overflow-x: auto">
+        <table>
+          <tr>
+            <th>Instância</th>
+            <th>Pedidos</th>
+            <th>Objetivo</th>
+            <th>Limite superior</th>
+            <th>Melhor oficial</th>
+            <th>% do melhor</th>
+            <th>Status</th>
+          </tr>
+          <tr>
+            <td><code>b_instance_0001</code></td>
+            <td class="c">11.321</td>
+            <td class="c">440,89</td>
+            <td class="c">3.812,28</td>
+            <td class="c">631,50</td>
+            <td class="c">69,82%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0002</code></td>
+            <td class="c">2.162</td>
+            <td class="c">154,77</td>
+            <td class="c">3.031,73</td>
+            <td class="c">180,64</td>
+            <td class="c">85,68%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0003</code></td>
+            <td class="c">2.070</td>
+            <td class="c">134,38</td>
+            <td class="c">1.989,50</td>
+            <td class="c">149,60</td>
+            <td class="c">89,82%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0004</code></td>
+            <td class="c">2.448</td>
+            <td class="c">140,10</td>
+            <td class="c">2.559,60</td>
+            <td class="c">155,94</td>
+            <td class="c">89,84%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0005</code></td>
+            <td class="c">6.468</td>
+            <td class="c">259,64</td>
+            <td class="c">2.707,46</td>
+            <td class="c">368,00</td>
+            <td class="c">70,55%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0006</code></td>
+            <td class="c">1.857</td>
+            <td class="c">80,84</td>
+            <td class="c">2.770,47</td>
+            <td class="c">84,03</td>
+            <td class="c">96,21%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0007</code></td>
+            <td class="c">1.841</td>
+            <td class="c">108,00</td>
+            <td class="c">108,00</td>
+            <td class="c">108,00</td>
+            <td class="c hit">100,00%</td>
+            <td>ótimo provado</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0008</code></td>
+            <td class="c">12.334</td>
+            <td class="c">127,50</td>
+            <td class="c">5.502,92</td>
+            <td class="c">227,10</td>
+            <td class="c">56,14%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0009</code></td>
+            <td class="c">5.581</td>
+            <td class="c">53,42</td>
+            <td class="c">2.778,56</td>
+            <td class="c">82,50</td>
+            <td class="c">64,75%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0010</code></td>
+            <td class="c">14.952</td>
+            <td class="c">115,57</td>
+            <td class="c">8.300,91</td>
+            <td class="c">444,00</td>
+            <td class="c">26,03%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0011</code></td>
+            <td class="c">45.112</td>
+            <td class="c">123,71</td>
+            <td class="c">19.101,00</td>
+            <td class="c">898,80</td>
+            <td class="c">13,76%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0012</code></td>
+            <td class="c">28.263</td>
+            <td class="c">177,89</td>
+            <td class="c">11.957,75</td>
+            <td class="c">567,64</td>
+            <td class="c">31,34%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0013</code></td>
+            <td class="c">38.214</td>
+            <td class="c">107,68</td>
+            <td class="c">19.417,00</td>
+            <td class="c">757,00</td>
+            <td class="c">14,22%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0014</code></td>
+            <td class="c">38.202</td>
+            <td class="c">112,69</td>
+            <td class="c">18.556,22</td>
+            <td class="c">885,17</td>
+            <td class="c">12,73%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>b_instance_0015</code></td>
+            <td class="c">11.541</td>
+            <td class="c">90,09</td>
+            <td class="c">6.016,78</td>
+            <td class="c">166,14</td>
+            <td class="c">54,22%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0001</code></td>
+            <td class="c">1.949</td>
+            <td class="c">68,00</td>
+            <td class="c">1.976,12</td>
+            <td class="c">70,85</td>
+            <td class="c">95,98%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0002</code></td>
+            <td class="c">2.942</td>
+            <td class="c">217,67</td>
+            <td class="c">217,67</td>
+            <td class="c">217,67</td>
+            <td class="c hit">100,00%</td>
+            <td>ótimo provado</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0003</code></td>
+            <td class="c">11.330</td>
+            <td class="c">494,75</td>
+            <td class="c">3.817,52</td>
+            <td class="c">667,67</td>
+            <td class="c">74,10%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0004</code></td>
+            <td class="c">2.732</td>
+            <td class="c">178,71</td>
+            <td class="c">3.777,10</td>
+            <td class="c">202,75</td>
+            <td class="c">88,14%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0005</code></td>
+            <td class="c">11.024</td>
+            <td class="c">392,23</td>
+            <td class="c">5.099,00</td>
+            <td class="c">628,67</td>
+            <td class="c">62,39%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0006</code></td>
+            <td class="c">2.704</td>
+            <td class="c">175,24</td>
+            <td class="c">2.742,34</td>
+            <td class="c">191,86</td>
+            <td class="c">91,34%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0007</code></td>
+            <td class="c">8.725</td>
+            <td class="c">70,74</td>
+            <td class="c">4.527,98</td>
+            <td class="c">115,15</td>
+            <td class="c">61,43%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0008</code></td>
+            <td class="c">20.364</td>
+            <td class="c">115,60</td>
+            <td class="c">10.520,00</td>
+            <td class="c">438,22</td>
+            <td class="c">26,38%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0009</code></td>
+            <td class="c">39.701</td>
+            <td class="c">106,63</td>
+            <td class="c">17.674,86</td>
+            <td class="c">819,88</td>
+            <td class="c">13,01%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0010</code></td>
+            <td class="c">44.193</td>
+            <td class="c">172,12</td>
+            <td class="c">14.433,00</td>
+            <td class="c">964,62</td>
+            <td class="c">17,84%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0011</code></td>
+            <td class="c">38.657</td>
+            <td class="c">105,12</td>
+            <td class="c">20.588,24</td>
+            <td class="c">1.060,00</td>
+            <td class="c">9,92%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0012</code></td>
+            <td class="c">52.322</td>
+            <td class="c">132,18</td>
+            <td class="c">28.890,00</td>
+            <td class="c">1.339,67</td>
+            <td class="c">9,87%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0013</code></td>
+            <td class="c">49.992</td>
+            <td class="c">121,57</td>
+            <td class="c">28.203,00</td>
+            <td class="c">1.060,71</td>
+            <td class="c">11,46%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0014</code></td>
+            <td class="c">68.064</td>
+            <td class="c">183,19</td>
+            <td class="c">22.918,00</td>
+            <td class="c">1.633,67</td>
+            <td class="c">11,21%</td>
+            <td>tempo esgotado</td>
+          </tr>
+          <tr>
+            <td><code>x_instance_0015</code></td>
+            <td class="c">2.839</td>
+            <td class="c">227,48</td>
+            <td class="c">4.254,05</td>
+            <td class="c">263,91</td>
+            <td class="c">86,19%</td>
+            <td>tempo esgotado</td>
+          </tr>
+        </table>
+      </div>
 
       <h2>Resumo das decisões</h2>
       <table>
@@ -1296,6 +1650,11 @@ while True:
           <td>Tolerância para arredondamento</td>
         </tr>
         <tr>
+          <td>Gap</td>
+          <td><code>mip_rel_gap</code> = 0</td>
+          <td>Cada rodada que termina prova o ótimo</td>
+        </tr>
+        <tr>
           <td>Tempo</td>
           <td>600 segundos por instância, divididos entre as rodadas</td>
           <td>
@@ -1306,23 +1665,25 @@ while True:
         <tr>
           <td>Tempo esgotado</td>
           <td>Limite inferior λ e limite superior λ + F̄</td>
-          <td>Mostram quão longe o algoritmo genético pode estar do ótimo</td>
+          <td>Mostram entre quais valores o ótimo está</td>
         </tr>
         <tr>
           <td>Sem solução</td>
           <td><code>None</code> e status <code>"no_solution"</code></td>
-          <td>O algoritmo exato é referência, não entrega</td>
+          <td>Deixa claro quando o tempo acabou sem onda válida</td>
         </tr>
       </table>
 
       <footer>
-        Fontes: issue #12 (texto de 2026-11-21) e
-        <code>docs/plano-implementacao.md</code> na <code>main</code> (commit
-        1d55666). Descrição oficial do problema
-        (<code>docs/reference/pt_problem_description.pdf</code>), objetivo (1),
-        restrições (2) a (4) e exemplo 5×5. Documentação do HiGHS consultada
-        pelo Context7 (<code>/ergo-code/highs</code>): README ("About HiGHS"),
-        <code>docs/src/solvers.md</code> e
+        Fontes: <code>src/order_selection/exact_algorithm.py</code> e os 30
+        pares <code>.txt</code> e <code>.json</code> do algoritmo exato em
+        <code>results/</code>, gerados pelo commit <code>e957035</code> na
+        rodada final e conferidos pelo <code>checker.py</code> oficial em
+        2026-11-25. <code>docs/plano-implementacao.md</code>. Descrição oficial
+        do problema (<code>docs/reference/pt_problem_description.pdf</code>),
+        objetivo (1), restrições (2) a (4) e exemplo 5×5. Documentação do HiGHS
+        consultada pelo Context7 (<code>/ergo-code/highs</code>): README ("About
+        HiGHS"), <code>docs/src/solvers.md</code> e
         <code>docs/src/interfaces/python/model-py.md</code>. W. Dinkelbach, "On
         Nonlinear Fractional Programming", Management Science 13(7), 1967. As
         rodadas da seção 6 e o valor padrão de <code>mip_rel_gap</code> foram
